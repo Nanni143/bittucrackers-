@@ -7,12 +7,14 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-50 text-gray-800 pb-20">
+<body class="bg-gray-50 text-gray-800 pb-24">
 
+  <!-- Top Announcement -->
   <div class="bg-red-800 text-white text-xs text-center py-2 px-3 font-medium">
     Online booking open for the FIRST TIME in Kavali — book online, pay on delivery.
   </div>
 
+  <!-- Header -->
   <header class="bg-white border-b px-4 py-3 flex items-center justify-between sticky top-0 z-40">
     <div class="flex items-center space-x-2">
       <span class="bg-red-600 text-white font-bold px-2.5 py-1 rounded-md text-sm">B</span>
@@ -24,6 +26,7 @@
     </button>
   </header>
 
+  <!-- Hero Banner -->
   <section class="p-4 bg-orange-50/60 border-b">
     <span class="text-[10px] font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">First online cracker booking in Kavali</span>
     <h1 class="text-2xl font-black text-gray-950 mt-2 leading-tight">
@@ -35,18 +38,51 @@
     </p>
   </section>
 
-  <!-- Categories -->
-  <div class="p-4 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs">
-    <button onclick="filterCategory('All')" class="cat-btn bg-red-600 text-white px-3 py-1.5 rounded-full font-medium">All</button>
-    <button onclick="filterCategory('Sparklers')" class="cat-btn bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium">Sparklers</button>
-    <button onclick="filterCategory('Sound Crackers')" class="cat-btn bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium">Sound Crackers</button>
-    <button onclick="filterCategory('Flower Pots')" class="cat-btn bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium">Flower Pots</button>
-    <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium">Gift Boxes</button>
+  <!-- Categories Bar -->
+  <div class="px-4 pt-3 pb-1 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs">
+    <button onclick="filterCategory('All')" class="cat-btn bg-red-600 text-white px-3.5 py-1.5 rounded-full font-semibold">All</button>
+    <button onclick="filterCategory('Sparklers')" class="cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Sparklers</button>
+    <button onclick="filterCategory('Sound Crackers')" class="cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Sound Crackers</button>
+    <button onclick="filterCategory('Ground Chakkars')" class="cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Ground Chakkars</button>
+    <button onclick="filterCategory('Flower Pots')" class="cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Flower Pots</button>
+    <button onclick="filterCategory('Sky Shots')" class="cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Sky Shots</button>
+    <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Gift Boxes</button>
   </div>
 
-  <!-- Products Grid -->
-  <main class="p-4 grid grid-cols-2 gap-3" id="product-list">
-    <div class="col-span-2 text-center text-xs text-gray-400 py-10">Loading crackers...</div>
+  <!-- View Layout & Sort Toolbar -->
+  <div class="px-4 py-2.5 flex items-center justify-between border-b bg-white text-xs">
+    <!-- View Switcher (1 col / 2 cols / 3 cols / List) -->
+    <div class="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg">
+      <button onclick="setViewMode('big')" id="btn-view-big" title="Big (1 by 1)" class="view-btn px-2 py-1 rounded text-gray-600 hover:text-black">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"/></svg>
+      </button>
+      <button onclick="setViewMode('medium')" id="btn-view-medium" title="Medium (2 items)" class="view-btn px-2 py-1 rounded bg-white font-bold text-red-600 shadow-sm">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h4a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm8 0a1 1 0 011-1h4a1 1 0 011 1v12a1 1 0 01-1 1h-4a1 1 0 01-1-1V4z"/></svg>
+      </button>
+      <button onclick="setViewMode('small')" id="btn-view-small" title="Small (3 items)" class="view-btn px-2 py-1 rounded text-gray-600 hover:text-black">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 4a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1H10a1 1 0 011 1v12a1 1 0 01-1 1H7.5a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H13a1 1 0 01-1-1V4z"/></svg>
+      </button>
+      <button onclick="setViewMode('list')" id="btn-view-list" title="List View" class="view-btn px-2 py-1 rounded text-gray-600 hover:text-black">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+      </button>
+    </div>
+
+    <!-- Sort Dropdown -->
+    <div class="flex items-center space-x-1.5">
+      <span class="text-gray-400 font-medium">Sort:</span>
+      <select id="sort-select" onchange="changeSort(this.value)" class="border rounded-lg px-2 py-1 bg-white text-xs font-semibold outline-none focus:border-red-600">
+        <option value="popular">Popularity</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Dynamic Product Grid / List -->
+  <main class="p-3" id="product-container">
+    <div id="product-list" class="grid grid-cols-2 gap-2.5">
+      <div class="col-span-full text-center text-xs text-gray-400 py-10">Loading crackers...</div>
+    </div>
   </main>
 
   <!-- Cart Modal -->
@@ -87,7 +123,7 @@
           <div class="flex justify-between font-bold text-sm text-red-600"><span>Total:</span><span id="total-val">₹0</span></div>
         </div>
 
-        <button type="submit" id="checkout-btn" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-xs mt-2">
+        <button type="submit" id="checkout-btn" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-xs mt-2 active:scale-95 transition">
           Place Order & Book on WhatsApp
         </button>
       </form>
@@ -104,17 +140,16 @@
     let allProducts = [];
     let cart = [];
     let activeCategory = 'All';
+    let currentViewMode = 'medium'; // 'big' | 'medium' | 'small' | 'list'
+    let currentSort = 'popular';
 
-    // Synchronize Store Settings Live from Supabase
+    // Synchronize Store Settings from Supabase
     async function syncStoreSettings() {
       try {
         const { data, error } = await db.from('store_settings').select('*').eq('id', 1).single();
         if (!error && data) {
           if (data.store_name) {
             document.querySelectorAll('.store-name-text').forEach(el => el.innerText = data.store_name);
-          }
-          if (data.display_phone) {
-            document.querySelectorAll('.store-phone-text').forEach(el => el.innerText = data.display_phone);
           }
           if (data.shop_address) {
             document.querySelectorAll('.store-address-text').forEach(el => el.innerText = data.shop_address);
@@ -136,46 +171,174 @@
       }
     }
 
+    // View Switcher logic
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      document.querySelectorAll('.view-btn').forEach(b => {
+        b.className = "view-btn px-2 py-1 rounded text-gray-600 hover:text-black";
+      });
+      const activeBtn = document.getElementById('btn-view-' + mode);
+      if (activeBtn) activeBtn.className = "view-btn px-2 py-1 rounded bg-white font-bold text-red-600 shadow-sm";
+      renderProducts();
+    }
+
+    // Sort Handler
+    function changeSort(val) {
+      currentSort = val;
+      renderProducts();
+    }
+
     function renderProducts() {
       const container = document.getElementById('product-list');
-      const filtered = activeCategory === 'All' ? allProducts : allProducts.filter(p => p.category === activeCategory);
+      let filtered = activeCategory === 'All' ? [...allProducts] : allProducts.filter(p => p.category === activeCategory);
+
+      // Apply Sort
+      if (currentSort === 'price-asc') {
+        filtered.sort((a, b) => Number(a.offer_price) - Number(b.offer_price));
+      } else if (currentSort === 'price-desc') {
+        filtered.sort((a, b) => Number(b.offer_price) - Number(a.offer_price));
+      }
 
       if (filtered.length === 0) {
-        container.innerHTML = '<div class="col-span-2 text-center text-xs text-gray-400 py-10">No products found.</div>';
+        container.className = "w-full";
+        container.innerHTML = '<div class="text-center text-xs text-gray-400 py-12">No products found in this category.</div>';
         return;
       }
 
-      container.innerHTML = filtered.map(p => `
-        <div class="bg-white border rounded-xl p-3 flex flex-col justify-between shadow-sm">
-          <div>
-            <img src="${p.image_url || 'https://placehold.co/200x150?text=Cracker'}" class="w-full h-24 object-cover rounded-lg mb-2" />
-            <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${p.category}</div>
-            <h3 class="font-bold text-xs mt-0.5 leading-snug line-clamp-2">${p.name}</h3>
-            <div class="flex items-center space-x-1.5 mt-1.5">
-              <span class="font-extrabold text-red-600 text-sm">₹${p.offer_price}</span>
-              <span class="line-through text-gray-400 text-[11px]">₹${p.mrp}</span>
-            </div>
+      // Configure Grid/List Layout Container
+      if (currentViewMode === 'big') {
+        container.className = "grid grid-cols-1 gap-4";
+      } else if (currentViewMode === 'medium') {
+        container.className = "grid grid-cols-2 gap-2.5";
+      } else if (currentViewMode === 'small') {
+        container.className = "grid grid-cols-3 gap-2";
+      } else if (currentViewMode === 'list') {
+        container.className = "flex flex-col space-y-2.5";
+      }
+
+      container.innerHTML = filtered.map(p => {
+        const inCartItem = cart.find(c => c.id === p.id);
+        const qty = inCartItem ? inCartItem.qty : 0;
+
+        // In-Card Quantity Stepper Button
+        const qtyButtonHtml = qty > 0 ? `
+          <div class="flex items-center justify-between border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-8 w-full">
+            <button onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
+            <span class="font-black text-red-700 text-xs px-1">${qty}</span>
+            <button onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
           </div>
-          <button onclick="addToCart('${p.id}')" class="w-full bg-red-50 text-red-600 font-bold py-1.5 rounded-lg text-xs mt-2.5 border border-red-200">
+        ` : `
+          <button onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
             + Add
           </button>
-        </div>
-      `).join('');
+        `;
+
+        // 1. LIST VIEW CARD
+        if (currentViewMode === 'list') {
+          return `
+            <div class="bg-white border rounded-xl p-2.5 flex items-center space-x-3 shadow-sm">
+              <img src="${p.image_url || 'https://placehold.co/120x120?text=Cracker'}" class="w-16 h-16 object-cover rounded-lg shrink-0" />
+              <div class="flex-1 min-w-0">
+                <span class="text-[9px] text-gray-400 uppercase font-bold tracking-wider">${p.category}</span>
+                <h3 class="font-bold text-xs text-gray-900 truncate">${p.name}</h3>
+                <div class="flex items-center space-x-1.5 mt-0.5">
+                  <span class="font-extrabold text-red-600 text-sm">₹${p.offer_price}</span>
+                  <span class="line-through text-gray-400 text-[10px]">₹${p.mrp}</span>
+                </div>
+              </div>
+              <div class="w-24 shrink-0">
+                ${qtyButtonHtml}
+              </div>
+            </div>
+          `;
+        }
+
+        // 2. SMALL (3 COLUMNS) CARD
+        if (currentViewMode === 'small') {
+          return `
+            <div class="bg-white border rounded-xl p-2 flex flex-col justify-between shadow-sm">
+              <div>
+                <img src="${p.image_url || 'https://placehold.co/150x120?text=Cracker'}" class="w-full h-16 object-cover rounded-md mb-1.5" />
+                <span class="text-[8px] text-gray-400 uppercase font-bold tracking-wider block truncate">${p.category}</span>
+                <h3 class="font-bold text-[11px] leading-tight text-gray-900 line-clamp-2 h-7">${p.name}</h3>
+                <div class="mt-1">
+                  <span class="font-black text-red-600 text-xs">₹${p.offer_price}</span>
+                  <span class="line-through text-gray-400 text-[9px]">₹${p.mrp}</span>
+                </div>
+              </div>
+              <div class="mt-2">
+                ${qtyButtonHtml}
+              </div>
+            </div>
+          `;
+        }
+
+        // 3. BIG (1 COLUMN) CARD
+        if (currentViewMode === 'big') {
+          return `
+            <div class="bg-white border rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-4 items-center">
+              <img src="${p.image_url || 'https://placehold.co/400x300?text=Cracker'}" class="w-full sm:w-48 h-44 object-cover rounded-xl" />
+              <div class="flex-1 w-full flex flex-col justify-between">
+                <div>
+                  <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">${p.category}</span>
+                  <h3 class="font-black text-base text-gray-900 mt-1">${p.name}</h3>
+                  <div class="flex items-center space-x-2 mt-2">
+                    <span class="font-black text-red-600 text-xl">₹${p.offer_price}</span>
+                    <span class="line-through text-gray-400 text-sm">₹${p.mrp}</span>
+                    <span class="bg-green-100 text-green-800 text-[10px] font-black px-2 py-0.5 rounded-full">
+                      ${Math.round(((p.mrp - p.offer_price) / p.mrp) * 100)}% OFF
+                    </span>
+                  </div>
+                </div>
+                <div class="mt-4 max-w-xs">
+                  ${qtyButtonHtml}
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        // 4. MEDIUM (2 COLUMNS) DEFAULT CARD
+        return `
+          <div class="bg-white border rounded-xl p-3 flex flex-col justify-between shadow-sm">
+            <div>
+              <img src="${p.image_url || 'https://placehold.co/200x150?text=Cracker'}" class="w-full h-24 object-cover rounded-lg mb-2" />
+              <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${p.category}</div>
+              <h3 class="font-bold text-xs mt-0.5 leading-snug line-clamp-2 h-8">${p.name}</h3>
+              <div class="flex items-center space-x-1.5 mt-1.5">
+                <span class="font-extrabold text-red-600 text-sm">₹${p.offer_price}</span>
+                <span class="line-through text-gray-400 text-[11px]">₹${p.mrp}</span>
+              </div>
+            </div>
+            <div class="mt-2.5">
+              ${qtyButtonHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
-    function addToCart(id) {
+    // Direct Quantity Stepper Handler
+    function updateItemQty(id, change) {
       const prod = allProducts.find(p => p.id === id);
       const existing = cart.find(c => c.id === id);
+
       if (existing) {
-        existing.qty += 1;
-      } else {
+        existing.qty += change;
+        if (existing.qty <= 0) {
+          cart = cart.filter(c => c.id !== id);
+        }
+      } else if (change > 0) {
         cart.push({ ...prod, qty: 1 });
       }
+
       updateCartUI();
+      renderProducts(); // Refresh in-card step counters immediately
     }
 
     function updateCartUI() {
-      document.getElementById('cart-count').innerText = cart.reduce((sum, item) => sum + item.qty, 0);
+      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById('cart-count').innerText = totalCount;
       const cartItemsDiv = document.getElementById('cart-items');
 
       if (cart.length === 0) {
@@ -187,7 +350,10 @@
               <p class="font-semibold text-gray-800">${item.name}</p>
               <p class="text-gray-500">₹${item.offer_price} × ${item.qty}</p>
             </div>
-            <span class="font-bold">₹${item.offer_price * item.qty}</span>
+            <div class="flex items-center space-x-2">
+              <span class="font-bold">₹${item.offer_price * item.qty}</span>
+              <button onclick="updateItemQty('${item.id}', -item.qty)" class="text-red-500 font-bold text-sm px-1">&times;</button>
+            </div>
           </div>
         `).join('');
       }
@@ -208,8 +374,8 @@
       activeCategory = cat;
       document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.className = btn.innerText === cat 
-          ? "cat-btn bg-red-600 text-white px-3 py-1.5 rounded-full font-medium" 
-          : "cat-btn bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium";
+          ? "cat-btn bg-red-600 text-white px-3.5 py-1.5 rounded-full font-semibold" 
+          : "cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium";
       });
       renderProducts();
     }
@@ -264,7 +430,6 @@
       window.location.href = `https://wa.me/${storeWhatsAppNumber}?text=${message}`;
     }
 
-    // Run both on page launch
     syncStoreSettings();
     loadLiveProducts();
   </script>
