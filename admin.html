@@ -344,7 +344,48 @@
             <label class="font-semibold block mb-0.5">Phone *</label>
             <input required id="new-admin-phone" class="w-full border rounded p-2" />
           </div>
-          <div>
+          <div> | async function handleLogin(e) {
+      e.preventDefault();
+      const loginId = document.getElementById('login-id').value.trim();
+      const loginPass = document.getElementById('login-pass').value.trim();
+      const errorBox = document.getElementById('login-error');
+
+      // Direct fallback login for the primary super admin
+      if ((loginId === 'bittu_admin' || loginId === 'admin@bittucrackers.in') && loginPass === 'admin@bittu123') {
+        currentUser = {
+          username: 'bittu_admin',
+          first_name: 'Bittu',
+          last_name: 'Kumar',
+          email: 'admin@bittucrackers.in',
+          role: 'Super Admin'
+        };
+        localStorage.setItem('admin_session', JSON.stringify(currentUser));
+        document.getElementById('auth-modal').classList.add('hidden');
+        document.getElementById('admin-layout').classList.remove('hidden');
+        setupDashboard();
+        return;
+      }
+
+      // Query database for team members added later
+      const { data, error } = await db.from('admin_users')
+        .select('*')
+        .eq('password_hash', loginPass);
+
+      const matchedUser = data ? data.find(u => u.username === loginId || u.email === loginId) : null;
+
+      if (!matchedUser) {
+        errorBox.innerText = 'Invalid username/email or password.';
+        errorBox.classList.remove('hidden');
+        return;
+      }
+
+      currentUser = matchedUser;
+      localStorage.setItem('admin_session', JSON.stringify(currentUser));
+      document.getElementById('auth-modal').classList.add('hidden');
+      document.getElementById('admin-layout').classList.remove('hidden');
+      setupDashboard();
+    }
+            
             <label class="font-semibold block mb-0.5">Initial Password *</label>
             <input required id="new-admin-pass" type="password" class="w-full border rounded p-2" />
           </div>
