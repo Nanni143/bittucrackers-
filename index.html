@@ -6,7 +6,6 @@
   <title>Bittu Crackers - Online Booking</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Leaflet Map CSS/JS for Flipkart/Amazon Style Exact Pin Picker -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
@@ -15,9 +14,9 @@
 </head>
 <body class="bg-gray-100 text-gray-800 pb-28">
 
-  <!-- ================= TOP FLIPKART-STYLE LOCATION HEADER ================= -->
+  <!-- ================= TOP LOCATION HEADER ================= -->
   <header class="bg-white border-b px-4 py-2.5 sticky top-0 z-40 shadow-xs flex items-center justify-between">
-    <div onclick="openAddressSelectModal()" class="flex items-center space-x-2.5 cursor-pointer flex-1 min-w-0 pr-2">
+    <div onclick="handleTopLocationClick()" class="flex items-center space-x-2.5 cursor-pointer flex-1 min-w-0 pr-2">
       <div class="bg-red-50 text-red-600 p-2 rounded-xl shrink-0">
         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
       </div>
@@ -31,7 +30,7 @@
       </div>
     </div>
 
-    <!-- Cart Button with Pill Badge -->
+    <!-- Cart Button -->
     <button onclick="openCartView()" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm active:scale-95 transition shrink-0">
       <span>Cart</span>
       <span id="cart-count" class="bg-white text-red-600 rounded-full px-1.5 py-0.2 text-[10px] font-black">0</span>
@@ -79,7 +78,7 @@
     </div>
   </main>
 
-  <!-- ================= FLIPKART STYLE CHECKOUT / CART VIEW (Images 1 & 2) ================= -->
+  <!-- ================= CHECKOUT / CONFIRM DETAILS VIEW ================= -->
   <div id="cart-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-xs z-50 hidden flex justify-end">
     <div class="bg-gray-50 w-full max-w-md h-full flex flex-col overflow-y-auto">
       
@@ -89,40 +88,34 @@
           <button onclick="closeCartView()" class="text-gray-600 hover:text-black font-bold text-lg">←</button>
           <h2 class="text-base font-extrabold text-gray-900">Confirm details</h2>
         </div>
-        <div class="flex items-center space-x-4 text-[11px] font-bold text-gray-400">
-          <span class="text-blue-600 flex items-center space-x-1"><span>✓</span><span>Address</span></span>
+        <div class="flex items-center space-x-3 text-[11px] font-bold">
+          <span class="text-blue-600">✓ Address</span>
           <span class="text-blue-600 font-black">② Confirm</span>
-          <span>③ Book</span>
+          <span class="text-gray-400">③ Book</span>
         </div>
       </div>
 
       <div class="flex-1 p-3.5 space-y-3 overflow-y-auto">
-        <!-- 1. Flipkart-style "Delivering to" Address Card (Image 1) -->
+        
+        <!-- Delivering To Card -->
         <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-2xs space-y-2">
           <div class="flex justify-between items-center">
             <span class="text-xs font-black text-gray-900 uppercase tracking-wide">Delivering to</span>
             <button type="button" onclick="openAddressSelectModal()" class="text-blue-600 font-bold text-xs hover:underline">Change</button>
           </div>
 
-          <div class="flex items-start space-x-2 pt-1">
-            <span class="text-gray-900 mt-0.5 text-sm">📍</span>
-            <div class="flex-1 text-xs">
-              <h3 id="card-cust-name" class="font-extrabold text-gray-900 text-sm">B.v.sravan</h3>
-              <p id="card-cust-address" class="text-gray-600 mt-0.5 leading-relaxed">11-33-979, Vengal rao nagar, Kavali, Andhra Pradesh</p>
-              <p id="card-cust-phone" class="text-gray-500 mt-1 font-semibold flex items-center space-x-1">
-                <span>📞</span><span id="card-cust-phone-val">9493525447</span>
-              </p>
-            </div>
+          <div id="address-card-content" class="pt-1">
+            <!-- Rendered dynamically -->
           </div>
         </div>
 
-        <!-- 2. Ordered Items List with Stepper Quantity -->
+        <!-- Ordered Items List -->
         <div class="bg-white rounded-2xl p-3 border border-gray-200 shadow-2xs space-y-2.5">
           <h3 class="text-xs font-black text-gray-900 uppercase tracking-wide border-b pb-2">Order Items</h3>
           <div id="cart-items-list" class="divide-y space-y-2"></div>
         </div>
 
-        <!-- 3. Price Details Card (Flipkart Summary) -->
+        <!-- Price Details Card -->
         <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-2xs space-y-2 text-xs">
           <h3 class="font-black text-gray-900 uppercase tracking-wide border-b pb-2">Price Details</h3>
           <div class="flex justify-between text-gray-600">
@@ -164,7 +157,41 @@
     </div>
   </div>
 
-  <!-- ================= FLIPKART SAVED ADDRESSES BOTTOM SHEET (Image 2) ================= -->
+  <!-- ================= SUCCESS CONFIRMATION MODAL ================= -->
+  <div id="order-success-modal" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center space-y-4">
+      <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl font-black">
+        ✓
+      </div>
+      <div>
+        <span class="bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">Booking Successful</span>
+        <h3 class="text-xl font-black text-gray-950 mt-1">Order Confirmed!</h3>
+        <p class="text-xs text-gray-500 mt-1">Order ID: <span id="success-order-id" class="font-mono font-bold text-gray-800">#---</span></p>
+      </div>
+
+      <div class="bg-gray-50 rounded-2xl p-3.5 text-left text-xs space-y-1.5 border">
+        <div class="flex justify-between text-gray-500">
+          <span>Deliver to:</span>
+          <span id="success-cust-name" class="font-bold text-gray-800">---</span>
+        </div>
+        <p id="success-cust-addr" class="text-[11px] text-gray-600 line-clamp-2">---</p>
+        <div class="border-t pt-1.5 flex justify-between font-bold text-gray-900">
+          <span>Pay on Delivery:</span>
+          <span id="success-total" class="text-red-600 text-sm">₹0</span>
+        </div>
+      </div>
+
+      <p class="text-[11px] text-gray-500 leading-relaxed">
+        WhatsApp message generated! Our Kavali delivery manager will verify your order shortly.
+      </p>
+
+      <button type="button" onclick="closeSuccessAndShopMore()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl text-xs active:scale-95 transition shadow-sm">
+        Done & Continue Shopping
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= SAVED ADDRESSES BOTTOM SHEET ================= -->
   <div id="address-select-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-2xs z-50 hidden flex items-end justify-center p-0">
     <div class="bg-white w-full max-w-md rounded-t-3xl p-4 shadow-2xl flex flex-col max-h-[85vh] space-y-3">
       <div class="flex justify-between items-center border-b pb-2">
@@ -172,11 +199,10 @@
         <button onclick="closeAddressSelectModal()" class="text-gray-400 hover:text-black text-2xl font-bold">&times;</button>
       </div>
 
-      <!-- "+ Add New Address" Button (Image 2) -->
       <button onclick="startAddNewAddressFlow()" class="w-full bg-blue-50 border border-blue-200 text-blue-700 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-between hover:bg-blue-100 transition">
         <span class="flex items-center space-x-2">
           <span class="text-base font-black">+</span>
-          <span>Add New</span>
+          <span>Add New Address</span>
         </span>
         <span>➔</span>
       </button>
@@ -186,9 +212,8 @@
     </div>
   </div>
 
-  <!-- ================= FLIPKART INTERACTIVE MAP PIN PICKER (Images 3 & 4) ================= -->
+  <!-- ================= INTERACTIVE MAP PIN PICKER ================= -->
   <div id="map-pin-modal" class="fixed inset-0 bg-white z-50 hidden flex flex-col">
-    <!-- Header -->
     <div class="px-4 py-3 border-b flex items-center justify-between bg-white z-10 shadow-2xs">
       <div class="flex items-center space-x-3">
         <button onclick="closeMapPinModal()" class="text-gray-700 text-lg font-bold">←</button>
@@ -197,11 +222,10 @@
       <span class="text-[11px] text-gray-400 font-semibold">Step 1 of 2</span>
     </div>
 
-    <!-- Map Area with Center Pin (Image 4) -->
     <div class="relative flex-1 w-full bg-gray-200">
       <div id="interactive-map" class="w-full h-full"></div>
 
-      <!-- Center Fixed Map Pin (Flipkart Style) -->
+      <!-- Center Fixed Map Pin -->
       <div class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center z-20 pb-8">
         <div class="bg-neutral-900 text-white font-bold text-[10px] px-3 py-1 rounded-full shadow-lg mb-1 animate-bounce">
           Place pin on the exact location
@@ -209,7 +233,7 @@
         <div class="text-red-600 text-4xl drop-shadow-md">📍</div>
       </div>
 
-      <!-- Floating "Use my current location" Pill (Image 4) -->
+      <!-- Use My Current Location Pill -->
       <div class="absolute bottom-4 inset-x-0 flex justify-center z-20 px-4">
         <button type="button" onclick="triggerGPSCurrentLocation()" id="btn-use-gps-pill" class="bg-white hover:bg-gray-50 text-blue-600 border border-blue-200 font-bold text-xs px-4 py-2.5 rounded-full shadow-xl flex items-center space-x-2 active:scale-95 transition">
           <span>🎯</span>
@@ -218,16 +242,16 @@
       </div>
     </div>
 
-    <!-- Bottom Deliver To Summary Box (Image 4) -->
+    <!-- Bottom Detected Location Card -->
     <div class="bg-white border-t p-4 space-y-3 z-10 shadow-lg">
       <div>
         <span class="text-[10px] text-gray-400 font-bold uppercase block">Deliver To</span>
         <div class="flex justify-between items-start mt-0.5">
           <div class="pr-2">
-            <h4 id="map-detected-title" class="font-extrabold text-gray-900 text-xs">Vengal Rao Nagar</h4>
-            <p id="map-detected-full" class="text-[11px] text-gray-500 line-clamp-2 mt-0.5">Kavali, SPSR Nellore District, Andhra Pradesh</p>
+            <h4 id="map-detected-title" class="font-extrabold text-gray-900 text-xs">Locating...</h4>
+            <p id="map-detected-full" class="text-[11px] text-gray-500 line-clamp-2 mt-0.5">Move pin to your delivery area</p>
           </div>
-          <span id="map-zone-rate-pill" class="bg-emerald-50 text-emerald-700 font-bold text-[10px] px-2 py-0.5 rounded-full shrink-0">FREE Delivery</span>
+          <span id="map-zone-rate-pill" class="bg-emerald-50 text-emerald-700 font-bold text-[10px] px-2 py-0.5 rounded-full shrink-0">Checking...</span>
         </div>
       </div>
 
@@ -237,7 +261,7 @@
     </div>
   </div>
 
-  <!-- ================= FLIPKART "DELIVER TO" DETAILS FORM (Image 5) ================= -->
+  <!-- ================= DELIVER TO DETAILS FORM ================= -->
   <div id="address-form-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-2xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl flex flex-col space-y-3.5 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b pb-2">
@@ -247,35 +271,31 @@
 
       <div class="bg-amber-50 text-amber-800 text-[10px] p-2 rounded-xl flex items-center space-x-1 border border-amber-200">
         <span>ℹ️</span>
-        <span>Ensure your address details are accurate for a smooth festival delivery experience</span>
+        <span>Enter your building/flat details so our delivery boy reaches you easily.</span>
       </div>
 
-      <!-- Flat/House/Building Name * -->
       <div>
         <label class="block text-[11px] font-bold text-gray-700 mb-0.5">Flat/House/building name *</label>
-        <input id="input-house-no" type="text" placeholder="e.g. 11-33-979, Near Reddy Sangam" class="w-full border border-gray-300 rounded-lg p-2.5 text-xs outline-none focus:border-blue-600" />
+        <input id="input-house-no" type="text" placeholder="e.g. D.No 12/4, Near Water Tank" class="w-full border border-gray-300 rounded-lg p-2.5 text-xs outline-none focus:border-blue-600" />
       </div>
 
-      <!-- Area/Sector/Locality (Auto-filled from Pin) -->
       <div class="bg-gray-50 border rounded-xl p-2.5 flex justify-between items-center text-xs">
         <div>
           <span class="text-[9px] font-bold text-gray-400 uppercase block">Area / Locality</span>
-          <p id="form-locality-text" class="font-semibold text-gray-800 text-[11px] truncate max-w-[240px]">Vengal Rao Nagar, Kavali</p>
+          <p id="form-locality-text" class="font-semibold text-gray-800 text-[11px] truncate max-w-[240px]">---</p>
         </div>
         <button type="button" onclick="reopenMapPicker()" class="text-blue-600 font-bold text-xs hover:underline">Change</button>
       </div>
 
-      <!-- Name & Mobile Number * -->
       <div>
         <label class="block text-[11px] font-bold text-gray-700 mb-0.5">Enter your full name *</label>
-        <input id="input-name" type="text" placeholder="Your Name" class="w-full border border-gray-300 rounded-lg p-2.5 text-xs outline-none focus:border-blue-600" />
+        <input id="input-name" type="text" placeholder="Full Name" class="w-full border border-gray-300 rounded-lg p-2.5 text-xs outline-none focus:border-blue-600" />
       </div>
       <div>
         <label class="block text-[11px] font-bold text-gray-700 mb-0.5">10-digit mobile number *</label>
         <input id="input-phone" type="tel" placeholder="Mobile Number" class="w-full border border-gray-300 rounded-lg p-2.5 text-xs outline-none focus:border-blue-600" />
       </div>
 
-      <!-- Address Type (Home / Work) -->
       <div>
         <span class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Type of address</span>
         <div class="flex space-x-2 text-xs">
@@ -300,7 +320,7 @@
   <script>
     const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
     const SUPABASE_KEY = "sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
-    const KAVALI_BASE_COORDS = { lat: 14.9132, lon: 79.9928 }; // Origin Store
+    const KAVALI_BASE_COORDS = { lat: 14.9132, lon: 79.9928 };
     let storeWhatsAppNumber = "917829978883";
 
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -312,73 +332,106 @@
     let currentViewMode = 'medium';
     let currentSort = 'popular';
 
-    // Saved Addresses (Flipkart Style)
-    let savedAddresses = [
-      {
-        id: "addr_1",
-        name: "B.v.sravan",
-        phone: "9493525447",
-        house: "11-33-979",
-        area: "Vengal rao nagar, Kavali, Andhra Pradesh",
-        lat: 14.9132,
-        lon: 79.9928,
-        zoneName: "Kavali City & Town (Local)",
-        deliveryCharge: 0
-      }
-    ];
-    let selectedAddress = savedAddresses[0];
+    // No predefined sample address — start clean
+    let savedAddresses = [];
+    let selectedAddress = null;
 
     let leafletMap = null;
     let tempMapCoords = { ...KAVALI_BASE_COORDS };
-    let tempDetectedInfo = { areaName: "Vengal Rao Nagar, Kavali", fullAddress: "Kavali, SPSR Nellore District, Andhra Pradesh", zoneName: "Kavali City & Town (Local)", deliveryCharge: 0 };
+    let tempDetectedInfo = { areaName: "Kavali", fullAddress: "Kavali, SPSR Nellore District", zoneName: "Local", deliveryCharge: 0 };
 
-    // 1. INITIAL SETUP
     async function init() {
-      // Load saved addresses from browser storage if present
+      // 1. Load user's saved addresses from browser storage
       const stored = localStorage.getItem('bittu_saved_addresses');
       if (stored) {
-        try { savedAddresses = JSON.parse(stored); selectedAddress = savedAddresses[0]; } catch(e){}
+        try {
+          savedAddresses = JSON.parse(stored);
+          if (savedAddresses.length > 0) {
+            selectedAddress = savedAddresses[0];
+          }
+        } catch(e) {}
       }
 
-      // Sync Delivery Zones from Supabase
+      // 2. Load delivery zones from Supabase
       const { data: zData } = await db.from('delivery_zones').select('*');
-      if (zData && zData.length > 0) {
-        deliveryZones = zData;
-      } else {
-        deliveryZones = [
-          { zone_name: 'Kavali City & Town (Local)', area_keywords: 'kavali, vengal, musunuru, maddurupadu, rudrakota', delivery_charge: 0 },
-          { zone_name: 'Kavali Rural & Mandals', area_keywords: 'bogole, bitragunta, jaladanki, allur, dagadarthi, kaligiri, vinjamur', delivery_charge: 99 },
-          { zone_name: 'Nellore City & Towns', area_keywords: 'nellore, kovur, buchi, buchireddypalem, atmakur, udayagiri', delivery_charge: 150 },
-          { zone_name: 'Other District Border Areas', area_keywords: 'kandukur, singarayakonda, gudur, naidupeta', delivery_charge: 199 }
-        ];
-      }
+      deliveryZones = zData && zData.length > 0 ? zData : [
+        { zone_name: 'Kavali City & Town (Local)', area_keywords: 'kavali, vengal, musunuru, maddurupadu, rudrakota', delivery_charge: 0 },
+        { zone_name: 'Kavali Rural & Mandals', area_keywords: 'bogole, bitragunta, jaladanki, allur, dagadarthi, kaligiri, vinjamur', delivery_charge: 99 },
+        { zone_name: 'Nellore City & Towns', area_keywords: 'nellore, kovur, buchi, buchireddypalem, atmakur, udayagiri', delivery_charge: 150 },
+        { zone_name: 'Other District Border Areas', area_keywords: 'kandukur, singarayakonda, gudur, naidupeta', delivery_charge: 199 }
+      ];
 
-      // Sync WhatsApp from Store Settings
+      // 3. Load WhatsApp number
       const { data: sData } = await db.from('store_settings').select('*').eq('id', 1).single();
       if (sData && sData.whatsapp_number) storeWhatsAppNumber = sData.whatsapp_number.replace(/\D/g, '');
 
-      renderSavedAddressesList();
-      applySelectedAddress(selectedAddress);
+      updateAddressUI();
       loadLiveProducts();
     }
 
-    // 2. FLIPKART ADDRESS MANAGEMENT & MODALS
+    function handleTopLocationClick() {
+      if (savedAddresses.length === 0) {
+        startAddNewAddressFlow();
+      } else {
+        openAddressSelectModal();
+      }
+    }
+
+    function updateAddressUI() {
+      const topName = document.getElementById('top-loc-name');
+      const topDesc = document.getElementById('top-loc-desc');
+      const cardContent = document.getElementById('address-card-content');
+
+      if (selectedAddress) {
+        topName.innerText = selectedAddress.name + ' - ' + (selectedAddress.house || selectedAddress.area.split(',')[0]);
+        topDesc.innerText = selectedAddress.area;
+
+        cardContent.innerHTML = `
+          <div class="flex items-start space-x-2">
+            <span class="text-gray-900 mt-0.5 text-sm">📍</span>
+            <div class="flex-1 text-xs">
+              <h3 class="font-extrabold text-gray-900 text-sm">${selectedAddress.name}</h3>
+              <p class="text-gray-600 mt-0.5 leading-relaxed">${selectedAddress.house ? selectedAddress.house + ', ' : ''}${selectedAddress.area}</p>
+              <p class="text-gray-500 mt-1 font-semibold">📞 ${selectedAddress.phone}</p>
+            </div>
+          </div>
+        `;
+        document.getElementById('delivery-zone-badge').innerText = selectedAddress.zoneName || 'Local';
+      } else {
+        topName.innerText = "Add Delivery Address";
+        topDesc.innerText = "Tap to set GPS location for delivery";
+
+        cardContent.innerHTML = `
+          <div onclick="startAddNewAddressFlow()" class="p-3 border-2 border-dashed border-blue-300 rounded-xl bg-blue-50/50 text-center cursor-pointer">
+            <span class="text-blue-600 font-bold text-xs">+ Tap to Add Delivery Address</span>
+          </div>
+        `;
+        document.getElementById('delivery-zone-badge').innerText = "Not set";
+      }
+
+      renderSavedAddressesList();
+      updateTotal();
+    }
+
     function renderSavedAddressesList() {
       const container = document.getElementById('saved-addresses-list');
+      if (savedAddresses.length === 0) {
+        container.innerHTML = '<p class="text-xs text-gray-400 py-3 text-center">No saved addresses yet. Tap "+ Add New Address" above.</p>';
+        return;
+      }
       container.innerHTML = savedAddresses.map(a => `
-        <div onclick="selectAddressById('${a.id}')" class="p-3 border rounded-xl cursor-pointer flex items-start justify-between ${selectedAddress.id === a.id ? 'border-blue-500 bg-blue-50/50' : 'bg-white hover:bg-gray-50'}">
+        <div onclick="selectAddressById('${a.id}')" class="p-3 border rounded-xl cursor-pointer flex items-start justify-between ${selectedAddress && selectedAddress.id === a.id ? 'border-blue-500 bg-blue-50/50' : 'bg-white hover:bg-gray-50'}">
           <div class="flex items-start space-x-2.5">
             <span class="text-base text-gray-700 mt-0.5">📍</span>
             <div class="text-xs">
               <div class="flex items-center space-x-2">
                 <span class="font-bold text-gray-900">${a.name}</span>
-                ${selectedAddress.id === a.id ? '<span class="bg-blue-100 text-blue-700 font-bold text-[9px] px-1.5 py-0.2 rounded">Selected</span>' : ''}
+                ${selectedAddress && selectedAddress.id === a.id ? '<span class="bg-blue-100 text-blue-700 font-bold text-[9px] px-1.5 py-0.2 rounded">Selected</span>' : ''}
               </div>
-              <p class="text-gray-600 mt-0.5 text-[11px] leading-snug">${a.house ? a.house + ', ' : ''}${a.area}</p>
+              <p class="text-gray-600 mt-0.5 text-[11px]">${a.house ? a.house + ', ' : ''}${a.area}</p>
               <p class="text-gray-500 font-semibold mt-0.5 text-[11px]">📞 ${a.phone}</p>
             </div>
           </div>
-          <span class="text-gray-400 text-xs">⋮</span>
         </div>
       `).join('');
     }
@@ -386,28 +439,16 @@
     function selectAddressById(id) {
       const matched = savedAddresses.find(a => a.id === id);
       if (matched) {
-        applySelectedAddress(matched);
+        selectedAddress = matched;
+        updateAddressUI();
         closeAddressSelectModal();
       }
-    }
-
-    function applySelectedAddress(addr) {
-      selectedAddress = addr;
-      document.getElementById('top-loc-name').innerText = addr.name + ' - ' + (addr.house || addr.area.split(',')[0]);
-      document.getElementById('top-loc-desc').innerText = addr.area;
-
-      document.getElementById('card-cust-name').innerText = addr.name;
-      document.getElementById('card-cust-address').innerText = `${addr.house ? addr.house + ', ' : ''}${addr.area}`;
-      document.getElementById('card-cust-phone-val').innerText = addr.phone;
-      document.getElementById('delivery-zone-badge').innerText = addr.zoneName || 'Local';
-
-      updateTotal();
     }
 
     function openAddressSelectModal() { document.getElementById('address-select-modal').classList.remove('hidden'); }
     function closeAddressSelectModal() { document.getElementById('address-select-modal').classList.add('hidden'); }
 
-    // 3. MAP PIN PICKER (Images 3 & 4)
+    // MAP PIN PICKER
     function startAddNewAddressFlow() {
       closeAddressSelectModal();
       document.getElementById('map-pin-modal').classList.remove('hidden');
@@ -417,15 +458,14 @@
     function closeMapPinModal() { document.getElementById('map-pin-modal').classList.add('hidden'); }
 
     function initMapPicker() {
-      const startLat = selectedAddress.lat || KAVALI_BASE_COORDS.lat;
-      const startLon = selectedAddress.lon || KAVALI_BASE_COORDS.lon;
+      const startLat = (selectedAddress && selectedAddress.lat) || KAVALI_BASE_COORDS.lat;
+      const startLon = (selectedAddress && selectedAddress.lon) || KAVALI_BASE_COORDS.lon;
       tempMapCoords = { lat: startLat, lon: startLon };
 
       if (!leafletMap) {
         leafletMap = L.map('interactive-map', { zoomControl: false }).setView([startLat, startLon], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
 
-        // When user drags map, pin stays fixed in center (Images 3 & 4)
         leafletMap.on('moveend', function() {
           const center = leafletMap.getCenter();
           tempMapCoords = { lat: center.lat, lon: center.lng };
@@ -466,8 +506,6 @@
         const pincode = addr.postcode ? ` - ${addr.postcode}` : "";
 
         const fullAddress = `${areaTitle}, ${district}, ${state}${pincode}`;
-
-        // Calculate delivery zone
         const zoneInfo = evaluateDeliveryCharge(fullAddress, lat, lon);
 
         tempDetectedInfo = {
@@ -480,15 +518,13 @@
         document.getElementById('map-detected-title').innerText = areaTitle;
         document.getElementById('map-detected-full').innerText = fullAddress;
         document.getElementById('map-zone-rate-pill').innerText = zoneInfo.charge === 0 ? "FREE Delivery" : `₹${zoneInfo.charge} Delivery`;
-        document.getElementById('map-zone-rate-pill').className = zoneInfo.charge === 0 ? "bg-emerald-50 text-emerald-700 font-bold text-[10px] px-2 py-0.5 rounded-full" : "bg-blue-50 text-blue-700 font-bold text-[10px] px-2 py-0.5 rounded-full";
       } catch (e) {
-        console.warn("Geocoding note:", e);
+        console.warn(e);
       }
     }
 
     function evaluateDeliveryCharge(addressString, lat, lon) {
       const lower = addressString.toLowerCase();
-      // Match keywords in configured delivery_zones
       for (const z of deliveryZones) {
         const keys = (z.area_keywords || '').split(',').map(k => k.trim().toLowerCase());
         if (keys.some(k => k && lower.includes(k))) {
@@ -498,17 +534,16 @@
       return { zoneName: "Regional Delivery", charge: 99 };
     }
 
-    // 4. STEP 2: ADDRESS DETAILS FORM (Image 5)
     function proceedToAddressDetailsForm() {
       closeMapPinModal();
       document.getElementById('form-locality-text').innerText = tempDetectedInfo.fullAddress;
-      document.getElementById('input-name').value = selectedAddress.name || "";
-      document.getElementById('input-phone').value = selectedAddress.phone || "";
+      document.getElementById('input-name').value = selectedAddress ? selectedAddress.name : "";
+      document.getElementById('input-phone').value = selectedAddress ? selectedAddress.phone : "";
+      document.getElementById('input-house-no').value = "";
       document.getElementById('address-form-modal').classList.remove('hidden');
     }
 
     function closeAddressFormModal() { document.getElementById('address-form-modal').classList.add('hidden'); }
-
     function reopenMapPicker() {
       closeAddressFormModal();
       document.getElementById('map-pin-modal').classList.remove('hidden');
@@ -536,14 +571,259 @@
       };
 
       savedAddresses.unshift(newAddr);
+      selectedAddress = newAddr;
       localStorage.setItem('bittu_saved_addresses', JSON.stringify(savedAddresses));
 
-      renderSavedAddressesList();
-      applySelectedAddress(newAddr);
+      updateAddressUI();
       closeAddressFormModal();
     }
 
-    // 5. CART & BILLING CALCULATIONS
+    // No predefined sample address — start clean
+    let savedAddresses = [];
+    let selectedAddress = null;
+
+    let leafletMap = null;
+    let tempMapCoords = { ...KAVALI_BASE_COORDS };
+    let tempDetectedInfo = { areaName: "Kavali", fullAddress: "Kavali, SPSR Nellore District", zoneName: "Local", deliveryCharge: 0 };
+
+    async function init() {
+      // 1. Load user's saved addresses from browser storage
+      const stored = localStorage.getItem('bittu_saved_addresses');
+      if (stored) {
+        try {
+          savedAddresses = JSON.parse(stored);
+          if (savedAddresses.length > 0) {
+            selectedAddress = savedAddresses[0];
+          }
+        } catch(e) {}
+      }
+
+      // 2. Load delivery zones from Supabase
+      const { data: zData } = await db.from('delivery_zones').select('*');
+      deliveryZones = zData && zData.length > 0 ? zData : [
+        { zone_name: 'Kavali City & Town (Local)', area_keywords: 'kavali, vengal, musunuru, maddurupadu, rudrakota', delivery_charge: 0 },
+        { zone_name: 'Kavali Rural & Mandals', area_keywords: 'bogole, bitragunta, jaladanki, allur, dagadarthi, kaligiri, vinjamur', delivery_charge: 99 },
+        { zone_name: 'Nellore City & Towns', area_keywords: 'nellore, kovur, buchi, buchireddypalem, atmakur, udayagiri', delivery_charge: 150 },
+        { zone_name: 'Other District Border Areas', area_keywords: 'kandukur, singarayakonda, gudur, naidupeta', delivery_charge: 199 }
+      ];
+
+      // 3. Load WhatsApp number
+      const { data: sData } = await db.from('store_settings').select('*').eq('id', 1).single();
+      if (sData && sData.whatsapp_number) storeWhatsAppNumber = sData.whatsapp_number.replace(/\D/g, '');
+
+      updateAddressUI();
+      loadLiveProducts();
+    }
+
+    function handleTopLocationClick() {
+      if (savedAddresses.length === 0) {
+        startAddNewAddressFlow();
+      } else {
+        openAddressSelectModal();
+      }
+    }
+
+    function updateAddressUI() {
+      const topName = document.getElementById('top-loc-name');
+      const topDesc = document.getElementById('top-loc-desc');
+      const cardContent = document.getElementById('address-card-content');
+
+      if (selectedAddress) {
+        topName.innerText = selectedAddress.name + ' - ' + (selectedAddress.house || selectedAddress.area.split(',')[0]);
+        topDesc.innerText = selectedAddress.area;
+
+        cardContent.innerHTML = `
+          <div class="flex items-start space-x-2">
+            <span class="text-gray-900 mt-0.5 text-sm">📍</span>
+            <div class="flex-1 text-xs">
+              <h3 class="font-extrabold text-gray-900 text-sm">${selectedAddress.name}</h3>
+              <p class="text-gray-600 mt-0.5 leading-relaxed">${selectedAddress.house ? selectedAddress.house + ', ' : ''}${selectedAddress.area}</p>
+              <p class="text-gray-500 mt-1 font-semibold">📞 ${selectedAddress.phone}</p>
+            </div>
+          </div>
+        `;
+        document.getElementById('delivery-zone-badge').innerText = selectedAddress.zoneName || 'Local';
+      } else {
+        topName.innerText = "Add Delivery Address";
+        topDesc.innerText = "Tap to set GPS location for delivery";
+
+        cardContent.innerHTML = `
+          <div onclick="startAddNewAddressFlow()" class="p-3 border-2 border-dashed border-blue-300 rounded-xl bg-blue-50/50 text-center cursor-pointer">
+            <span class="text-blue-600 font-bold text-xs">+ Tap to Add Delivery Address</span>
+          </div>
+        `;
+        document.getElementById('delivery-zone-badge').innerText = "Not set";
+      }
+
+      renderSavedAddressesList();
+      updateTotal();
+    }
+
+    function renderSavedAddressesList() {
+      const container = document.getElementById('saved-addresses-list');
+      if (savedAddresses.length === 0) {
+        container.innerHTML = '<p class="text-xs text-gray-400 py-3 text-center">No saved addresses yet. Tap "+ Add New Address" above.</p>';
+        return;
+      }
+      container.innerHTML = savedAddresses.map(a => `
+        <div onclick="selectAddressById('${a.id}')" class="p-3 border rounded-xl cursor-pointer flex items-start justify-between ${selectedAddress && selectedAddress.id === a.id ? 'border-blue-500 bg-blue-50/50' : 'bg-white hover:bg-gray-50'}">
+          <div class="flex items-start space-x-2.5">
+            <span class="text-base text-gray-700 mt-0.5">📍</span>
+            <div class="text-xs">
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-gray-900">${a.name}</span>
+                ${selectedAddress && selectedAddress.id === a.id ? '<span class="bg-blue-100 text-blue-700 font-bold text-[9px] px-1.5 py-0.2 rounded">Selected</span>' : ''}
+              </div>
+              <p class="text-gray-600 mt-0.5 text-[11px]">${a.house ? a.house + ', ' : ''}${a.area}</p>
+              <p class="text-gray-500 font-semibold mt-0.5 text-[11px]">📞 ${a.phone}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectAddressById(id) {
+      const matched = savedAddresses.find(a => a.id === id);
+      if (matched) {
+        selectedAddress = matched;
+        updateAddressUI();
+        closeAddressSelectModal();
+      }
+    }
+
+    function openAddressSelectModal() { document.getElementById('address-select-modal').classList.remove('hidden'); }
+    function closeAddressSelectModal() { document.getElementById('address-select-modal').classList.add('hidden'); }
+
+    // MAP PIN PICKER
+    function startAddNewAddressFlow() {
+      closeAddressSelectModal();
+      document.getElementById('map-pin-modal').classList.remove('hidden');
+      setTimeout(initMapPicker, 200);
+    }
+
+    function closeMapPinModal() { document.getElementById('map-pin-modal').classList.add('hidden'); }
+
+    function initMapPicker() {
+      const startLat = (selectedAddress && selectedAddress.lat) || KAVALI_BASE_COORDS.lat;
+      const startLon = (selectedAddress && selectedAddress.lon) || KAVALI_BASE_COORDS.lon;
+      tempMapCoords = { lat: startLat, lon: startLon };
+
+      if (!leafletMap) {
+        leafletMap = L.map('interactive-map', { zoomControl: false }).setView([startLat, startLon], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
+
+        leafletMap.on('moveend', function() {
+          const center = leafletMap.getCenter();
+          tempMapCoords = { lat: center.lat, lon: center.lng };
+          reverseGeocodeMapCenter(center.lat, center.lng);
+        });
+      } else {
+        leafletMap.invalidateSize();
+        leafletMap.setView([startLat, startLon], 15);
+      }
+      reverseGeocodeMapCenter(startLat, startLon);
+    }
+
+    function triggerGPSCurrentLocation() {
+      const pill = document.getElementById('btn-use-gps-pill');
+      pill.innerText = "Finding GPS location...";
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        tempMapCoords = { lat, lon };
+        if (leafletMap) leafletMap.setView([lat, lon], 16);
+        reverseGeocodeMapCenter(lat, lon);
+        pill.innerHTML = "<span>🎯</span><span>Use my current location</span>";
+      }, () => {
+        alert("Please enable location permission on your phone to auto-detect.");
+        pill.innerHTML = "<span>🎯</span><span>Use my current location</span>";
+      }, { enableHighAccuracy: true });
+    }
+
+    async function reverseGeocodeMapCenter(lat, lon) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+        const data = await res.json();
+        const addr = data.address || {};
+
+        const areaTitle = addr.suburb || addr.neighbourhood || addr.village || addr.road || addr.town || "Kavali Area";
+        const district = addr.county || addr.city_district || "SPSR Nellore District";
+        const state = addr.state || "Andhra Pradesh";
+        const pincode = addr.postcode ? ` - ${addr.postcode}` : "";
+
+        const fullAddress = `${areaTitle}, ${district}, ${state}${pincode}`;
+        const zoneInfo = evaluateDeliveryCharge(fullAddress, lat, lon);
+
+        tempDetectedInfo = {
+          areaName: areaTitle,
+          fullAddress: fullAddress,
+          zoneName: zoneInfo.zoneName,
+          deliveryCharge: zoneInfo.charge
+        };
+
+        document.getElementById('map-detected-title').innerText = areaTitle;
+        document.getElementById('map-detected-full').innerText = fullAddress;
+        document.getElementById('map-zone-rate-pill').innerText = zoneInfo.charge === 0 ? "FREE Delivery" : `₹${zoneInfo.charge} Delivery`;
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    function evaluateDeliveryCharge(addressString, lat, lon) {
+      const lower = addressString.toLowerCase();
+      for (const z of deliveryZones) {
+        const keys = (z.area_keywords || '').split(',').map(k => k.trim().toLowerCase());
+        if (keys.some(k => k && lower.includes(k))) {
+          return { zoneName: z.zone_name, charge: Number(z.delivery_charge || 0) };
+        }
+      }
+      return { zoneName: "Regional Delivery", charge: 99 };
+    }
+
+    function proceedToAddressDetailsForm() {
+      closeMapPinModal();
+      document.getElementById('form-locality-text').innerText = tempDetectedInfo.fullAddress;
+      document.getElementById('input-name').value = selectedAddress ? selectedAddress.name : "";
+      document.getElementById('input-phone').value = selectedAddress ? selectedAddress.phone : "";
+      document.getElementById('input-house-no').value = "";
+      document.getElementById('address-form-modal').classList.remove('hidden');
+    }
+
+    function closeAddressFormModal() { document.getElementById('address-form-modal').classList.add('hidden'); }
+    function reopenMapPicker() {
+      closeAddressFormModal();
+      document.getElementById('map-pin-modal').classList.remove('hidden');
+    }
+
+    function saveAndApplyAddress() {
+      const houseNo = document.getElementById('input-house-no').value.trim();
+      const name = document.getElementById('input-name').value.trim();
+      const phone = document.getElementById('input-phone').value.trim();
+
+      if (!houseNo) return alert("Please enter Flat / House / Building name.");
+      if (!name) return alert("Please enter your name.");
+      if (!phone || phone.length < 10) return alert("Please enter a valid 10-digit mobile number.");
+
+      const newAddr = {
+        id: "addr_" + Date.now(),
+        name: name,
+        phone: phone,
+        house: houseNo,
+        area: tempDetectedInfo.fullAddress,
+        lat: tempMapCoords.lat,
+        lon: tempMapCoords.lon,
+        zoneName: tempDetectedInfo.zoneName,
+        deliveryCharge: tempDetectedInfo.deliveryCharge
+      };
+
+      savedAddresses.unshift(newAddr);
+      selectedAddress = newAddr;
+      localStorage.setItem('bittu_saved_addresses', JSON.stringify(savedAddresses));
+
+      updateAddressUI();
+      closeAddressFormModal();
+    }
+// CART VIEW
     function openCartView() {
       renderCartItems();
       updateTotal();
@@ -568,7 +848,6 @@
               <span class="line-through text-gray-400 text-[10px]">₹${item.mrp}</span>
             </div>
           </div>
-          <!-- In-cart quantity stepper -->
           <div class="flex items-center space-x-2">
             <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden h-7">
               <button onclick="updateItemQty('${item.id}', -1)" class="w-6 h-full font-black text-gray-600 hover:bg-gray-100 flex items-center justify-center">−</button>
@@ -586,7 +865,7 @@
       const mrpSubtotal = cart.reduce((sum, i) => sum + (Number(i.mrp || i.offer_price) * i.qty), 0);
       const offerSubtotal = cart.reduce((sum, i) => sum + (Number(i.offer_price) * i.qty), 0);
       const discount = mrpSubtotal - offerSubtotal;
-      const deliveryFee = Number(selectedAddress.deliveryCharge || 0);
+      const deliveryFee = selectedAddress ? Number(selectedAddress.deliveryCharge || 0) : 0;
       const grandTotal = offerSubtotal + deliveryFee;
 
       document.getElementById('cart-count').innerText = itemsCount;
@@ -599,9 +878,14 @@
       document.getElementById('summary-savings-text').innerText = `₹${discount.toFixed(0)}`;
     }
 
-    // 6. WHATSAPP CONFIRMATION (Image 1 Final Step)
+    // CHECKOUT & BOOKING CONFIRMATION
     async function confirmOrderAndWhatsApp() {
       if (cart.length === 0) return alert("Your cart is empty. Please add items.");
+      if (!selectedAddress) {
+        alert("Please add and confirm your delivery address before placing your order.");
+        startAddNewAddressFlow();
+        return;
+      }
 
       const btn = document.getElementById('btn-submit-order');
       btn.disabled = true;
@@ -612,48 +896,73 @@
       const offerSubtotal = cart.reduce((sum, i) => sum + (Number(i.offer_price) * i.qty), 0);
       const deliveryFee = Number(selectedAddress.deliveryCharge || 0);
       const grandTotal = offerSubtotal + deliveryFee;
-
-      // Exact map link from pin coordinates
       const mapPinUrl = `https://maps.google.com/?q=${selectedAddress.lat},${selectedAddress.lon}`;
+      const fullAddr = `${selectedAddress.house ? selectedAddress.house + ', ' : ''}${selectedAddress.area}`;
 
-      // Insert into Supabase Orders table
-      await db.from('orders').insert([{
-        id: orderId,
-        customer_name: selectedAddress.name,
-        customer_phone: selectedAddress.phone,
-        delivery_address: `${selectedAddress.house ? selectedAddress.house + ', ' : ''}${selectedAddress.area}`,
-        delivery_location: `${selectedAddress.zoneName} (${mapPinUrl})`,
-        delivery_fee: deliveryFee,
-        total_amount: grandTotal,
-        items: cart,
-        status: 'Pending'
-      }]);
+      try {
+        // Save to Supabase Orders
+        await db.from('orders').insert([{
+          id: orderId,
+          customer_name: selectedAddress.name,
+          customer_phone: selectedAddress.phone,
+          delivery_address: fullAddr,
+          delivery_location: `${selectedAddress.zoneName} (${mapPinUrl})`,
+          delivery_fee: deliveryFee,
+          total_amount: grandTotal,
+          items: cart,
+          status: 'Confirmed'
+        }]);
 
-      const itemLines = cart.map(i => `• ${i.name} (x${i.qty}) = ₹${i.offer_price * i.qty}`).join('\n');
+        // Build WhatsApp text
+        const itemLines = cart.map(i => `• ${i.name} (x${i.qty}) = ₹${i.offer_price * i.qty}`).join('\n');
+        const message = encodeURIComponent(
+          `*NEW FESTIVAL ORDER #${orderId}*\n` +
+          `---------------------------------\n` +
+          `*Customer Name:* ${selectedAddress.name}\n` +
+          `*Phone:* ${selectedAddress.phone}\n` +
+          `*Delivery Address:* ${fullAddr}\n` +
+          `*Google Maps Pin:* ${mapPinUrl}\n` +
+          `*Delivery Zone:* ${selectedAddress.zoneName}\n` +
+          `---------------------------------\n` +
+          `*Items Ordered (${itemsCount} items):*\n${itemLines}\n` +
+          `---------------------------------\n` +
+          `*Delivery Fee:* ${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}\n` +
+          `*Total Pay on Delivery:* ₹${grandTotal.toFixed(0)}\n\n` +
+          `Please confirm my festival crackers booking! 🎉`
+        );
 
-      const message = encodeURIComponent(
-        `*NEW FESTIVAL ORDER #${orderId}*\n` +
-        `---------------------------------\n` +
-        `*Customer Name:* ${selectedAddress.name}\n` +
-        `*Phone:* ${selectedAddress.phone}\n` +
-        `*Delivery Address:* ${selectedAddress.house ? selectedAddress.house + ', ' : ''}${selectedAddress.area}\n` +
-        `*Exact Google Maps Pin:* ${mapPinUrl}\n` +
-        `*Delivery Zone:* ${selectedAddress.zoneName}\n` +
-        `---------------------------------\n` +
-        `*Items Ordered (${itemsCount} items):*\n${itemLines}\n` +
-        `---------------------------------\n` +
-        `*Delivery Fee:* ${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}\n` +
-        `*Total Pay on Delivery:* ₹${grandTotal.toFixed(0)}\n\n` +
-        `Please confirm my festival crackers booking! 🎉`
-      );
+        // Open WhatsApp in a clean window
+        window.open(`https://wa.me/${storeWhatsAppNumber}?text=${message}`, '_blank');
 
-      window.location.href = `https://wa.me/${storeWhatsAppNumber}?text=${message}`;
+        // Transition immediately to Success Screen
+        closeCartView();
+        document.getElementById('success-order-id').innerText = '#' + orderId;
+        document.getElementById('success-cust-name').innerText = selectedAddress.name;
+        document.getElementById('success-cust-addr').innerText = fullAddr;
+        document.getElementById('success-total').innerText = `₹${grandTotal.toFixed(0)}`;
+        document.getElementById('order-success-modal').classList.remove('hidden');
+
+        // Reset cart
+        cart = [];
+        renderProducts();
+        updateTotal();
+
+      } catch (err) {
+        alert("Booking error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Continue & Book on WhatsApp";
+      }
     }
 
-    // 7. PRODUCT RENDERING & STEPPER
+    function closeSuccessAndShopMore() {
+      document.getElementById('order-success-modal').classList.add('hidden');
+    }
+
+    // PRODUCTS
     async function loadLiveProducts() {
-      const { data, error } = await db.from('products').select('*');
-      if (!error && data) {
+      const { data } = await db.from('products').select('*');
+      if (data) {
         allProducts = data;
         renderProducts();
       }
