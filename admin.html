@@ -3,44 +3,145 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Panel - Bittu Crackers</title>
+  <title>Bittu Crackers - Admin Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- PDF.js library to parse product text from uploaded PDFs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+  </script>
 </head>
-<body class="bg-gray-100 text-gray-800 antialiased min-h-screen pb-12">
+<body class="bg-gray-100 text-gray-800 font-sans antialiased min-h-screen">
 
-  <!-- PIN Modal -->
-  <div id="login-modal" class="fixed inset-0 bg-gray-900/80 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-6 w-full max-w-xs shadow-xl text-center">
-      <h2 class="text-base font-bold text-gray-900">Admin Login</h2>
-      <p class="text-xs text-gray-500 mt-1 mb-4">Enter PIN (Default: 1234)</p>
-      <input id="admin-pin" type="password" maxlength="6" placeholder="PIN" class="w-full text-center text-lg tracking-widest border rounded-lg p-2 mb-3 outline-none focus:border-red-600" />
-      <button onclick="checkPin()" class="w-full bg-red-600 text-white font-semibold py-2 rounded-lg text-xs">Enter Dashboard</button>
-      <p id="login-error" class="text-xs text-red-600 mt-2 hidden">Incorrect PIN.</p>
+  <!-- ================= AUTHENTICATION MODAL ================= -->
+  <div id="auth-modal" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-gray-100">
+      <div class="flex items-center space-x-2.5 mb-5">
+        <span class="bg-red-600 text-white font-black px-2.5 py-1 rounded-lg text-sm">B</span>
+        <div>
+          <h2 class="text-base font-extrabold text-gray-950">BITTU CRACKERS</h2>
+          <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Admin Portal</p>
+        </div>
+      </div>
+
+      <form onsubmit="handleLogin(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Username or Email</label>
+          <input required id="login-id" type="text" placeholder="e.g. bittu_admin" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600" />
+        </div>
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Password</label>
+          <input required id="login-pass" type="password" placeholder="••••••••" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600" />
+        </div>
+        <p id="login-error" class="text-red-600 text-[11px] hidden font-semibold"></p>
+        <button type="submit" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-sm hover:bg-red-700 transition">
+          Sign In to Admin
+        </button>
+      </form>
+      <div class="mt-4 pt-3 border-t text-[11px] text-gray-400 text-center">
+        Default: <code class="text-gray-600">bittu_admin</code> / <code class="text-gray-600">admin@bittu123</code>
+      </div>
     </div>
   </div>
 
-  <div id="admin-app" class="hidden">
-    <header class="bg-neutral-900 text-white px-4 py-3 flex justify-between items-center sticky top-0 z-30">
-      <div class="flex items-center space-x-2">
-        <span class="bg-red-600 text-white font-black px-2 py-0.5 rounded text-xs">B</span>
-        <span class="font-extrabold text-sm tracking-wide">BITTU CRACKERS ADMIN</span>
+  <!-- ================= MAIN ADMIN DASHBOARD ================= -->
+  <div id="admin-layout" class="hidden min-h-screen flex flex-col md:flex-row">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside class="w-full md:w-60 bg-neutral-900 text-white flex flex-col justify-between shrink-0 p-4 border-r border-neutral-800">
+      <div>
+        <div class="flex items-center space-x-2.5 pb-5 border-b border-neutral-800 mb-5">
+          <span class="bg-red-600 text-white font-black px-2 py-0.5 rounded text-xs">B</span>
+          <div>
+            <h1 class="text-xs font-black tracking-wide">BITTU CRACKERS</h1>
+            <p class="text-[9px] text-gray-400 tracking-wider">ADMIN PANEL</p>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons Matching Screen 3 -->
+        <nav class="space-y-1 text-xs font-medium">
+          <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-600 text-white">
+            <span>⊞</span><span>Dashboard</span>
+          </button>
+          <button onclick="navigate('orders')" id="nav-orders" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
+            <span>☰</span><span>Orders</span>
+          </button>
+          <button onclick="navigate('products')" id="nav-products" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
+            <span>⬚</span><span>Products</span>
+          </button>
+          <button onclick="navigate('price-sheet')" id="nav-price-sheet" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
+            <span>₹</span><span>Price Sheet</span>
+          </button>
+          <button onclick="navigate('team-profile')" id="nav-team-profile" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
+            <span>👥</span><span>Team & Profile</span>
+          </button>
+          <button onclick="navigate('store-settings')" id="nav-store-settings" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
+            <span>⚙</span><span>Store Settings</span>
+          </button>
+        </nav>
       </div>
-      <a href="index.html" class="text-xs text-gray-400 hover:text-white">Store View →</a>
-    </header>
 
-    <div class="bg-white border-b px-4 py-2 flex space-x-2 text-xs font-semibold">
-      <button onclick="switchTab('orders')" id="tab-orders" class="px-3 py-1.5 rounded-lg bg-red-600 text-white">Orders</button>
-      <button onclick="switchTab('products')" id="tab-products" class="px-3 py-1.5 rounded-lg text-gray-600">Price Sheet & Items</button>
-    </div>
+      <!-- Current Logged User Info -->
+      <div class="pt-4 border-t border-neutral-800 text-xs">
+        <div class="flex items-center justify-between">
+          <div>
+            <p id="current-user-name" class="font-bold text-white text-xs">Bittu Kumar</p>
+            <p id="current-user-role" class="text-[10px] text-gray-400">Super Admin</p>
+          </div>
+          <button onclick="handleLogout()" class="text-[11px] text-red-400 hover:underline">Logout</button>
+        </div>
+      </div>
+    </aside>
 
-    <main class="p-4 max-w-4xl mx-auto space-y-6">
+    <!-- MAIN RIGHT VIEWPORT -->
+    <main class="flex-1 p-4 md:p-8 max-w-6xl mx-auto overflow-y-auto">
 
-      <!-- Orders Tab -->
-      <section id="sec-orders" class="space-y-4">
+      <!-- 1. DASHBOARD TAB -->
+      <section id="view-dashboard" class="tab-view space-y-6">
+        <div>
+          <h1 class="text-2xl font-black text-gray-950">Dashboard</h1>
+          <p class="text-xs text-gray-500">Live snapshot of bookings, revenue and stock.</p>
+        </div>
+
+        <!-- 4 Metric Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="bg-white p-4 rounded-xl border shadow-sm">
+            <span class="text-xs font-semibold text-gray-500">Today's Orders</span>
+            <div id="stat-today" class="text-2xl font-black text-gray-900 mt-2">0</div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border shadow-sm">
+            <span class="text-xs font-semibold text-amber-600">Pending Orders</span>
+            <div id="stat-pending" class="text-2xl font-black text-amber-600 mt-2">0</div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border shadow-sm">
+            <span class="text-xs font-semibold text-emerald-600">Total Booked Value</span>
+            <div id="stat-revenue" class="text-2xl font-black text-emerald-600 mt-2">₹0</div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border shadow-sm">
+            <span class="text-xs font-semibold text-gray-500">Low Stock Alerts</span>
+            <div class="text-2xl font-black text-gray-900 mt-2">0</div>
+          </div>
+        </div>
+
+        <!-- Latest Orders Preview -->
+        <div class="bg-white rounded-xl border shadow-sm p-4">
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-sm font-bold text-gray-900">Latest Orders</h2>
+            <button onclick="navigate('orders')" class="text-xs text-red-600 font-semibold hover:underline">View all →</button>
+          </div>
+          <div id="dashboard-recent-orders" class="divide-y text-xs">Loading...</div>
+        </div>
+      </section>
+
+      <!-- 2. ORDERS TAB -->
+      <section id="view-orders" class="tab-view space-y-4 hidden">
         <div class="flex justify-between items-center">
-          <h2 class="text-base font-bold text-gray-900">Customer Bookings</h2>
-          <button onclick="loadOrders()" class="text-xs bg-gray-200 px-3 py-1 rounded font-semibold">Refresh</button>
+          <div>
+            <h1 class="text-2xl font-black text-gray-950">Orders</h1>
+            <p class="text-xs text-gray-500">Verify customer details and dispatch orders.</p>
+          </div>
+          <button onclick="loadOrders()" class="text-xs bg-gray-200 px-3 py-1.5 rounded-lg font-semibold">Refresh</button>
         </div>
         <div class="bg-white rounded-xl border overflow-x-auto shadow-sm">
           <table class="w-full text-left text-xs whitespace-nowrap">
@@ -48,65 +149,231 @@
               <tr>
                 <th class="p-3">Order</th>
                 <th class="p-3">Customer</th>
-                <th class="p-3">Amount</th>
+                <th class="p-3">Location</th>
+                <th class="p-3">Total</th>
                 <th class="p-3">Status</th>
-                <th class="p-3 text-right">Action</th>
+                <th class="p-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody id="orders-table-body" class="divide-y"></tbody>
+            <tbody id="orders-table" class="divide-y"></tbody>
           </table>
         </div>
       </section>
 
-      <!-- Products & Price Sheet Tab -->
-      <section id="sec-products" class="space-y-4 hidden">
-        <div class="flex justify-between items-center">
+      <!-- 3. PRODUCTS TAB (With PDF Import & Image Upload) -->
+      <section id="view-products" class="tab-view space-y-4 hidden">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
           <div>
-            <h2 class="text-base font-bold text-gray-900">Products & Pricing</h2>
-            <p class="text-[11px] text-gray-500">Edit rates or add new inventory.</p>
+            <h1 class="text-2xl font-black text-gray-950">Products</h1>
+            <p class="text-xs text-gray-500">Manage catalog, upload images, or import wholesale lists.</p>
           </div>
-          <button onclick="openAddModal()" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Add Item</button>
+          <div class="flex space-x-2">
+            <button onclick="document.getElementById('pdf-file-input').click()" class="bg-gray-800 text-white text-xs px-3 py-2 rounded-lg font-bold flex items-center space-x-1">
+              <span>📄</span><span>Import via PDF</span>
+            </button>
+            <input type="file" id="pdf-file-input" accept=".pdf" class="hidden" onchange="handlePdfUpload(event)" />
+            <button onclick="openProductModal()" class="bg-red-600 text-white text-xs px-3 py-2 rounded-lg font-bold">+ Add Product</button>
+          </div>
+        </div>
+
+        <div id="pdf-import-alert" class="hidden bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs text-emerald-800 flex justify-between items-center">
+          <span id="pdf-import-msg">Importing products...</span>
+          <button onclick="this.parentElement.classList.add('hidden')" class="font-bold">&times;</button>
         </div>
 
         <div class="bg-white rounded-xl border overflow-x-auto shadow-sm">
           <table class="w-full text-left text-xs whitespace-nowrap">
             <thead class="bg-gray-50 border-b text-gray-500 font-bold uppercase text-[10px]">
               <tr>
-                <th class="p-3">Photo</th>
-                <th class="p-3">Name</th>
+                <th class="p-3">Product</th>
                 <th class="p-3">Category</th>
+                <th class="p-3">MRP</th>
+                <th class="p-3">Offer Price</th>
+                <th class="p-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="products-table" class="divide-y"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 4. PRICE SHEET TAB (In-line Quick Editing) -->
+      <section id="view-price-sheet" class="tab-view space-y-4 hidden">
+        <div>
+          <h1 class="text-2xl font-black text-gray-950">Price Sheet</h1>
+          <p class="text-xs text-gray-500">Edit MRP vs offer prices directly in-line and save per row.</p>
+        </div>
+        <div class="bg-white rounded-xl border overflow-x-auto shadow-sm">
+          <table class="w-full text-left text-xs whitespace-nowrap">
+            <thead class="bg-gray-50 border-b text-gray-500 font-bold uppercase text-[10px]">
+              <tr>
+                <th class="p-3">Category</th>
+                <th class="p-3">Product</th>
                 <th class="p-3">MRP (₹)</th>
                 <th class="p-3">Offer (₹)</th>
                 <th class="p-3 text-right">Save</th>
               </tr>
             </thead>
-            <tbody id="products-table-body" class="divide-y"></tbody>
+            <tbody id="price-sheet-table" class="divide-y"></tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- 5. TEAM & PROFILE TAB -->
+      <section id="view-team-profile" class="tab-view space-y-6 hidden">
+        <div>
+          <h1 class="text-2xl font-black text-gray-950">Team & Profile</h1>
+          <p class="text-xs text-gray-500">Manage administrator privileges and account security.</p>
+        </div>
+
+        <!-- My Profile -->
+        <div class="bg-white rounded-xl border p-5 shadow-sm space-y-4">
+          <h2 class="text-sm font-bold text-gray-900 border-b pb-2">My Profile</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div>
+              <label class="block font-semibold mb-1">First name</label>
+              <input id="my-first-name" class="w-full border rounded p-2" />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Last name</label>
+              <input id="my-last-name" class="w-full border rounded p-2" />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Phone</label>
+              <input id="my-phone" class="w-full border rounded p-2" />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Email</label>
+              <input id="my-email" class="w-full border rounded p-2" />
+            </div>
+          </div>
+          <button onclick="saveMyProfile()" class="bg-red-600 text-white font-bold px-4 py-2 rounded-lg text-xs">Save Profile</button>
+        </div>
+
+        <!-- Admin Team List (Visible to Super Admins) -->
+        <div class="bg-white rounded-xl border p-5 shadow-sm space-y-4">
+          <div class="flex justify-between items-center border-b pb-2">
+            <h2 class="text-sm font-bold text-gray-900">Admin Team</h2>
+            <button id="btn-add-admin" onclick="openAddAdminModal()" class="bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold">+ Add Admin</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs whitespace-nowrap">
+              <thead class="bg-gray-50 border-b text-gray-500 font-bold uppercase text-[10px]">
+                <tr>
+                  <th class="p-3">Admin</th>
+                  <th class="p-3">Contact</th>
+                  <th class="p-3">Role</th>
+                  <th class="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="team-table" class="divide-y"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. STORE SETTINGS TAB -->
+      <section id="view-store-settings" class="tab-view space-y-4 hidden">
+        <div>
+          <h1 class="text-2xl font-black text-gray-950">Store Settings</h1>
+          <p class="text-xs text-gray-500">Configure store addresses, delivery zones, and WhatsApp order phone.</p>
+        </div>
+        <div class="bg-white rounded-xl border p-5 max-w-xl space-y-3.5 text-xs shadow-sm">
+          <div>
+            <label class="block font-semibold mb-1">Store Name</label>
+            <input id="cfg-name" class="w-full border rounded p-2" />
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold mb-1">WhatsApp Orders Number</label>
+              <input id="cfg-wa" class="w-full border rounded p-2" placeholder="e.g. 917829978883" />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Display Phone</label>
+              <input id="cfg-phone" class="w-full border rounded p-2" />
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">Shop Address</label>
+            <textarea id="cfg-address" rows="2" class="w-full border rounded p-2"></textarea>
+          </div>
+          <button onclick="saveStoreSettings()" class="bg-red-600 text-white font-bold px-4 py-2 rounded-lg text-xs">Save Settings</button>
         </div>
       </section>
 
     </main>
   </div>
 
-  <!-- Add Item Modal -->
-  <div id="add-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-5 w-full max-w-xs overflow-y-auto">
+  <!-- ADD ADMIN MODAL (Matching Screen 8) -->
+  <div id="add-admin-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl">
       <div class="flex justify-between items-center mb-3">
-        <h3 class="text-sm font-bold">Add Cracker</h3>
-        <button onclick="closeAddModal()" class="text-gray-400 font-bold text-xl">&times;</button>
+        <h3 class="text-sm font-bold text-gray-900">Add Admin</h3>
+        <button onclick="closeAddAdminModal()" class="text-gray-400 text-xl font-bold">&times;</button>
+      </div>
+      <form onsubmit="handleCreateAdmin(event)" class="space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-semibold block mb-0.5">Username *</label>
+            <input required id="new-admin-user" class="w-full border rounded p-2" />
+          </div>
+          <div>
+            <label class="font-semibold block mb-0.5">Role *</label>
+            <select id="new-admin-role" class="w-full border rounded p-2">
+              <option value="Admin">Admin</option>
+              <option value="Super Admin">Super Admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-semibold block mb-0.5">First name *</label>
+            <input required id="new-admin-fname" class="w-full border rounded p-2" />
+          </div>
+          <div>
+            <label class="font-semibold block mb-0.5">Last name</label>
+            <input id="new-admin-lname" class="w-full border rounded p-2" />
+          </div>
+        </div>
+        <div>
+          <label class="font-semibold block mb-0.5">Email *</label>
+          <input required id="new-admin-email" type="email" class="w-full border rounded p-2" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-semibold block mb-0.5">Phone *</label>
+            <input required id="new-admin-phone" class="w-full border rounded p-2" />
+          </div>
+          <div>
+            <label class="font-semibold block mb-0.5">Initial Password *</label>
+            <input required id="new-admin-pass" type="password" class="w-full border rounded p-2" />
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-xs mt-2">Create Admin</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD PRODUCT MODAL -->
+  <div id="product-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-sm font-bold text-gray-900">Add Cracker</h3>
+        <button onclick="closeProductModal()" class="text-gray-400 text-xl font-bold">&times;</button>
       </div>
       <form onsubmit="handleSaveProduct(event)" class="space-y-3 text-xs">
         <div>
           <label class="font-semibold block mb-0.5">Product Name *</label>
-          <input required id="p-name" type="text" class="w-full border rounded p-2" placeholder="e.g. 10-Sky Rainbow" />
+          <input required id="prod-name" class="w-full border rounded p-2" placeholder="e.g. 10-Sky Rainbow" />
         </div>
         <div>
           <label class="font-semibold block mb-0.5">Category *</label>
-          <select id="p-category" class="w-full border rounded p-2">
+          <select id="prod-category" class="w-full border rounded p-2">
             <option value="Sparklers">Sparklers</option>
             <option value="Sound Crackers">Sound Crackers</option>
             <option value="Ground Chakkars">Ground Chakkars</option>
             <option value="Flower Pots">Flower Pots</option>
+            <option value="Fountains">Fountains</option>
             <option value="Sky Shots">Sky Shots</option>
             <option value="Gift Boxes">Gift Boxes</option>
           </select>
@@ -114,60 +381,142 @@
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="font-semibold block mb-0.5">MRP (₹) *</label>
-            <input required id="p-mrp" type="number" class="w-full border rounded p-2" />
+            <input required id="prod-mrp" type="number" class="w-full border rounded p-2" />
           </div>
           <div>
-            <label class="font-semibold block mb-0.5">Offer (₹) *</label>
-            <input required id="p-price" type="number" class="w-full border rounded p-2" />
+            <label class="font-semibold block mb-0.5">Offer Price (₹) *</label>
+            <input required id="prod-price" type="number" class="w-full border rounded p-2" />
           </div>
         </div>
         <div>
-          <label class="font-semibold block mb-0.5">Photo</label>
-          <input id="p-image-file" type="file" accept="image/*" class="w-full text-[11px] text-gray-500" />
+          <label class="font-semibold block mb-0.5">Image Photo</label>
+          <input id="prod-image-file" type="file" accept="image/*" class="w-full text-xs text-gray-500" />
         </div>
-        <button type="submit" id="save-btn" class="w-full bg-red-600 text-white font-bold py-2 rounded-lg mt-2">Upload & Save</button>
+        <button type="submit" id="save-prod-btn" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-xs mt-2">Save Product</button>
       </form>
     </div>
   </div>
 
   <script>
+    // Supabase Initialization
     const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
     const SUPABASE_KEY = "Sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let productsCache = [];
+    let currentUser = null;
+    let productsList = [];
+    let ordersList = [];
+    let teamList = [];
 
-    function checkPin() {
-      if (document.getElementById('admin-pin').value === '1234') {
-        document.getElementById('login-modal').classList.add('hidden');
-        document.getElementById('admin-app').classList.remove('hidden');
-        loadOrders();
-        loadProducts();
-      } else {
-        document.getElementById('login-error').classList.remove('hidden');
+    // ================= 1. AUTHENTICATION =================
+    async function handleLogin(e) {
+      e.preventDefault();
+      const loginId = document.getElementById('login-id').value.trim();
+      const loginPass = document.getElementById('login-pass').value.trim();
+      const errorBox = document.getElementById('login-error');
+
+      const { data, error } = await db.from('admin_users')
+        .select('*')
+        .or(`username.eq.${loginId},email.eq.${loginId}`)
+        .eq('password_hash', loginPass)
+        .single();
+
+      if (error || !data) {
+        errorBox.innerText = 'Invalid username/email or password.';
+        errorBox.classList.remove('hidden');
+        return;
+      }
+
+      currentUser = data;
+      localStorage.setItem('admin_session', JSON.stringify(data));
+      document.getElementById('auth-modal').classList.add('hidden');
+      document.getElementById('admin-layout').classList.remove('hidden');
+      setupDashboard();
+    }
+
+    function checkSession() {
+      const session = localStorage.getItem('admin_session');
+      if (session) {
+        currentUser = JSON.parse(session);
+        document.getElementById('auth-modal').classList.add('hidden');
+        document.getElementById('admin-layout').classList.remove('hidden');
+        setupDashboard();
       }
     }
 
-    function switchTab(tab) {
-      document.getElementById('sec-orders').classList.toggle('hidden', tab !== 'orders');
-      document.getElementById('sec-products').classList.toggle('hidden', tab !== 'products');
-      document.getElementById('tab-orders').className = tab === 'orders' ? 'px-3 py-1.5 rounded-lg bg-red-600 text-white' : 'px-3 py-1.5 rounded-lg text-gray-600';
-      document.getElementById('tab-products').className = tab === 'products' ? 'px-3 py-1.5 rounded-lg bg-red-600 text-white' : 'px-3 py-1.5 rounded-lg text-gray-600';
+    function handleLogout() {
+      localStorage.removeItem('admin_session');
+      location.reload();
+    }
+
+    // ================= 2. NAVIGATION =================
+    function navigate(tabName) {
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+      document.querySelectorAll('.nav-item').forEach(b => {
+        b.className = 'nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white';
+      });
+
+      document.getElementById(`view-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`nav-${tabName}`);
+      if (activeBtn) activeBtn.className = 'nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-600 text-white';
+
+      if (tabName === 'orders') loadOrders();
+      if (tabName === 'products') loadProducts();
+      if (tabName === 'price-sheet') loadPriceSheet();
+      if (tabName === 'team-profile') loadTeamAndProfile();
+      if (tabName === 'store-settings') loadStoreSettings();
+    }
+
+    function setupDashboard() {
+      document.getElementById('current-user-name').innerText = `${currentUser.first_name} ${currentUser.last_name || ''}`;
+      document.getElementById('current-user-role').innerText = currentUser.role;
+      loadDashboardMetrics();
+    }
+
+    // ================= 3. METRICS & ORDERS =================
+    async function loadDashboardMetrics() {
+      const { data } = await db.from('orders').select('*').order('created_at', { ascending: false });
+      ordersList = data || [];
+
+      const today = new Date().toISOString().slice(0, 10);
+      const todayCount = ordersList.filter(o => o.created_at && o.created_at.startsWith(today)).length;
+      const pendingCount = ordersList.filter(o => o.status === 'Pending').length;
+      const totalRev = ordersList.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+
+      document.getElementById('stat-today').innerText = todayCount;
+      document.getElementById('stat-pending').innerText = pendingCount;
+      document.getElementById('stat-revenue').innerText = `₹${totalRev}`;
+
+      const recDiv = document.getElementById('dashboard-recent-orders');
+      recDiv.innerHTML = ordersList.slice(0, 5).map(o => `
+        <div class="py-2.5 flex justify-between items-center">
+          <div>
+            <p class="font-bold text-gray-900">#${o.id} - ${o.customer_name}</p>
+            <p class="text-[10px] text-gray-400">${o.delivery_location}</p>
+          </div>
+          <div class="text-right">
+            <span class="font-bold text-gray-900">₹${o.total_amount}</span>
+            <span class="block text-[10px] uppercase font-bold ${o.status === 'Confirmed' ? 'text-emerald-600' : 'text-amber-600'}">${o.status}</span>
+          </div>
+        </div>
+      `).join('') || '<p class="py-4 text-center text-gray-400">No orders yet.</p>';
     }
 
     async function loadOrders() {
       const { data } = await db.from('orders').select('*').order('created_at', { ascending: false });
-      const tbody = document.getElementById('orders-table-body');
-      tbody.innerHTML = (data || []).map(o => `
+      ordersList = data || [];
+      document.getElementById('orders-table').innerHTML = ordersList.map(o => `
         <tr>
           <td class="p-3 font-mono font-bold text-gray-700">#${o.id}</td>
           <td class="p-3 font-semibold text-gray-900">${o.customer_name}<br><span class="text-gray-400 font-normal text-[11px]">${o.customer_phone}</span></td>
+          <td class="p-3 text-gray-600">${o.delivery_location}</td>
           <td class="p-3 font-bold text-gray-900">₹${o.total_amount}</td>
           <td class="p-3">
-            <select onchange="updateOrderStatus('${o.id}', this.value)" class="text-xs border rounded px-1.5 py-0.5">
+            <select onchange="updateOrderStatus('${o.id}', this.value)" class="border rounded px-1.5 py-0.5 text-xs">
               <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
               <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
               <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+              <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
             </select>
           </td>
           <td class="p-3 text-right">
@@ -181,73 +530,156 @@
       await db.from('orders').update({ status }).eq('id', id);
     }
 
+    // ================= 4. PRODUCTS & PDF IMPORT =================
     async function loadProducts() {
       const { data } = await db.from('products').select('*').order('name');
-      productsCache = data || [];
-      const tbody = document.getElementById('products-table-body');
-      tbody.innerHTML = productsCache.map(p => `
+      productsList = data || [];
+      document.getElementById('products-table').innerHTML = productsList.map(p => `
         <tr>
-          <td class="p-3">
-            <img src="${p.image_url || 'https://placehold.co/40x40?text=Cracker'}" class="w-8 h-8 object-cover rounded border" />
+          <td class="p-3 flex items-center space-x-2.5">
+            <img src="${p.image_url || 'https://placehold.co/40x40?text=Cracker'}" class="w-8 h-8 rounded object-cover border" />
+            <span class="font-bold text-gray-900">${p.name}</span>
           </td>
-          <td class="p-3 font-semibold text-gray-900">${p.name}</td>
           <td class="p-3 text-gray-500">${p.category}</td>
-          <td class="p-3">
-            <input type="number" value="${p.mrp}" id="mrp-${p.id}" class="w-16 border rounded px-1.5 py-0.5 text-xs text-gray-500" />
-          </td>
-          <td class="p-3">
-            <input type="number" value="${p.offer_price}" id="price-${p.id}" class="w-16 border border-red-300 rounded px-1.5 py-0.5 text-xs font-bold text-red-600" />
-          </td>
+          <td class="p-3">₹${p.mrp}</td>
+          <td class="p-3 font-bold text-red-600">₹${p.offer_price}</td>
           <td class="p-3 text-right">
-            <button onclick="saveInlinePrice('${p.id}')" class="bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded text-xs font-semibold">Save</button>
+            <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:underline">Delete</button>
           </td>
         </tr>
       `).join('');
     }
 
-    async function saveInlinePrice(id) {
-      const mrp = Number(document.getElementById(`mrp-${id}`).value);
-      const offer_price = Number(document.getElementById(`price-${id}`).value);
-      await db.from('products').update({ mrp, offer_price }).eq('id', id);
-      alert('Price updated live on storefront!');
-    }
+    async function handlePdfUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
 
-    function openAddModal() { document.getElementById('add-modal').classList.remove('hidden'); }
-    function closeAddModal() { document.getElementById('add-modal').classList.add('hidden'); }
+      const alertBox = document.getElementById('pdf-import-alert');
+      const alertMsg = document.getElementById('pdf-import-msg');
+      alertBox.classList.remove('hidden');
+      alertMsg.innerText = 'Extracting and parsing products from PDF...';
 
-    async function handleSaveProduct(e) {
-      e.preventDefault();
-      const saveBtn = document.getElementById('save-btn');
-      saveBtn.innerText = 'Uploading...';
-      saveBtn.disabled = true;
+      const fileReader = new FileReader();
+      fileReader.onload = async function() {
+        const typedarray = new Uint8Array(this.result);
+        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+        let fullText = '';
 
-      let imageUrl = null;
-      const fileInput = document.getElementById('p-image-file');
-
-      if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const filePath = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-        const { error: uploadErr } = await db.storage.from('products').upload(filePath, file);
-
-        if (!uploadErr) {
-          const { data: publicUrlData } = db.storage.from('products').getPublicUrl(filePath);
-          imageUrl = publicUrlData.publicUrl;
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          fullText += content.items.map(item => item.str).join(' ') + '\n';
         }
-      }
 
-      await db.from('products').insert([{
-        name: document.getElementById('p-name').value,
-        category: document.getElementById('p-category').value,
-        mrp: Number(document.getElementById('p-mrp').value),
-        offer_price: Number(document.getElementById('p-price').value),
-        image_url: imageUrl
-      }]);
+        // Example Regex line extraction: "Product Name 100 80"
+        const lines = fullText.split('\n');
+        let imported = 0;
 
-      closeAddModal();
-      saveBtn.innerText = 'Upload & Save';
-      saveBtn.disabled = false;
-      loadProducts();
+        for (const line of lines) {
+          const match = line.match(/(.+?)\s+(\d+)\s+(\d+)$/);
+          if (match) {
+            const name = match[1].trim();
+            const mrp = Number(match[2]);
+            const offer = Number(match[3]);
+            await db.from('products').insert([{
+              name,
+              category: 'Sparklers',
+              mrp,
+              offer_price: offer,
+              image_url: 'https://placehold.co/200x150?text=Cracker'
+            }]);
+            imported++;
+          }
+        }
+
+        alertMsg.innerText = `PDF Imported successfully! Added ${imported} products.`;
+        loadProducts();
+      };
+      fileReader.readAsArrayBuffer(file);
     }
+
+    // ================= 5. PRICE SHEET IN-LINE EDITING =================
+    async function loadPriceSheet() {
+      const { data } = await db.from('products').select('*').order('name');
+      productsList = data || [];
+      document.getElementById('price-sheet-table').innerHTML = productsList.map(p => `
+        <tr>
+          <td class="p-3 text-gray-500">${p.category}</td>
+          <td class="p-3 font-semibold text-gray-900">${p.name}</td>
+          <td class="p-3"><input type="number" id="ps-mrp-${p.id}" value="${p.mrp}" class="w-16 border rounded p-1 text-xs text-gray-500" /></td>
+          <td class="p-3"><input type="number" id="ps-offer-${p.id}" value="${p.offer_price}" class="w-16 border border-red-300 rounded p-1 text-xs font-bold text-red-600" /></td>
+          <td class="p-3 text-right">
+            <button onclick="saveRowPrice('${p.id}')" class="bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded text-xs font-semibold">Save</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function saveRowPrice(id) {
+      const mrp = Number(document.getElementById(`ps-mrp-${id}`).value);
+      const offer_price = Number(document.getElementById(`ps-offer-${id}`).value);
+      await db.from('products').update({ mrp, offer_price }).eq('id', id);
+      alert('Price saved live!');
+    }
+
+    // ================= 6. TEAM, ROLES & PASSWORD RESETS =================
+    async function loadTeamAndProfile() {
+      document.getElementById('my-first-name').value = currentUser.first_name || '';
+      document.getElementById('my-last-name').value = currentUser.last_name || '';
+      document.getElementById('my-phone').value = currentUser.phone || '';
+      document.getElementById('my-email').value = currentUser.email || '';
+
+      const { data } = await db.from('admin_users').select('*').order('created_at');
+      teamList = data || [];
+
+      // Passwords and raw logins are masked; only actions appear
+      document.getElementById('team-table').innerHTML = teamList.map(u => `
+        <tr>
+          <td class="p-3 font-bold text-gray-900">${u.first_name} ${u.last_name || ''}<br><span class="text-gray-400 font-normal text-[10px]">@${u.username}</span></td>
+          <td class="p-3 text-gray-500">${u.email}<br><span class="text-[10px]">${u.phone}</span></td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.role === 'Super Admin' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}">${u.role}</span></td>
+          <td class="p-3 text-right space-x-1">
+            ${currentUser.role === 'Super Admin' ? `
+              <button onclick="sendPasswordReset('${u.email}', '${u.username}')" class="text-blue-600 font-semibold hover:underline">Reset password</button>
+            ` : `<span class="text-gray-400">Restricted</span>`}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function sendPasswordReset(email, username) {
+      const newPass = prompt(`Set a temporary new password for ${username}:`);
+      if (newPass) {
+        db.from('admin_users').update({ password_hash: newPass }).eq('email', email).then(() => {
+          alert(`Password reset for ${username}! You can provide this temporary password to them.`);
+        });
+      }
+    }
+
+    async function handleCreateAdmin(e) {
+      e.preventDefault();
+      const newAdmin = {
+        username: document.getElementById('new-admin-user').value.trim(),
+        role: document.getElementById('new-admin-role').value,
+        first_name: document.getElementById('new-admin-fname').value.trim(),
+        last_name: document.getElementById('new-admin-lname').value.trim(),
+        email: document.getElementById('new-admin-email').value.trim(),
+        phone: document.getElementById('new-admin-phone').value.trim(),
+        password_hash: document.getElementById('new-admin-pass').value.trim()
+      };
+
+      await db.from('admin_users').insert([newAdmin]);
+      closeAddAdminModal();
+      loadTeamAndProfile();
+    }
+
+    // Modal controllers
+    function openAddAdminModal() { document.getElementById('add-admin-modal').classList.remove('hidden'); }
+    function closeAddAdminModal() { document.getElementById('add-admin-modal').classList.add('hidden'); }
+    function openProductModal() { document.getElementById('product-modal').classList.remove('hidden'); }
+    function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
+
+    checkSession();
   </script>
 </body>
 </html>
