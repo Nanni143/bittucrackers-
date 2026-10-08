@@ -10,6 +10,9 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     .leaflet-control-attribution { display: none !important; }
+    /* Ensure Leaflet stays strictly behind custom UI overlays */
+    .leaflet-pane { z-index: 10 !important; }
+    .leaflet-top, .leaflet-bottom { z-index: 11 !important; }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800 pb-28">
@@ -30,7 +33,6 @@
       </div>
     </div>
 
-    <!-- Cart Button -->
     <button onclick="openCartView()" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm active:scale-95 transition shrink-0">
       <span>Cart</span>
       <span id="cart-count" class="bg-white text-red-600 rounded-full px-1.5 py-0.2 text-[10px] font-black">0</span>
@@ -96,17 +98,13 @@
       </div>
 
       <div class="flex-1 p-3.5 space-y-3 overflow-y-auto">
-        
         <!-- Delivering To Card -->
         <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-2xs space-y-2">
           <div class="flex justify-between items-center">
             <span class="text-xs font-black text-gray-900 uppercase tracking-wide">Delivering to</span>
             <button type="button" onclick="openAddressSelectModal()" class="text-blue-600 font-bold text-xs hover:underline">Change</button>
           </div>
-
-          <div id="address-card-content" class="pt-1">
-            <!-- Rendered dynamically -->
-          </div>
+          <div id="address-card-content" class="pt-1"></div>
         </div>
 
         <!-- Ordered Items List -->
@@ -129,7 +127,7 @@
           <div class="flex justify-between text-gray-600 items-center">
             <div class="flex items-center space-x-1">
               <span>Delivery Charges</span>
-              <span id="delivery-zone-badge" class="bg-gray-100 text-gray-600 px-1.5 py-0.2 rounded text-[10px] font-bold">Kavali</span>
+              <span id="delivery-zone-badge" class="bg-gray-100 text-gray-600 px-1.5 py-0.2 rounded text-[10px] font-bold">Local</span>
             </div>
             <span id="summary-delivery-charge" class="font-bold text-gray-900">FREE</span>
           </div>
@@ -143,7 +141,7 @@
         </div>
       </div>
 
-      <!-- Bottom Sticky Booking Button -->
+      <!-- Bottom Booking Bar -->
       <div class="bg-white border-t p-3 sticky bottom-0 shadow-lg flex items-center justify-between">
         <div>
           <span class="text-[10px] text-gray-400 font-bold uppercase block">Pay on Delivery</span>
@@ -153,7 +151,6 @@
           Continue & Book on WhatsApp
         </button>
       </div>
-
     </div>
   </div>
 
@@ -180,10 +177,6 @@
           <span id="success-total" class="text-red-600 text-sm">₹0</span>
         </div>
       </div>
-
-      <p class="text-[11px] text-gray-500 leading-relaxed">
-        WhatsApp message generated! Our Kavali delivery manager will verify your order shortly.
-      </p>
 
       <button type="button" onclick="closeSuccessAndShopMore()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl text-xs active:scale-95 transition shadow-sm">
         Done & Continue Shopping
@@ -212,9 +205,10 @@
     </div>
   </div>
 
-  <!-- ================= INTERACTIVE MAP PIN PICKER ================= -->
-  <div id="map-pin-modal" class="fixed inset-0 bg-white z-50 hidden flex flex-col">
-    <div class="px-4 py-3 border-b flex items-center justify-between bg-white z-10 shadow-2xs">
+  <!-- ================= FULLSCREEN INTERACTIVE MAP PIN PICKER ================= -->
+  <div id="map-pin-modal" class="fixed inset-0 bg-white z-50 hidden flex flex-col h-screen w-screen">
+    <!-- Top Bar -->
+    <div class="px-4 py-3 border-b flex items-center justify-between bg-white z-30 shadow-xs shrink-0">
       <div class="flex items-center space-x-3">
         <button onclick="closeMapPinModal()" class="text-gray-700 text-lg font-bold">←</button>
         <h3 class="font-extrabold text-sm text-gray-900">Add new address</h3>
@@ -222,36 +216,38 @@
       <span class="text-[11px] text-gray-400 font-semibold">Step 1 of 2</span>
     </div>
 
-    <div class="relative flex-1 w-full bg-gray-200">
-      <div id="interactive-map" class="w-full h-full"></div>
+    <!-- Map Viewport -->
+    <div class="relative flex-1 w-full h-full overflow-hidden">
+      <!-- Fullscreen Leaflet Container -->
+      <div id="interactive-map" class="absolute inset-0 w-full h-full"></div>
 
-      <!-- Center Fixed Map Pin -->
-      <div class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center z-20 pb-8">
-        <div class="bg-neutral-900 text-white font-bold text-[10px] px-3 py-1 rounded-full shadow-lg mb-1 animate-bounce">
+      <!-- Center Fixed Map Pin Overlay -->
+      <div class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center z-20 pb-10">
+        <div class="bg-neutral-900 text-white font-bold text-[10px] px-3 py-1 rounded-full shadow-xl mb-1.5 animate-bounce">
           Place pin on the exact location
         </div>
-        <div class="text-red-600 text-4xl drop-shadow-md">📍</div>
+        <div class="text-red-600 text-4xl drop-shadow-lg">📍</div>
       </div>
 
-      <!-- Use My Current Location Pill -->
-      <div class="absolute bottom-4 inset-x-0 flex justify-center z-20 px-4">
-        <button type="button" onclick="triggerGPSCurrentLocation()" id="btn-use-gps-pill" class="bg-white hover:bg-gray-50 text-blue-600 border border-blue-200 font-bold text-xs px-4 py-2.5 rounded-full shadow-xl flex items-center space-x-2 active:scale-95 transition">
-          <span>🎯</span>
-          <span>Use my current location</span>
+      <!-- Floating "Use My Current Location" GPS Pill Overlay -->
+      <div class="absolute bottom-5 inset-x-0 flex justify-center z-20 px-4 pointer-events-auto">
+        <button type="button" onclick="triggerGPSCurrentLocation()" id="btn-use-gps-pill" class="bg-white hover:bg-gray-50 text-blue-600 border border-blue-200 font-extrabold text-xs px-5 py-3 rounded-full shadow-2xl flex items-center space-x-2 active:scale-95 transition">
+          <span class="text-sm">🎯</span>
+          <span id="gps-pill-text">Use my current location</span>
         </button>
       </div>
     </div>
 
     <!-- Bottom Detected Location Card -->
-    <div class="bg-white border-t p-4 space-y-3 z-10 shadow-lg">
+    <div class="bg-white border-t p-4 space-y-3 z-30 shadow-lg shrink-0">
       <div>
         <span class="text-[10px] text-gray-400 font-bold uppercase block">Deliver To</span>
         <div class="flex justify-between items-start mt-0.5">
-          <div class="pr-2">
-            <h4 id="map-detected-title" class="font-extrabold text-gray-900 text-xs">Locating...</h4>
-            <p id="map-detected-full" class="text-[11px] text-gray-500 line-clamp-2 mt-0.5">Move pin to your delivery area</p>
+          <div class="pr-2 flex-1 min-w-0">
+            <h4 id="map-detected-title" class="font-extrabold text-gray-900 text-xs truncate">Locating area...</h4>
+            <p id="map-detected-full" class="text-[11px] text-gray-500 line-clamp-2 mt-0.5">Move pin to your exact delivery building or house</p>
           </div>
-          <span id="map-zone-rate-pill" class="bg-emerald-50 text-emerald-700 font-bold text-[10px] px-2 py-0.5 rounded-full shrink-0">Checking...</span>
+          <span id="map-zone-rate-pill" class="bg-emerald-50 text-emerald-700 font-bold text-[10px] px-2.5 py-1 rounded-full shrink-0">Checking rate...</span>
         </div>
       </div>
 
@@ -316,7 +312,7 @@
     </div>
   </div>
 
-  <!-- ================= JAVASCRIPT LOGIC ================= -->
+   <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
     const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
     const SUPABASE_KEY = "sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
@@ -332,27 +328,22 @@
     let currentViewMode = 'medium';
     let currentSort = 'popular';
 
-    // No predefined sample address — start clean
     let savedAddresses = [];
     let selectedAddress = null;
 
     let leafletMap = null;
     let tempMapCoords = { ...KAVALI_BASE_COORDS };
-    let tempDetectedInfo = { areaName: "Kavali", fullAddress: "Kavali, SPSR Nellore District", zoneName: "Local", deliveryCharge: 0 };
+    let tempDetectedInfo = { areaName: "Kavali", fullAddress: "Kavali, Andhra Pradesh", zoneName: "Local", deliveryCharge: 0 };
 
     async function init() {
-      // 1. Load user's saved addresses from browser storage
       const stored = localStorage.getItem('bittu_saved_addresses');
       if (stored) {
         try {
           savedAddresses = JSON.parse(stored);
-          if (savedAddresses.length > 0) {
-            selectedAddress = savedAddresses[0];
-          }
+          if (savedAddresses.length > 0) selectedAddress = savedAddresses[0];
         } catch(e) {}
       }
 
-      // 2. Load delivery zones from Supabase
       const { data: zData } = await db.from('delivery_zones').select('*');
       deliveryZones = zData && zData.length > 0 ? zData : [
         { zone_name: 'Kavali City & Town (Local)', area_keywords: 'kavali, vengal, musunuru, maddurupadu, rudrakota', delivery_charge: 0 },
@@ -361,7 +352,6 @@
         { zone_name: 'Other District Border Areas', area_keywords: 'kandukur, singarayakonda, gudur, naidupeta', delivery_charge: 199 }
       ];
 
-      // 3. Load WhatsApp number
       const { data: sData } = await db.from('store_settings').select('*').eq('id', 1).single();
       if (sData && sData.whatsapp_number) storeWhatsAppNumber = sData.whatsapp_number.replace(/\D/g, '');
 
@@ -370,11 +360,8 @@
     }
 
     function handleTopLocationClick() {
-      if (savedAddresses.length === 0) {
-        startAddNewAddressFlow();
-      } else {
-        openAddressSelectModal();
-      }
+      if (savedAddresses.length === 0) startAddNewAddressFlow();
+      else openAddressSelectModal();
     }
 
     function updateAddressUI() {
@@ -448,11 +435,16 @@
     function openAddressSelectModal() { document.getElementById('address-select-modal').classList.remove('hidden'); }
     function closeAddressSelectModal() { document.getElementById('address-select-modal').classList.add('hidden'); }
 
-    // MAP PIN PICKER
+    // ================= MAP PIN PICKER (FULLSCREEN & IN-BOUNDS) =================
     function startAddNewAddressFlow() {
       closeAddressSelectModal();
       document.getElementById('map-pin-modal').classList.remove('hidden');
-      setTimeout(initMapPicker, 200);
+
+      // Allow DOM to paint fullscreen modal before sizing map
+      setTimeout(() => {
+        initMapPicker();
+        triggerGPSCurrentLocation(); // Prompt and center immediately
+      }, 250);
     }
 
     function closeMapPinModal() { document.getElementById('map-pin-modal').classList.add('hidden'); }
@@ -463,7 +455,7 @@
       tempMapCoords = { lat: startLat, lon: startLon };
 
       if (!leafletMap) {
-        leafletMap = L.map('interactive-map', { zoomControl: false }).setView([startLat, startLon], 15);
+        leafletMap = L.map('interactive-map', { zoomControl: false }).setView([startLat, startLon], 16);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
 
         leafletMap.on('moveend', function() {
@@ -471,27 +463,33 @@
           tempMapCoords = { lat: center.lat, lon: center.lng };
           reverseGeocodeMapCenter(center.lat, center.lng);
         });
-      } else {
-        leafletMap.invalidateSize();
-        leafletMap.setView([startLat, startLon], 15);
       }
+
+      // Force Leaflet to recalculate container bounds
+      leafletMap.invalidateSize();
+      leafletMap.setView([startLat, startLon], 16);
       reverseGeocodeMapCenter(startLat, startLon);
     }
 
     function triggerGPSCurrentLocation() {
-      const pill = document.getElementById('btn-use-gps-pill');
-      pill.innerText = "Finding GPS location...";
+      const pillText = document.getElementById('gps-pill-text');
+      pillText.innerText = "Finding your GPS location...";
+
       navigator.geolocation.getCurrentPosition((pos) => {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
         tempMapCoords = { lat, lon };
-        if (leafletMap) leafletMap.setView([lat, lon], 16);
+
+        if (leafletMap) {
+          leafletMap.invalidateSize();
+          leafletMap.setView([lat, lon], 17);
+        }
         reverseGeocodeMapCenter(lat, lon);
-        pill.innerHTML = "<span>🎯</span><span>Use my current location</span>";
-      }, () => {
-        alert("Please enable location permission on your phone to auto-detect.");
-        pill.innerHTML = "<span>🎯</span><span>Use my current location</span>";
-      }, { enableHighAccuracy: true });
+        pillText.innerText = "Use my current location";
+      }, (err) => {
+        pillText.innerText = "Use my current location";
+        alert("Please enable GPS location permission in your browser.");
+      }, { enableHighAccuracy: true, timeout: 8000 });
     }
 
     async function reverseGeocodeMapCenter(lat, lon) {
@@ -500,12 +498,15 @@
         const data = await res.json();
         const addr = data.address || {};
 
-        const areaTitle = addr.suburb || addr.neighbourhood || addr.village || addr.road || addr.town || "Kavali Area";
-        const district = addr.county || addr.city_district || "SPSR Nellore District";
-        const state = addr.state || "Andhra Pradesh";
+        const areaTitle = addr.suburb || addr.neighbourhood || addr.village || addr.road || addr.town || addr.city || "Detected Area";
+        const district = addr.county || addr.city_district || addr.state_district || "";
+        const state = addr.state || "";
         const pincode = addr.postcode ? ` - ${addr.postcode}` : "";
 
-        const fullAddress = `${areaTitle}, ${district}, ${state}${pincode}`;
+        // Build accurate address string from geocoded response
+        const addressParts = [areaTitle, district, state].filter(Boolean);
+        const fullAddress = addressParts.join(', ') + pincode;
+
         const zoneInfo = evaluateDeliveryCharge(fullAddress, lat, lon);
 
         tempDetectedInfo = {
@@ -547,6 +548,7 @@
     function reopenMapPicker() {
       closeAddressFormModal();
       document.getElementById('map-pin-modal').classList.remove('hidden');
+      setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 200);
     }
 
     function saveAndApplyAddress() {
@@ -578,252 +580,7 @@
       closeAddressFormModal();
     }
 
-    // No predefined sample address — start clean
-    let savedAddresses = [];
-    let selectedAddress = null;
-
-    let leafletMap = null;
-    let tempMapCoords = { ...KAVALI_BASE_COORDS };
-    let tempDetectedInfo = { areaName: "Kavali", fullAddress: "Kavali, SPSR Nellore District", zoneName: "Local", deliveryCharge: 0 };
-
-    async function init() {
-      // 1. Load user's saved addresses from browser storage
-      const stored = localStorage.getItem('bittu_saved_addresses');
-      if (stored) {
-        try {
-          savedAddresses = JSON.parse(stored);
-          if (savedAddresses.length > 0) {
-            selectedAddress = savedAddresses[0];
-          }
-        } catch(e) {}
-      }
-
-      // 2. Load delivery zones from Supabase
-      const { data: zData } = await db.from('delivery_zones').select('*');
-      deliveryZones = zData && zData.length > 0 ? zData : [
-        { zone_name: 'Kavali City & Town (Local)', area_keywords: 'kavali, vengal, musunuru, maddurupadu, rudrakota', delivery_charge: 0 },
-        { zone_name: 'Kavali Rural & Mandals', area_keywords: 'bogole, bitragunta, jaladanki, allur, dagadarthi, kaligiri, vinjamur', delivery_charge: 99 },
-        { zone_name: 'Nellore City & Towns', area_keywords: 'nellore, kovur, buchi, buchireddypalem, atmakur, udayagiri', delivery_charge: 150 },
-        { zone_name: 'Other District Border Areas', area_keywords: 'kandukur, singarayakonda, gudur, naidupeta', delivery_charge: 199 }
-      ];
-
-      // 3. Load WhatsApp number
-      const { data: sData } = await db.from('store_settings').select('*').eq('id', 1).single();
-      if (sData && sData.whatsapp_number) storeWhatsAppNumber = sData.whatsapp_number.replace(/\D/g, '');
-
-      updateAddressUI();
-      loadLiveProducts();
-    }
-
-    function handleTopLocationClick() {
-      if (savedAddresses.length === 0) {
-        startAddNewAddressFlow();
-      } else {
-        openAddressSelectModal();
-      }
-    }
-
-    function updateAddressUI() {
-      const topName = document.getElementById('top-loc-name');
-      const topDesc = document.getElementById('top-loc-desc');
-      const cardContent = document.getElementById('address-card-content');
-
-      if (selectedAddress) {
-        topName.innerText = selectedAddress.name + ' - ' + (selectedAddress.house || selectedAddress.area.split(',')[0]);
-        topDesc.innerText = selectedAddress.area;
-
-        cardContent.innerHTML = `
-          <div class="flex items-start space-x-2">
-            <span class="text-gray-900 mt-0.5 text-sm">📍</span>
-            <div class="flex-1 text-xs">
-              <h3 class="font-extrabold text-gray-900 text-sm">${selectedAddress.name}</h3>
-              <p class="text-gray-600 mt-0.5 leading-relaxed">${selectedAddress.house ? selectedAddress.house + ', ' : ''}${selectedAddress.area}</p>
-              <p class="text-gray-500 mt-1 font-semibold">📞 ${selectedAddress.phone}</p>
-            </div>
-          </div>
-        `;
-        document.getElementById('delivery-zone-badge').innerText = selectedAddress.zoneName || 'Local';
-      } else {
-        topName.innerText = "Add Delivery Address";
-        topDesc.innerText = "Tap to set GPS location for delivery";
-
-        cardContent.innerHTML = `
-          <div onclick="startAddNewAddressFlow()" class="p-3 border-2 border-dashed border-blue-300 rounded-xl bg-blue-50/50 text-center cursor-pointer">
-            <span class="text-blue-600 font-bold text-xs">+ Tap to Add Delivery Address</span>
-          </div>
-        `;
-        document.getElementById('delivery-zone-badge').innerText = "Not set";
-      }
-
-      renderSavedAddressesList();
-      updateTotal();
-    }
-
-    function renderSavedAddressesList() {
-      const container = document.getElementById('saved-addresses-list');
-      if (savedAddresses.length === 0) {
-        container.innerHTML = '<p class="text-xs text-gray-400 py-3 text-center">No saved addresses yet. Tap "+ Add New Address" above.</p>';
-        return;
-      }
-      container.innerHTML = savedAddresses.map(a => `
-        <div onclick="selectAddressById('${a.id}')" class="p-3 border rounded-xl cursor-pointer flex items-start justify-between ${selectedAddress && selectedAddress.id === a.id ? 'border-blue-500 bg-blue-50/50' : 'bg-white hover:bg-gray-50'}">
-          <div class="flex items-start space-x-2.5">
-            <span class="text-base text-gray-700 mt-0.5">📍</span>
-            <div class="text-xs">
-              <div class="flex items-center space-x-2">
-                <span class="font-bold text-gray-900">${a.name}</span>
-                ${selectedAddress && selectedAddress.id === a.id ? '<span class="bg-blue-100 text-blue-700 font-bold text-[9px] px-1.5 py-0.2 rounded">Selected</span>' : ''}
-              </div>
-              <p class="text-gray-600 mt-0.5 text-[11px]">${a.house ? a.house + ', ' : ''}${a.area}</p>
-              <p class="text-gray-500 font-semibold mt-0.5 text-[11px]">📞 ${a.phone}</p>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function selectAddressById(id) {
-      const matched = savedAddresses.find(a => a.id === id);
-      if (matched) {
-        selectedAddress = matched;
-        updateAddressUI();
-        closeAddressSelectModal();
-      }
-    }
-
-    function openAddressSelectModal() { document.getElementById('address-select-modal').classList.remove('hidden'); }
-    function closeAddressSelectModal() { document.getElementById('address-select-modal').classList.add('hidden'); }
-
-    // MAP PIN PICKER
-    function startAddNewAddressFlow() {
-      closeAddressSelectModal();
-      document.getElementById('map-pin-modal').classList.remove('hidden');
-      setTimeout(initMapPicker, 200);
-    }
-
-    function closeMapPinModal() { document.getElementById('map-pin-modal').classList.add('hidden'); }
-
-    function initMapPicker() {
-      const startLat = (selectedAddress && selectedAddress.lat) || KAVALI_BASE_COORDS.lat;
-      const startLon = (selectedAddress && selectedAddress.lon) || KAVALI_BASE_COORDS.lon;
-      tempMapCoords = { lat: startLat, lon: startLon };
-
-      if (!leafletMap) {
-        leafletMap = L.map('interactive-map', { zoomControl: false }).setView([startLat, startLon], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
-
-        leafletMap.on('moveend', function() {
-          const center = leafletMap.getCenter();
-          tempMapCoords = { lat: center.lat, lon: center.lng };
-          reverseGeocodeMapCenter(center.lat, center.lng);
-        });
-      } else {
-        leafletMap.invalidateSize();
-        leafletMap.setView([startLat, startLon], 15);
-      }
-      reverseGeocodeMapCenter(startLat, startLon);
-    }
-
-    function triggerGPSCurrentLocation() {
-      const pill = document.getElementById('btn-use-gps-pill');
-      pill.innerText = "Finding GPS location...";
-      navigator.geolocation.getCurrentPosition((pos) => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        tempMapCoords = { lat, lon };
-        if (leafletMap) leafletMap.setView([lat, lon], 16);
-        reverseGeocodeMapCenter(lat, lon);
-        pill.innerHTML = "<span>🎯</span><span>Use my current location</span>";
-      }, () => {
-        alert("Please enable location permission on your phone to auto-detect.");
-        pill.innerHTML = "<span>🎯</span><span>Use my current location</span>";
-      }, { enableHighAccuracy: true });
-    }
-
-    async function reverseGeocodeMapCenter(lat, lon) {
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-        const data = await res.json();
-        const addr = data.address || {};
-
-        const areaTitle = addr.suburb || addr.neighbourhood || addr.village || addr.road || addr.town || "Kavali Area";
-        const district = addr.county || addr.city_district || "SPSR Nellore District";
-        const state = addr.state || "Andhra Pradesh";
-        const pincode = addr.postcode ? ` - ${addr.postcode}` : "";
-
-        const fullAddress = `${areaTitle}, ${district}, ${state}${pincode}`;
-        const zoneInfo = evaluateDeliveryCharge(fullAddress, lat, lon);
-
-        tempDetectedInfo = {
-          areaName: areaTitle,
-          fullAddress: fullAddress,
-          zoneName: zoneInfo.zoneName,
-          deliveryCharge: zoneInfo.charge
-        };
-
-        document.getElementById('map-detected-title').innerText = areaTitle;
-        document.getElementById('map-detected-full').innerText = fullAddress;
-        document.getElementById('map-zone-rate-pill').innerText = zoneInfo.charge === 0 ? "FREE Delivery" : `₹${zoneInfo.charge} Delivery`;
-      } catch (e) {
-        console.warn(e);
-      }
-    }
-
-    function evaluateDeliveryCharge(addressString, lat, lon) {
-      const lower = addressString.toLowerCase();
-      for (const z of deliveryZones) {
-        const keys = (z.area_keywords || '').split(',').map(k => k.trim().toLowerCase());
-        if (keys.some(k => k && lower.includes(k))) {
-          return { zoneName: z.zone_name, charge: Number(z.delivery_charge || 0) };
-        }
-      }
-      return { zoneName: "Regional Delivery", charge: 99 };
-    }
-
-    function proceedToAddressDetailsForm() {
-      closeMapPinModal();
-      document.getElementById('form-locality-text').innerText = tempDetectedInfo.fullAddress;
-      document.getElementById('input-name').value = selectedAddress ? selectedAddress.name : "";
-      document.getElementById('input-phone').value = selectedAddress ? selectedAddress.phone : "";
-      document.getElementById('input-house-no').value = "";
-      document.getElementById('address-form-modal').classList.remove('hidden');
-    }
-
-    function closeAddressFormModal() { document.getElementById('address-form-modal').classList.add('hidden'); }
-    function reopenMapPicker() {
-      closeAddressFormModal();
-      document.getElementById('map-pin-modal').classList.remove('hidden');
-    }
-
-    function saveAndApplyAddress() {
-      const houseNo = document.getElementById('input-house-no').value.trim();
-      const name = document.getElementById('input-name').value.trim();
-      const phone = document.getElementById('input-phone').value.trim();
-
-      if (!houseNo) return alert("Please enter Flat / House / Building name.");
-      if (!name) return alert("Please enter your name.");
-      if (!phone || phone.length < 10) return alert("Please enter a valid 10-digit mobile number.");
-
-      const newAddr = {
-        id: "addr_" + Date.now(),
-        name: name,
-        phone: phone,
-        house: houseNo,
-        area: tempDetectedInfo.fullAddress,
-        lat: tempMapCoords.lat,
-        lon: tempMapCoords.lon,
-        zoneName: tempDetectedInfo.zoneName,
-        deliveryCharge: tempDetectedInfo.deliveryCharge
-      };
-
-      savedAddresses.unshift(newAddr);
-      selectedAddress = newAddr;
-      localStorage.setItem('bittu_saved_addresses', JSON.stringify(savedAddresses));
-
-      updateAddressUI();
-      closeAddressFormModal();
-    }
-// CART VIEW
+    // CART VIEW
     function openCartView() {
       renderCartItems();
       updateTotal();
@@ -859,7 +616,6 @@
         </div>
       `).join('');
     }
-
     function updateTotal() {
       const itemsCount = cart.reduce((sum, i) => sum + i.qty, 0);
       const mrpSubtotal = cart.reduce((sum, i) => sum + (Number(i.mrp || i.offer_price) * i.qty), 0);
@@ -878,7 +634,7 @@
       document.getElementById('summary-savings-text').innerText = `₹${discount.toFixed(0)}`;
     }
 
-    // CHECKOUT & BOOKING CONFIRMATION
+    // CHECKOUT CONFIRMATION
     async function confirmOrderAndWhatsApp() {
       if (cart.length === 0) return alert("Your cart is empty. Please add items.");
       if (!selectedAddress) {
@@ -900,7 +656,6 @@
       const fullAddr = `${selectedAddress.house ? selectedAddress.house + ', ' : ''}${selectedAddress.area}`;
 
       try {
-        // Save to Supabase Orders
         await db.from('orders').insert([{
           id: orderId,
           customer_name: selectedAddress.name,
@@ -913,7 +668,6 @@
           status: 'Confirmed'
         }]);
 
-        // Build WhatsApp text
         const itemLines = cart.map(i => `• ${i.name} (x${i.qty}) = ₹${i.offer_price * i.qty}`).join('\n');
         const message = encodeURIComponent(
           `*NEW FESTIVAL ORDER #${orderId}*\n` +
@@ -931,10 +685,8 @@
           `Please confirm my festival crackers booking! 🎉`
         );
 
-        // Open WhatsApp in a clean window
         window.open(`https://wa.me/${storeWhatsAppNumber}?text=${message}`, '_blank');
 
-        // Transition immediately to Success Screen
         closeCartView();
         document.getElementById('success-order-id').innerText = '#' + orderId;
         document.getElementById('success-cust-name').innerText = selectedAddress.name;
@@ -942,11 +694,9 @@
         document.getElementById('success-total').innerText = `₹${grandTotal.toFixed(0)}`;
         document.getElementById('order-success-modal').classList.remove('hidden');
 
-        // Reset cart
         cart = [];
         renderProducts();
         updateTotal();
-
       } catch (err) {
         alert("Booking error: " + err.message);
       } finally {
@@ -959,7 +709,6 @@
       document.getElementById('order-success-modal').classList.add('hidden');
     }
 
-    // PRODUCTS
     async function loadLiveProducts() {
       const { data } = await db.from('products').select('*');
       if (data) {
