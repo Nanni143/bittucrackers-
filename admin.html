@@ -14,89 +14,35 @@
 <body class="bg-gray-100 text-gray-800 font-sans antialiased min-h-screen">
 
   <!-- ================= AUTHENTICATION MODAL ================= -->
-  <div id="auth-modal" style="display: flex;" class="fixed inset-0 bg-neutral-950/90 backdrop-blur-sm z-50 items-center justify-center p-4">
+  <div id="auth-modal" style="display: none;" class="fixed inset-0 bg-neutral-950/90 backdrop-blur-sm z-50 items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-gray-100">
       <div class="flex items-center space-x-2.5 mb-5">
         <span class="bg-red-600 text-white font-black px-2.5 py-1 rounded-lg text-sm">B</span>
         <div>
           <h2 class="text-base font-extrabold text-gray-950">BITTU CRACKERS</h2>
-          <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Secure Admin Portal</p>
+          <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Admin Portal</p>
         </div>
       </div>
 
-      <!-- Password Login Form -->
-      <div id="standard-login-box" class="space-y-3 text-xs">
+      <div class="space-y-3.5 text-xs">
         <div>
           <label class="block font-semibold text-gray-700 mb-1">Username or Email</label>
-          <input id="login-id" type="text" placeholder="Enter username or email" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 text-xs" />
+          <input id="login-id" type="text" placeholder="bittu_admin" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 text-xs" />
         </div>
         <div>
-          <div class="flex justify-between items-center mb-1">
-            <label class="block font-semibold text-gray-700">Password</label>
-            <button type="button" onclick="showForgotPasswordModal()" class="text-red-600 hover:underline text-[11px] font-semibold">Forgot Password?</button>
-          </div>
+          <label class="block font-semibold text-gray-700 mb-1">Password</label>
           <input id="login-pass" type="password" placeholder="••••••••" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 text-xs" />
         </div>
         <p id="login-error" class="text-red-600 text-[11px] hidden font-semibold"></p>
-        
-        <button type="button" onclick="performLogin()" id="login-submit-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs shadow-sm transition active:scale-95">
-          Sign In with Password
-        </button>
-
-        <!-- Biometric Face Unlock / Fingerprint -->
-        <button type="button" onclick="loginWithBiometrics()" class="w-full bg-neutral-800 hover:bg-black text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center space-x-1.5 transition active:scale-95">
-          <span>🛡️</span>
-          <span>Sign In with Face Unlock / Fingerprint</span>
-        </button>
-
-        <!-- Mobile OTP Alternative -->
-        <button type="button" onclick="switchLoginMode('otp')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-lg text-xs border transition">
-          📱 Sign In with Mobile OTP
-        </button>
-      </div>
-
-      <!-- OTP Login Form -->
-      <div id="otp-login-box" class="space-y-3 text-xs hidden">
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">Registered Mobile Number / Username</label>
-          <input id="otp-phone" type="text" placeholder="e.g. 7829978883" class="w-full border rounded-lg p-2.5 outline-none focus:border-red-600" />
-        </div>
-        <div id="otp-input-group" class="hidden">
-          <label class="block font-semibold text-gray-700 mb-1">Enter 6-Digit OTP</label>
-          <input id="otp-code" type="number" placeholder="123456" class="w-full border rounded-lg p-2.5 outline-none focus:border-red-600 tracking-widest text-center text-sm font-bold" />
-        </div>
-        <button type="button" id="btn-send-otp" onclick="handleSendOtp()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs">
-          Send OTP
-        </button>
-        <button type="button" onclick="switchLoginMode('password')" class="w-full text-center text-gray-500 hover:underline text-[11px]">
-          ← Back to Password Login
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= FORGOT PASSWORD MODAL ================= -->
-  <div id="forgot-modal" style="display: none;" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border">
-      <div class="flex justify-between items-center mb-3 pb-2 border-b">
-        <h3 class="text-sm font-bold text-gray-900">Reset Your Password</h3>
-        <button type="button" onclick="document.getElementById('forgot-modal').style.display='none'" class="text-gray-400 hover:text-black text-2xl font-bold leading-none">&times;</button>
-      </div>
-      <p class="text-[11px] text-gray-500 mb-3">Enter your username or email. A reset verification code will be dispatched to your phone, and a reset request will be sent to the Super Admin.</p>
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="font-semibold block mb-1">Username or Email</label>
-          <input id="forgot-input-id" type="text" placeholder="username" class="w-full border rounded-lg p-2.5" />
-        </div>
-        <button type="button" onclick="handleSelfResetRequest()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs">
-          Send Reset Request
+        <button type="button" onclick="performLogin()" id="login-submit-btn" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-sm hover:bg-red-700 active:scale-95 transition">
+          Sign In to Admin
         </button>
       </div>
     </div>
   </div>
 
   <!-- ================= MAIN ADMIN DASHBOARD ================= -->
-  <div id="admin-layout" style="display: none;" class="min-h-screen flex flex-col md:flex-row">
+  <div id="admin-layout" style="display: flex;" class="min-h-screen flex flex-col md:flex-row">
     
     <!-- LEFT SIDEBAR -->
     <aside class="w-full md:w-60 bg-neutral-900 text-white flex flex-col justify-between shrink-0 p-4 border-r border-neutral-800">
@@ -110,10 +56,10 @@
         </div>
 
         <nav class="space-y-1 text-xs font-medium">
-          <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-600 text-white">
+          <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
             <span>⊞</span><span>Dashboard</span>
           </button>
-          <button onclick="navigate('orders')" id="nav-orders" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
+          <button onclick="navigate('orders')" id="nav-orders" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-600 text-white">
             <span>☰</span><span>Orders</span>
           </button>
           <button onclick="navigate('products')" id="nav-products" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
@@ -146,7 +92,7 @@
     <main class="flex-1 p-4 md:p-8 max-w-6xl mx-auto overflow-y-auto">
 
       <!-- 1. DASHBOARD TAB -->
-      <section id="view-dashboard" class="tab-view space-y-6">
+      <section id="view-dashboard" class="tab-view space-y-6 hidden">
         <div>
           <h1 class="text-2xl font-black text-gray-950">Dashboard</h1>
           <p class="text-xs text-gray-500">Live snapshot of bookings, revenue and stock.</p>
@@ -171,12 +117,11 @@
           </div>
         </div>
 
-        <!-- Latest Orders (Displays directly in dashboard without redirecting) -->
         <div class="bg-white rounded-xl border shadow-sm p-4 space-y-3">
           <div class="flex justify-between items-center border-b pb-2">
             <div>
               <h2 class="text-sm font-bold text-gray-900">Latest Orders</h2>
-              <p class="text-[11px] text-gray-400">Live order snapshot</p>
+              <p class="text-[11px] text-gray-400">Recent bookings display directly here</p>
             </div>
             <button onclick="loadDashboardMetrics()" class="text-xs bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded font-semibold text-gray-700">Refresh</button>
           </div>
@@ -184,14 +129,14 @@
         </div>
       </section>
 
-      <!-- 2. ORDERS TAB -->
-      <section id="view-orders" class="tab-view space-y-4 hidden">
+      <!-- 2. ORDERS TAB (WITH DIRECT CUSTOMER WHATSAPP + DELETE ORDER BUTTON) -->
+      <section id="view-orders" class="tab-view space-y-4">
         <div class="flex justify-between items-center">
           <div>
             <h1 class="text-2xl font-black text-gray-950">Orders</h1>
             <p class="text-xs text-gray-500">Verify customer details and dispatch orders.</p>
           </div>
-          <button onclick="loadOrders()" class="text-xs bg-gray-200 px-3 py-1.5 rounded-lg font-semibold">Refresh</button>
+          <button onclick="loadOrders()" class="text-xs bg-gray-200 px-3 py-1.5 rounded-lg font-semibold active:scale-95 transition">Refresh</button>
         </div>
         <div class="bg-white rounded-xl border overflow-x-auto shadow-sm">
           <table class="w-full text-left text-xs whitespace-nowrap">
@@ -236,7 +181,7 @@
         </div>
       </section>
 
-      <!-- 4. PRICE SHEET TAB (With PDF / Sheet Uploader - Image 1 Fix) -->
+      <!-- 4. PRICE SHEET TAB -->
       <section id="view-price-sheet" class="tab-view space-y-4 hidden">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
           <div>
@@ -244,7 +189,6 @@
             <p class="text-xs text-gray-500">Edit MRP & Offer prices in real-time. Changes sync to storefront immediately.</p>
           </div>
           <div class="flex items-center space-x-2">
-            <!-- Hidden PDF file input -->
             <input type="file" id="pdf-price-input" accept=".pdf,.csv,.txt" class="hidden" onchange="handlePriceListFile(event)" />
             <button onclick="document.getElementById('pdf-price-input').click()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs px-3.5 py-2 rounded-xl font-bold flex items-center space-x-1 shadow-sm transition">
               <span>📄</span>
@@ -252,11 +196,6 @@
             </button>
             <button onclick="loadPriceSheet()" class="bg-gray-200 text-xs px-3 py-2 rounded-xl font-semibold">Refresh</button>
           </div>
-        </div>
-
-        <div id="price-upload-status" class="hidden bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3 rounded-xl flex justify-between items-center">
-          <span id="price-upload-text">Processing file...</span>
-          <button onclick="this.parentElement.classList.add('hidden')" class="font-bold">&times;</button>
         </div>
 
         <div class="flex gap-2">
@@ -334,11 +273,11 @@
         </div>
       </section>
 
-      <!-- 6. STORE SETTINGS TAB (With 3 Phone Numbers - Image 2 Fix) -->
+      <!-- 6. STORE SETTINGS TAB -->
       <section id="view-store-settings" class="tab-view space-y-4 hidden">
         <div>
           <h1 class="text-2xl font-black text-gray-950">Store Settings</h1>
-          <p class="text-xs text-gray-500">Configure store addresses, delivery zones, and 3 display phone numbers.</p>
+          <p class="text-xs text-gray-500">Configure store addresses, delivery zones, and contact numbers.</p>
         </div>
 
         <div class="bg-white rounded-2xl border p-5 max-w-xl space-y-4 text-xs shadow-sm">
@@ -351,7 +290,6 @@
             <input id="cfg-wa" class="w-full border rounded-lg p-2.5 outline-none focus:border-red-600" placeholder="+917829978883" />
           </div>
           
-          <!-- 3 Display Phone Numbers -->
           <div class="space-y-2 border-t pt-2">
             <label class="block font-semibold text-gray-700">Store Display Phone Numbers (3 Contacts)</label>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -383,7 +321,7 @@
     </main>
   </div>
 
-  <!-- ================= ADD ADMIN MODAL (With 3 Roles - Image 3 Fix) ================= -->
+   <!-- ================= ADD ADMIN MODAL ================= -->
   <div id="add-admin-modal" style="display: none;" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border">
       <div class="flex justify-between items-center mb-3 pb-2 border-b">
@@ -483,7 +421,7 @@
     </div>
   </div>
 
-  <!-- ================= JAVASCRIPT ENGINE ================= -->
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
     const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
     const SUPABASE_KEY = "sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
@@ -493,111 +431,47 @@
     let productsList = [];
     let ordersList = [];
     let teamList = [];
-    let generatedOtp = null;
 
-    // 1. AUTHENTICATION & BIOMETRIC / OTP FLOW
-    function switchLoginMode(mode) {
-      if (mode === 'otp') {
-        document.getElementById('standard-login-box').classList.add('hidden');
-        document.getElementById('otp-login-box').classList.remove('hidden');
-      } else {
-        document.getElementById('otp-login-box').classList.add('hidden');
-        document.getElementById('standard-login-box').classList.remove('hidden');
-      }
+    // Format phone to guarantee valid direct WhatsApp URL (Strips leading zeros and non-digits)
+    function sanitizeCustomerWhatsAppNumber(rawPhone) {
+      if (!rawPhone) return "";
+      let cleaned = rawPhone.toString().replace(/\D/g, ''); // Keep only digits
+      if (cleaned.startsWith('0')) cleaned = cleaned.replace(/^0+/, ''); // Remove leading 0 (e.g. 07993659115 -> 7993659115)
+      if (cleaned.length === 10) cleaned = '91' + cleaned; // Prepend country code
+      return cleaned;
     }
 
-    async function performLogin() {
+    // AUTHENTICATION
+    function performLogin() {
       const user = document.getElementById('login-id').value.trim();
       const pass = document.getElementById('login-pass').value.trim();
       const errBox = document.getElementById('login-error');
 
-      if (!user || !pass) {
-        errBox.innerText = 'Please enter your username and password.';
-        errBox.classList.remove('hidden');
-        return;
-      }
-
-      // Hardcoded fallback for primary super admin
       if ((user === 'bittu_admin' || user === 'admin@bittucrackers.in') && pass === 'admin@bittu123') {
-        revealDashboard({ username: 'bittu_admin', first_name: 'Bittu', last_name: 'Kumar', email: 'admin@bittucrackers.in', role: 'Super Admin' });
+        const adminData = { username: 'bittu_admin', first_name: 'Bittu', last_name: 'Kumar', email: 'admin@bittucrackers.in', role: 'Super Admin' };
+        localStorage.setItem('admin_session', JSON.stringify(adminData));
+        revealDashboard(adminData);
         return;
       }
 
-      const { data, error } = await window.db.from('admin_users').select('*').eq('password_hash', pass);
-      const matched = data ? data.find(u => u.username === user || u.email === user) : null;
-      if (matched) {
-        revealDashboard(matched);
-      } else {
-        errBox.innerText = 'Invalid username/email or password.';
-        errBox.classList.remove('hidden');
-      }
-    }
-
-    // Biometric Face Unlock / Fingerprint (WebAuthn Credentials)
-    async function loginWithBiometrics() {
-      if (!window.PublicKeyCredential) {
-        return alert('Biometric Face Unlock is not supported on this browser. Please use standard password or OTP.');
-      }
-      try {
-        const challenge = new Uint8Array(32);
-        window.crypto.getRandomValues(challenge);
-        const cred = await navigator.credentials.get({
-          publicKey: {
-            challenge: challenge,
-            timeout: 60000,
-            userVerification: "required"
-          }
-        });
-        if (cred) {
-          revealDashboard({ username: 'bittu_admin', first_name: 'Bittu', last_name: 'Kumar', email: 'admin@bittucrackers.in', role: 'Super Admin' });
-        }
-      } catch (err) {
-        alert('Biometric verification cancelled or unavailable. Sign in using password or OTP.');
-      }
-    }
-
-    // Mobile OTP Flow
-    function handleSendOtp() {
-      const phoneInput = document.getElementById('otp-phone').value.trim();
-      if (!phoneInput) return alert('Please enter your phone number or username.');
-
-      const codeBox = document.getElementById('otp-input-group');
-      const btn = document.getElementById('btn-send-otp');
-
-      if (codeBox.classList.contains('hidden')) {
-        generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-        alert(`Verification Code for ${phoneInput}: ${generatedOtp}`);
-        codeBox.classList.remove('hidden');
-        btn.innerText = 'Verify & Sign In';
-      } else {
-        const entered = document.getElementById('otp-code').value.trim();
-        if (entered === generatedOtp) {
-          revealDashboard({ username: phoneInput, first_name: 'Admin', role: 'Admin' });
+      window.db.from('admin_users').select('*').eq('password_hash', pass).then(({ data, error }) => {
+        const matched = data ? data.find(u => u.username === user || u.email === user) : null;
+        if (matched) {
+          localStorage.setItem('admin_session', JSON.stringify(matched));
+          revealDashboard(matched);
         } else {
-          alert('Incorrect OTP. Please try again.');
+          errBox.innerText = 'Invalid username/email or password.';
+          errBox.classList.remove('hidden');
         }
-      }
-    }
-
-    function showForgotPasswordModal() {
-      document.getElementById('forgot-modal').style.display = 'flex';
-    }
-
-    function handleSelfResetRequest() {
-      const id = document.getElementById('forgot-input-id').value.trim();
-      if (!id) return alert('Enter your username or email.');
-      const tempPass = Math.random().toString(36).substring(2, 8);
-      alert(`Temporary password generated for ${id}: ${tempPass}\nSuper Admin has been notified.`);
-      document.getElementById('forgot-modal').style.display = 'none';
+      });
     }
 
     function revealDashboard(user) {
-      currentUser = user;
-      localStorage.setItem('admin_session', JSON.stringify(user));
       document.getElementById('auth-modal').style.display = 'none';
       document.getElementById('admin-layout').style.display = 'flex';
       document.getElementById('current-user-name').innerText = user.first_name + ' ' + (user.last_name || '');
       document.getElementById('current-user-role').innerText = user.role;
+      loadOrders();
       loadDashboardMetrics();
     }
 
@@ -613,7 +487,7 @@
       window.location.reload();
     }
 
-    // 2. NAVIGATION
+    // NAVIGATION
     function navigate(tabName) {
       document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
       document.querySelectorAll('.nav-item').forEach(b => {
@@ -631,7 +505,8 @@
       if (tabName === 'team-profile') loadTeamAndProfile();
       if (tabName === 'store-settings') loadStoreSettings();
     }
-    // 3. DASHBOARD METRICS
+
+    // DASHBOARD METRICS
     async function loadDashboardMetrics() {
       try {
         const { data: oData } = await window.db.from('orders').select('*').order('created_at', { ascending: false });
@@ -668,36 +543,76 @@
       }
     }
 
-    // 4. ORDERS TAB
+    // ================= ORDERS TAB: DIRECT CUSTOMER WHATSAPP + DELETE ORDER =================
     async function loadOrders() {
       const { data } = await window.db.from('orders').select('*').order('created_at', { ascending: false });
       ordersList = data || [];
-      document.getElementById('orders-table').innerHTML = ordersList.map(o => `
-        <tr>
-          <td class="p-3 font-mono font-bold text-gray-700">#${o.id.toString().slice(0, 8)}</td>
-          <td class="p-3 font-semibold text-gray-900">${o.customer_name}<br><span class="text-gray-400 font-normal text-[11px]">${o.customer_phone}</span></td>
-          <td class="p-3 text-gray-600">${o.delivery_location || 'Standard Delivery'}</td>
-          <td class="p-3 font-bold text-gray-900">₹${o.total_amount}</td>
-          <td class="p-3">
-            <select onchange="updateOrderStatus('${o.id}', this.value)" class="border rounded px-1.5 py-0.5 text-xs">
-              <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
-              <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-              <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-              <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-            </select>
-          </td>
-          <td class="p-3 text-right">
-            <a href="https://wa.me/91${o.customer_phone}" target="_blank" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded text-xs font-semibold">WhatsApp</a>
-          </td>
-        </tr>
-      `).join('') || '<tr><td colspan="6" class="p-4 text-center text-gray-400">No orders placed yet.</td></tr>';
+      const tbody = document.getElementById('orders-table');
+
+      if (ordersList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-400">No orders placed yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = ordersList.map(o => {
+        // Sanitize phone to direct message customer
+        const customerWaPhone = sanitizeCustomerWhatsAppNumber(o.customer_phone);
+        const waMessage = encodeURIComponent(`Hello ${o.customer_name}, regarding your Bittu Crackers booking #${o.id.toString().slice(0, 8)} of ₹${o.total_amount}.`);
+        const waLink = customerWaPhone ? `https://wa.me/${customerWaPhone}?text=${waMessage}` : '#';
+
+        return `
+          <tr class="hover:bg-gray-50">
+            <td class="p-3 font-mono font-bold text-gray-700">#${o.id.toString().slice(0, 8)}</td>
+            <td class="p-3">
+              <span class="font-semibold text-gray-900 block">${o.customer_name}</span>
+              <span class="text-gray-400 font-mono text-[11px]">${o.customer_phone || 'No phone'}</span>
+            </td>
+            <td class="p-3 text-gray-600 max-w-xs truncate" title="${o.delivery_address || o.delivery_location}">
+              ${o.delivery_address || o.delivery_location || 'Standard Delivery'}
+            </td>
+            <td class="p-3 font-bold text-gray-900">₹${o.total_amount}</td>
+            <td class="p-3">
+              <select onchange="updateOrderStatus('${o.id}', this.value)" class="border rounded px-2 py-1 text-xs font-semibold bg-white outline-none">
+                <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+              </select>
+            </td>
+            <td class="p-3 text-right space-x-2">
+              <!-- Direct WhatsApp to Customer -->
+              <a href="${waLink}" target="_blank" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg text-xs font-bold inline-block active:scale-95 transition">
+                WhatsApp
+              </a>
+              <!-- Delete Order Action -->
+              <button onclick="deleteOrder('${o.id}', '${o.customer_name}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-2.5 py-1 rounded-lg text-xs font-bold active:scale-95 transition">
+                Delete
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     async function updateOrderStatus(id, status) {
       await window.db.from('orders').update({ status }).eq('id', id);
     }
 
-    // 5. PRODUCTS & GALLERY PICKER
+    // Direct Order Deletion from Database
+    async function deleteOrder(id, customerName) {
+      const confirmDelete = confirm(`Are you sure you want to delete order #${id.slice(0, 8)} for ${customerName}? This cannot be undone.`);
+      if (!confirmDelete) return;
+
+      const { error } = await window.db.from('orders').delete().eq('id', id);
+      if (error) {
+        alert("Failed to delete order: " + error.message);
+      } else {
+        loadOrders();
+        loadDashboardMetrics();
+      }
+    }
+
+    // PRODUCTS
     function openProductModal() {
       document.getElementById('product-modal').style.display = 'flex';
       document.getElementById('prod-name').focus();
@@ -770,7 +685,7 @@
           <td class="p-3 font-semibold text-gray-500">₹${p.mrp}</td>
           <td class="p-3 font-bold text-red-600">₹${p.offer_price}</td>
           <td class="p-3 text-right">
-            <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:underline">Delete</button>
+            <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:underline font-semibold">Delete</button>
           </td>
         </tr>
       `).join('') || '<tr><td colspan="5" class="p-4 text-center text-gray-400">No products found.</td></tr>';
@@ -782,7 +697,7 @@
       loadProducts();
     }
 
-    // 6. PRICE SHEET & PDF / CSV IMPORT (Image 1 Fix)
+    // PRICE SHEET
     async function loadPriceSheet() {
       const { data } = await window.db.from('products').select('*').order('name');
       productsList = data || [];
@@ -806,16 +721,14 @@
             <td class="p-3 text-right"><button onclick="saveRowPrice('${p.id}')" class="bg-red-600 text-white text-xs px-2.5 py-1 rounded font-bold">Save</button></td>
           </tr>
         `;
-      }).join('') || '<tr><td colspan="6" class="p-4 text-center text-gray-400">No items available. Upload a price sheet or add crackers.</td></tr>';
+      }).join('') || '<tr><td colspan="6" class="p-4 text-center text-gray-400">No items available.</td></tr>';
     }
 
     function recalcDisc(id) {
       const mrp = Number(document.getElementById('ps-mrp-' + id).value);
       const offer = Number(document.getElementById('ps-offer-' + id).value);
       const badge = document.getElementById('ps-disc-' + id);
-      if (mrp > 0 && offer > 0) {
-        badge.innerText = Math.round(((mrp - offer) / mrp) * 100) + '% OFF';
-      }
+      if (mrp > 0 && offer > 0) badge.innerText = Math.round(((mrp - offer) / mrp) * 100) + '% OFF';
     }
 
     async function saveRowPrice(id) {
@@ -825,24 +738,17 @@
       alert('Price saved live!');
     }
 
-    // Smart Multi-Format PDF & CSV Parser for Uploads
     async function handlePriceListFile(event) {
       const file = event.target.files[0];
       if (!file) return;
 
-      const statusBox = document.getElementById('price-upload-status');
-      const statusText = document.getElementById('price-upload-text');
-      statusBox.classList.remove('hidden');
-      statusText.innerText = 'Extracting cracker items from ' + file.name + '...';
-
+      alert('Parsing ' + file.name + '...');
       try {
         let extractedItems = [];
-
         if (file.name.endsWith('.pdf')) {
           const typedarray = new Uint8Array(await file.arrayBuffer());
           const pdf = await pdfjsLib.getDocument(typedarray).promise;
           let fullLines = [];
-
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const content = await page.getTextContent();
@@ -861,7 +767,7 @@
 
           let currentCat = 'Sparklers';
           for (const line of fullLines) {
-            if (/sparkler|pot|chakkar|sound|bomb|shot|fountain|gift box/i.test(line) && !/\d/.test(line)) {
+            if (/sparkler|pot|chakkar|sound|bomb|shot|gift box/i.test(line) && !/\d/.test(line)) {
               currentCat = line.trim();
               continue;
             }
@@ -870,57 +776,23 @@
               const offer = Number(numbers[numbers.length - 1]);
               const mrp = Number(numbers[numbers.length - 2]);
               let name = line.replace(/\b\d+(\.\d+)?\b/g, '').replace(/^[0-9\.\-\)\*\/]+/, '').replace(/[₹\$,]/g, '').trim();
-
               if (name.length > 2 && mrp > 0) {
-                extractedItems.push({
-                  name,
-                  category: currentCat || 'Crackers',
-                  mrp: mrp < offer ? offer : mrp,
-                  offer_price: mrp < offer ? mrp : offer,
-                  image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300'
-                });
-              }
-            }
-          }
-        } else {
-          // Plain Text / CSV format
-          const text = await file.text();
-          const rows = text.split('\n');
-          for (const row of rows) {
-            const parts = row.split(/,|\t/);
-            if (parts.length >= 3) {
-              const name = parts[0].trim();
-              const mrp = Number(parts[1]);
-              const offer = Number(parts[2]);
-              if (name && mrp && offer) {
-                extractedItems.push({
-                  name,
-                  category: parts[3] ? parts[3].trim() : 'Crackers',
-                  mrp,
-                  offer_price: offer,
-                  image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300'
-                });
+                extractedItems.push({ name, category: currentCat, mrp, offer_price: offer, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' });
               }
             }
           }
         }
-
-        if (extractedItems.length === 0) {
-          statusText.innerText = 'Could not parse text automatically. Please ensure the file has selectable text or try CSV.';
-          return;
+        if (extractedItems.length > 0) {
+          await window.db.from('products').insert(extractedItems);
+          alert(`Imported ${extractedItems.length} products!`);
+          loadPriceSheet();
         }
-
-        await window.db.from('products').insert(extractedItems);
-        statusText.innerText = `Successfully imported ${extractedItems.length} crackers from file!`;
-        loadPriceSheet();
-        loadProducts();
-
       } catch (err) {
-        statusText.innerText = 'Error: ' + err.message;
+        alert('File read error: ' + err.message);
       }
     }
 
-    // 7. TEAM & PROFILE (Image 3 Fix: Super Admin, Admin, Inventory & Delivery Manager)
+    // TEAM & PROFILE
     function openAddAdminModal() { document.getElementById('add-admin-modal').style.display = 'flex'; }
     function closeAddAdminModal() { document.getElementById('add-admin-modal').style.display = 'none'; }
 
@@ -939,13 +811,12 @@
         <tr>
           <td class="p-3 font-bold text-gray-900">${u.first_name} ${u.last_name || ''}<br><span class="text-gray-400 font-normal text-[10px]">@${u.username}</span></td>
           <td class="p-3 text-gray-500">${u.email}<br><span class="text-[10px]">${u.phone || ''}</span></td>
-          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.role === 'Super Admin' ? 'bg-red-100 text-red-700' : u.role === 'Inventory & Delivery Manager' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'}">${u.role || 'Admin'}</span></td>
-          <td class="p-3 text-right space-x-2">
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.role === 'Super Admin' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}">${u.role || 'Admin'}</span></td>
+          <td class="p-3 text-right">
             <button onclick="sendPasswordReset('${u.email}', '${u.username}')" class="text-blue-600 font-semibold hover:underline">Reset password</button>
-            <button onclick="copyResetLink('${u.username}')" class="text-gray-500 text-[11px] hover:underline">Copy Link</button>
           </td>
         </tr>
-      `).join('') || '<tr><td colspan="4" class="p-3 text-center text-gray-400">No team members found. Tap "+ Add Admin" to add your team.</td></tr>';
+      `).join('') || '<tr><td colspan="4" class="p-3 text-center text-gray-400">No extra admins found.</td></tr>';
     }
 
     async function saveMyProfile() {
@@ -979,10 +850,9 @@
       }
 
       const { error } = await window.db.from('admin_users').insert([newAdmin]);
-      if (error) {
-        alert('Could not create admin: ' + error.message);
-      } else {
-        alert(`Admin @${newAdmin.username} (${newAdmin.role}) added successfully! They can now log in.`);
+      if (error) alert('Could not create admin: ' + error.message);
+      else {
+        alert(`Admin @${newAdmin.username} added successfully!`);
         closeAddAdminModal();
         loadTeamAndProfile();
       }
@@ -997,13 +867,7 @@
       }
     }
 
-    function copyResetLink(username) {
-      const url = `${window.location.origin}/admin.html?reset_user=${username}`;
-      navigator.clipboard.writeText(url);
-      alert(`Direct Password Reset link for ${username} copied to clipboard!`);
-    }
-
-    // 8. STORE SETTINGS (Image 2 Fix: 3 Phone Numbers)
+    // STORE SETTINGS
     async function loadStoreSettings() {
       const { data } = await window.db.from('store_settings').select('*').eq('id', 1).single();
       if (data) {
@@ -1032,25 +896,19 @@
         id: 1,
         store_name,
         whatsapp_number,
-        display_phone: phone_1, // Default fallback
-        phone_1,
-        phone_2,
-        phone_3,
+        display_phone: phone_1,
+        phone_1, phone_2, phone_3,
         shop_address
       });
 
-      if (error) {
-        alert('Error saving settings: ' + error.message);
-      } else {
-        alert('Store settings saved successfully! All 3 contact numbers are updated.');
-      }
+      if (error) alert('Error saving settings: ' + error.message);
+      else alert('Store settings saved successfully!');
+
       btn.innerText = 'Save Store Settings';
       btn.disabled = false;
     }
 
-   // Initialize session check
     checkSession();
   </script>
 </body>
 </html>
-          
