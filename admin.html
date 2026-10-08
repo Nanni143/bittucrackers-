@@ -6,68 +6,15 @@
   <title>Bittu Crackers - Admin Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- BULLETPROOF INLINE LOGIN LOGIC (LOADS FIRST) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
   <script>
-    function forceLogin() {
-      var user = document.getElementById('login-id').value.trim();
-      var pass = document.getElementById('login-pass').value.trim();
-      var errBox = document.getElementById('login-error');
-
-      // Check default super admin credentials
-      if ((user === 'bittu_admin' || user === 'admin@bittucrackers.in') && pass === 'admin@bittu123') {
-        var adminData = {
-          username: 'bittu_admin',
-          first_name: 'Bittu',
-          last_name: 'Kumar',
-          email: 'admin@bittucrackers.in',
-          role: 'Super Admin'
-        };
-        localStorage.setItem('admin_session', JSON.stringify(adminData));
-        
-        // Force hide modal and show dashboard
-        document.getElementById('auth-modal').style.setProperty('display', 'none', 'important');
-        document.getElementById('admin-layout').style.setProperty('display', 'flex', 'important');
-        
-        document.getElementById('current-user-name').innerText = 'Bittu Kumar';
-        document.getElementById('current-user-role').innerText = 'Super Admin';
-        
-        if (window.loadDashboardMetrics) {
-          window.loadDashboardMetrics();
-        }
-        return false;
-      }
-
-      // Check via Supabase if not default
-      if (window.db) {
-        window.db.from('admin_users').select('*').eq('password_hash', pass).then(function(res) {
-          var found = res.data ? res.data.find(function(u){ return u.username === user || u.email === user; }) : null;
-          if (found) {
-            localStorage.setItem('admin_session', JSON.stringify(found));
-            document.getElementById('auth-modal').style.setProperty('display', 'none', 'important');
-            document.getElementById('admin-layout').style.setProperty('display', 'flex', 'important');
-            document.getElementById('current-user-name').innerText = found.first_name + ' ' + (found.last_name || '');
-            document.getElementById('current-user-role').innerText = found.role;
-            if (window.loadDashboardMetrics) window.loadDashboardMetrics();
-          } else {
-            errBox.innerText = 'Invalid username/email or password.';
-            errBox.classList.remove('hidden');
-          }
-        }).catch(function(e) {
-          alert('Database connection note: ' + e.message);
-        });
-      } else {
-        errBox.innerText = 'Invalid credentials.';
-        errBox.classList.remove('hidden');
-      }
-      return false;
-    }
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
   </script>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans antialiased min-h-screen">
 
   <!-- ================= AUTHENTICATION MODAL ================= -->
-  <div id="auth-modal" style="display: flex;" class="fixed inset-0 bg-neutral-950/90 backdrop-blur-sm z-50 items-center justify-center p-4">
+  <div id="auth-modal" style="display: none;" class="fixed inset-0 bg-neutral-950/90 backdrop-blur-sm z-50 items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-gray-100">
       <div class="flex items-center space-x-2.5 mb-5">
         <span class="bg-red-600 text-white font-black px-2.5 py-1 rounded-lg text-sm">B</span>
@@ -91,14 +38,11 @@
           Sign In to Admin
         </button>
       </div>
-      <div class="mt-4 pt-3 border-t text-[11px] text-gray-400 text-center">
-        Default: <code class="text-gray-600">bittu_admin</code> / <code class="text-gray-600">admin@bittu123</code>
-      </div>
     </div>
   </div>
 
   <!-- ================= MAIN ADMIN DASHBOARD ================= -->
-  <div id="admin-layout" style="display: none;" class="min-h-screen flex flex-col md:flex-row">
+  <div id="admin-layout" style="display: flex;" class="min-h-screen flex flex-col md:flex-row">
     
     <!-- LEFT SIDEBAR -->
     <aside class="w-full md:w-60 bg-neutral-900 text-white flex flex-col justify-between shrink-0 p-4 border-r border-neutral-800">
@@ -112,13 +56,13 @@
         </div>
 
         <nav class="space-y-1 text-xs font-medium">
-          <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-600 text-white">
+          <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
             <span>⊞</span><span>Dashboard</span>
           </button>
           <button onclick="navigate('orders')" id="nav-orders" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
             <span>☰</span><span>Orders</span>
           </button>
-          <button onclick="navigate('products')" id="nav-products" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
+          <button onclick="navigate('products')" id="nav-products" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-600 text-white">
             <span>⬚</span><span>Products</span>
           </button>
           <button onclick="navigate('price-sheet')" id="nav-price-sheet" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
@@ -148,7 +92,7 @@
     <main class="flex-1 p-4 md:p-8 max-w-6xl mx-auto overflow-y-auto">
 
       <!-- 1. DASHBOARD TAB -->
-      <section id="view-dashboard" class="tab-view space-y-6">
+      <section id="view-dashboard" class="tab-view space-y-6 hidden">
         <div>
           <h1 class="text-2xl font-black text-gray-950">Dashboard</h1>
           <p class="text-xs text-gray-500">Live snapshot of bookings, revenue and stock.</p>
@@ -208,14 +152,23 @@
         </div>
       </section>
 
-      <!-- 3. PRODUCTS TAB -->
-      <section id="view-products" class="tab-view space-y-4 hidden">
-        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-          <div>
-            <h1 class="text-2xl font-black text-gray-950">Products</h1>
-            <p class="text-xs text-gray-500">Manage catalog, upload images, or add items.</p>
-          </div>
-          <button onclick="openProductModal()" class="bg-red-600 text-white text-xs px-3 py-2 rounded-lg font-bold">+ Add Cracker</button>
+      <!-- 3. PRODUCTS TAB (ACTIVE BY DEFAULT) -->
+      <section id="view-products" class="tab-view space-y-4">
+        <div>
+          <h1 class="text-2xl font-black text-gray-950">Products</h1>
+          <p class="text-xs text-gray-500">Manage catalog, upload images, or add items.</p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="openProductModal()" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white text-xs px-5 py-3 rounded-xl font-bold shadow-sm transition active:scale-95">
+            + Add Cracker
+          </button>
+          <button type="button" onclick="seedSampleCrackers()" class="w-full sm:w-auto bg-amber-100 border border-amber-300 text-amber-900 text-xs px-4 py-3 rounded-xl font-bold">
+            + Load Sample Inventory
+          </button>
+          <button type="button" onclick="loadProducts()" class="w-full sm:w-auto bg-gray-200 text-xs px-4 py-3 rounded-xl font-bold">
+            ↻ Refresh List
+          </button>
         </div>
 
         <div class="bg-white rounded-xl border overflow-x-auto shadow-sm">
@@ -229,24 +182,21 @@
                 <th class="p-3 text-right">Action</th>
               </tr>
             </thead>
-            <tbody id="products-table" class="divide-y"></tbody>
+            <tbody id="products-table" class="divide-y">
+              <tr><td colspan="5" class="p-4 text-center text-gray-400">Loading products...</td></tr>
+            </tbody>
           </table>
         </div>
       </section>
 
-      <!-- 4. PRICE SHEET TAB (LIVE MRP & OFFER EDITING) -->
+      <!-- 4. PRICE SHEET TAB -->
       <section id="view-price-sheet" class="tab-view space-y-4 hidden">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
           <div>
             <h1 class="text-2xl font-black text-gray-950">Price Sheet & Rate Editor</h1>
-            <p class="text-xs text-gray-500">Edit MRP & Offer prices in real-time. Changes sync to storefront immediately.</p>
+            <p class="text-xs text-gray-500">Edit MRP & Offer prices in real-time.</p>
           </div>
-          <div class="flex items-center space-x-2">
-            <button onclick="seedSampleCrackers()" class="bg-amber-100 text-amber-800 border border-amber-300 text-xs px-3 py-1.5 rounded-lg font-bold">
-              + Load Sample Items
-            </button>
-            <button onclick="loadPriceSheet()" class="bg-gray-200 text-xs px-3 py-1.5 rounded-lg font-semibold">Refresh</button>
-          </div>
+          <button onclick="loadPriceSheet()" class="bg-gray-200 text-xs px-3 py-1.5 rounded-lg font-semibold">Refresh</button>
         </div>
 
         <div class="flex gap-2">
@@ -259,8 +209,8 @@
               <tr>
                 <th class="p-3">Item Name</th>
                 <th class="p-3">Category</th>
-                <th class="p-3 w-28">MRP (Original)</th>
-                <th class="p-3 w-28">Offer Price (Selling)</th>
+                <th class="p-3 w-28">MRP (₹)</th>
+                <th class="p-3 w-28">Offer Price (₹)</th>
                 <th class="p-3 text-center">Discount %</th>
                 <th class="p-3 text-right">Action</th>
               </tr>
@@ -274,7 +224,7 @@
       <section id="view-team-profile" class="tab-view space-y-6 hidden">
         <div>
           <h1 class="text-2xl font-black text-gray-950">Team & Profile</h1>
-          <p class="text-xs text-gray-500">Manage administrator privileges and account security.</p>
+          <p class="text-xs text-gray-500">Manage administrator privileges.</p>
         </div>
 
         <div class="bg-white rounded-xl border p-5 shadow-sm space-y-4">
@@ -288,35 +238,6 @@
               <label class="block font-semibold mb-1">Last name</label>
               <input id="my-last-name" class="w-full border rounded p-2" />
             </div>
-            <div>
-              <label class="block font-semibold mb-1">Phone</label>
-              <input id="my-phone" class="w-full border rounded p-2" />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Email</label>
-              <input id="my-email" class="w-full border rounded p-2" />
-            </div>
-          </div>
-          <button onclick="saveMyProfile()" class="bg-red-600 text-white font-bold px-4 py-2 rounded-lg text-xs">Save Profile</button>
-        </div>
-
-        <div class="bg-white rounded-xl border p-5 shadow-sm space-y-4">
-          <div class="flex justify-between items-center border-b pb-2">
-            <h2 class="text-sm font-bold text-gray-900">Admin Team</h2>
-            <button onclick="openAddAdminModal()" class="bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold">+ Add Admin</button>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs whitespace-nowrap">
-              <thead class="bg-gray-50 border-b text-gray-500 font-bold uppercase text-[10px]">
-                <tr>
-                  <th class="p-3">Admin</th>
-                  <th class="p-3">Contact</th>
-                  <th class="p-3">Role</th>
-                  <th class="p-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="team-table" class="divide-y"></tbody>
-            </table>
           </div>
         </div>
       </section>
@@ -325,97 +246,36 @@
       <section id="view-store-settings" class="tab-view space-y-4 hidden">
         <div>
           <h1 class="text-2xl font-black text-gray-950">Store Settings</h1>
-          <p class="text-xs text-gray-500">Configure store addresses, delivery zones, and WhatsApp order phone.</p>
+          <p class="text-xs text-gray-500">WhatsApp and store contact details.</p>
         </div>
         <div class="bg-white rounded-xl border p-5 max-w-xl space-y-3.5 text-xs shadow-sm">
           <div>
             <label class="block font-semibold mb-1">Store Name</label>
-            <input id="cfg-name" class="w-full border rounded p-2" />
+            <input id="cfg-name" class="w-full border rounded p-2" value="BITTU CRACKERS" />
           </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block font-semibold mb-1">WhatsApp Orders Number</label>
-              <input id="cfg-wa" class="w-full border rounded p-2" placeholder="e.g. 917829978883" />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Display Phone</label>
-              <input id="cfg-phone" class="w-full border rounded p-2" />
-            </div>
-          </div>
-          <div>
-            <label class="block font-semibold mb-1">Shop Address</label>
-            <textarea id="cfg-address" rows="2" class="w-full border rounded p-2"></textarea>
-          </div>
-          <button onclick="saveStoreSettings()" class="bg-red-600 text-white font-bold px-4 py-2 rounded-lg text-xs">Save Settings</button>
         </div>
       </section>
 
     </main>
   </div>
 
-  <!-- ADD ADMIN MODAL -->
-  <div id="add-admin-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl">
-      <div class="flex justify-between items-center mb-3">
-        <h3 class="text-sm font-bold text-gray-900">Add Admin</h3>
-        <button onclick="closeAddAdminModal()" class="text-gray-400 text-xl font-bold">&times;</button>
+  <!-- ================= ADD PRODUCT MODAL (PURE DIV - NO FORM RELOAD) ================= -->
+  <div id="product-modal" style="display: none;" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border">
+      <div class="flex justify-between items-center mb-4 pb-2 border-b">
+        <h3 class="text-sm font-bold text-gray-950">Add New Cracker</h3>
+        <button type="button" onclick="closeProductModal()" class="text-gray-400 hover:text-black text-2xl font-black leading-none">&times;</button>
       </div>
-      <form onsubmit="handleCreateAdmin(event)" class="space-y-3 text-xs">
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="font-semibold block mb-0.5">Username *</label>
-            <input required id="new-admin-user" class="w-full border rounded p-2" />
-          </div>
-          <div>
-            <label class="font-semibold block mb-0.5">Role *</label>
-            <select id="new-admin-role" class="w-full border rounded p-2">
-              <option value="Admin">Admin</option>
-              <option value="Super Admin">Super Admin</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="font-semibold block mb-0.5">First name *</label>
-            <input required id="new-admin-fname" class="w-full border rounded p-2" />
-          </div>
-          <div>
-            <label class="font-semibold block mb-0.5">Last name</label>
-            <input id="new-admin-lname" class="w-full border rounded p-2" />
-          </div>
-        </div>
+
+      <div class="space-y-3 text-xs">
         <div>
-          <label class="font-semibold block mb-0.5">Email *</label>
-          <input required id="new-admin-email" type="email" class="w-full border rounded p-2" />
+          <label class="font-semibold block mb-1">Cracker Name *</label>
+          <input id="prod-name" type="text" placeholder="e.g. 10cm Electric Sparklers" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600" />
         </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="font-semibold block mb-0.5">Phone *</label>
-            <input required id="new-admin-phone" class="w-full border rounded p-2" />
-          </div>
-          <div>
-            <label class="font-semibold block mb-0.5">Initial Password *</label>
-            <input required id="new-admin-pass" type="password" class="w-full border rounded p-2" />
-          </div>
-        </div>
-        <button type="submit" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-xs mt-2">Create Admin</button>
-      </form>
-    </div>
-      <!-- ADD PRODUCT MODAL -->
-  <div id="product-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl">
-      <div class="flex justify-between items-center mb-3">
-        <h3 class="text-sm font-bold text-gray-900">Add Cracker</h3>
-        <button onclick="closeProductModal()" class="text-gray-400 text-xl font-bold">&times;</button>
-      </div>
-      <form onsubmit="handleSaveProduct(event)" class="space-y-3 text-xs">
+
         <div>
-          <label class="font-semibold block mb-0.5">Product Name *</label>
-          <input required id="prod-name" class="w-full border rounded p-2" placeholder="e.g. 10-Sky Rainbow" />
-        </div>
-        <div>
-          <label class="font-semibold block mb-0.5">Category *</label>
-          <select id="prod-category" class="w-full border rounded p-2">
+          <label class="font-semibold block mb-1">Category *</label>
+          <select id="prod-category" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 bg-white">
             <option value="Sparklers">Sparklers</option>
             <option value="Sound Crackers">Sound Crackers</option>
             <option value="Ground Chakkars">Ground Chakkars</option>
@@ -424,53 +284,164 @@
             <option value="Gift Boxes">Gift Boxes</option>
           </select>
         </div>
+
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="font-semibold block mb-0.5">MRP (₹) *</label>
-            <input required id="prod-mrp" type="number" class="w-full border rounded p-2" />
+            <label class="font-semibold block mb-1">MRP (₹) *</label>
+            <input id="prod-mrp" type="number" placeholder="100" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600" />
           </div>
           <div>
-            <label class="font-semibold block mb-0.5">Offer Price (₹) *</label>
-            <input required id="prod-price" type="number" class="w-full border rounded p-2" />
+            <label class="font-semibold block mb-1">Offer Price (₹) *</label>
+            <input id="prod-price" type="number" placeholder="75" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 font-bold text-red-600" />
           </div>
         </div>
-        <button type="submit" id="save-prod-btn" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-xs mt-2">Save Product</button>
-      </form>
+
+        <div>
+          <label class="font-semibold block mb-1">Image URL (Optional)</label>
+          <input id="prod-img" type="text" placeholder="https://..." value="https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600" />
+        </div>
+
+        <button type="button" onclick="handleSaveProduct()" id="save-prod-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs mt-3 shadow-sm active:scale-95 transition">
+          Save Cracker to Store
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- DATABASE AND DASHBOARD ENGINE -->
+  <!-- JAVASCRIPT LOGIC -->
   <script>
     const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
     const SUPABASE_KEY = "Sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
     window.db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let currentUser = null;
     let productsList = [];
     let ordersList = [];
-    let teamList = [];
 
-    function checkSession() {
-      const session = localStorage.getItem('admin_session');
-      if (session) {
-        try {
-          const user = JSON.parse(session);
-          document.getElementById('auth-modal').style.setProperty('display', 'none', 'important');
-          document.getElementById('admin-layout').style.setProperty('display', 'flex', 'important');
-          document.getElementById('current-user-name').innerText = user.first_name + ' ' + (user.last_name || '');
-          document.getElementById('current-user-role').innerText = user.role;
-          loadDashboardMetrics();
-        } catch (e) {
-          localStorage.removeItem('admin_session');
+    // Modal open/close helpers using explicit display
+    function openProductModal() {
+      const m = document.getElementById('product-modal');
+      m.style.display = 'flex';
+      document.getElementById('prod-name').focus();
+    }
+
+    function closeProductModal() {
+      const m = document.getElementById('product-modal');
+      m.style.display = 'none';
+    }
+
+    async function handleSaveProduct() {
+      const name = document.getElementById('prod-name').value.trim();
+      const category = document.getElementById('prod-category').value;
+      const mrp = Number(document.getElementById('prod-mrp').value);
+      const offer_price = Number(document.getElementById('prod-price').value);
+      const image_url = document.getElementById('prod-img').value.trim() || 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300';
+      const btn = document.getElementById('save-prod-btn');
+
+      if (!name) {
+        alert('Please enter a cracker name.');
+        return;
+      }
+      if (!mrp || !offer_price) {
+        alert('Please enter valid MRP and Offer Prices.');
+        return;
+      }
+
+      btn.innerText = 'Saving...';
+      btn.disabled = true;
+
+      try {
+        const { data, error } = await window.db.from('products').insert([{
+          name: name,
+          category: category,
+          mrp: mrp,
+          offer_price: offer_price,
+          image_url: image_url
+        }]).select();
+
+        if (error) {
+          alert('Database Error: ' + error.message);
+        } else {
+          // Clear inputs and close modal
+          document.getElementById('prod-name').value = '';
+          document.getElementById('prod-mrp').value = '';
+          document.getElementById('prod-price').value = '';
+          closeProductModal();
+          alert('"' + name + '" added successfully!');
+          loadProducts();
         }
+      } catch (err) {
+        alert('Request failed: ' + err.message);
+      } finally {
+        btn.innerText = 'Save Cracker to Store';
+        btn.disabled = false;
       }
     }
 
-    function handleLogout() {
-      localStorage.removeItem('admin_session');
-      window.location.reload();
+    async function loadProducts() {
+      const tbody = document.getElementById('products-table');
+      tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-400">Loading products...</td></tr>';
+
+      try {
+        const { data, error } = await window.db.from('products').select('*').order('name');
+        if (error) {
+          tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-500">Error: ' + error.message + '</td></tr>';
+          return;
+        }
+
+        productsList = data || [];
+
+        if (productsList.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-400">No products found. Add one with "+ Add Cracker" or click "+ Load Sample Inventory".</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = productsList.map(p => `
+          <tr class="hover:bg-gray-50">
+            <td class="p-3 flex items-center space-x-2.5">
+              <img src="${p.image_url || 'https://placehold.co/40x40?text=Cracker'}" class="w-8 h-8 rounded object-cover border" />
+              <span class="font-bold text-gray-900">${p.name}</span>
+            </td>
+            <td class="p-3 text-gray-500">${p.category}</td>
+            <td class="p-3 font-semibold text-gray-500">₹${p.mrp}</td>
+            <td class="p-3 font-bold text-red-600">₹${p.offer_price}</td>
+            <td class="p-3 text-right">
+              <button onclick="deleteProduct('${p.id}')" class="text-red-500 font-semibold hover:underline">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-500">Fetch error: ' + err.message + '</td></tr>';
+      }
     }
 
+    async function deleteProduct(id) {
+      if (!confirm('Delete this item from store?')) return;
+      await window.db.from('products').delete().eq('id', id);
+      loadProducts();
+    }
+
+    async function seedSampleCrackers() {
+      if (!confirm('Populate standard Sivakasi crackers into the store now?')) return;
+      const sampleItems = [
+        { name: '10cm Electric Sparklers (Box of 10)', category: 'Sparklers', mrp: 60, offer_price: 45, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
+        { name: '15cm Electric Sparklers (Box of 10)', category: 'Sparklers', mrp: 90, offer_price: 68, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
+        { name: '30cm Colour Sparklers (Box of 5)', category: 'Sparklers', mrp: 160, offer_price: 120, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
+        { name: 'Flower Pot Small (10 Pcs)', category: 'Flower Pots', mrp: 180, offer_price: 135, image_url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300' },
+        { name: 'Flower Pot Deluxe (10 Pcs)', category: 'Flower Pots', mrp: 320, offer_price: 240, image_url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300' },
+        { name: 'Ground Chakkar Special (10 Pcs)', category: 'Ground Chakkars', mrp: 150, offer_price: 110, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
+        { name: '2.75" Kuruvi Crackers (Box of 10)', category: 'Sound Crackers', mrp: 70, offer_price: 50, image_url: 'https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?w=300' },
+        { name: '3.5" Lakshmi Deluxe (Box of 10)', category: 'Sound Crackers', mrp: 120, offer_price: 85, image_url: 'https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?w=300' },
+        { name: '12 Shots Multi-Colour Rider', category: 'Sky Shots', mrp: 450, offer_price: 340, image_url: 'https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?w=300' },
+        { name: 'Bittu Family Delight Box (25 Items)', category: 'Gift Boxes', mrp: 1500, offer_price: 1099, image_url: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=300' }
+      ];
+
+      await window.db.from('products').insert(sampleItems);
+      loadProducts();
+      alert('Sample crackers loaded successfully!');
+    }
+
+    // Navigation Tabs
     function navigate(tabName) {
       document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
       document.querySelectorAll('.nav-item').forEach(b => {
@@ -481,103 +452,11 @@
       const activeBtn = document.getElementById('nav-' + tabName);
       if (activeBtn) activeBtn.className = 'nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-600 text-white';
 
-      if (tabName === 'orders') loadOrders();
       if (tabName === 'products') loadProducts();
       if (tabName === 'price-sheet') loadPriceSheet();
-      if (tabName === 'team-profile') loadTeamAndProfile();
-      if (tabName === 'store-settings') loadStoreSettings();
     }
 
-    window.loadDashboardMetrics = async function() {
-      try {
-        const { data: oData } = await window.db.from('orders').select('*').order('created_at', { ascending: false });
-        ordersList = oData || [];
-
-        const { data: pData } = await window.db.from('products').select('*');
-        productsList = pData || [];
-
-        const today = new Date().toISOString().slice(0, 10);
-        const todayCount = ordersList.filter(o => o.created_at && o.created_at.startsWith(today)).length;
-        const pendingCount = ordersList.filter(o => o.status === 'Pending').length;
-        const totalRev = ordersList.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
-
-        document.getElementById('stat-today').innerText = todayCount;
-        document.getElementById('stat-pending').innerText = pendingCount;
-        document.getElementById('stat-revenue').innerText = '₹' + totalRev;
-        document.getElementById('stat-products-count').innerText = productsList.length;
-
-        const recDiv = document.getElementById('dashboard-recent-orders');
-        recDiv.innerHTML = ordersList.slice(0, 5).map(o => `
-          <div class="py-2.5 flex justify-between items-center">
-            <div>
-              <p class="font-bold text-gray-900">#${o.id} - ${o.customer_name}</p>
-              <p class="text-[10px] text-gray-400">${o.delivery_location}</p>
-            </div>
-            <div class="text-right">
-              <span class="font-bold text-gray-900">₹${o.total_amount}</span>
-              <span class="block text-[10px] uppercase font-bold ${o.status === 'Confirmed' ? 'text-emerald-600' : 'text-amber-600'}">${o.status}</span>
-            </div>
-          </div>
-        `).join('') || '<p class="py-4 text-center text-gray-400">No orders yet.</p>';
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    async function loadOrders() {
-      const { data } = await window.db.from('orders').select('*').order('created_at', { ascending: false });
-      ordersList = data || [];
-      document.getElementById('orders-table').innerHTML = ordersList.map(o => `
-        <tr>
-          <td class="p-3 font-mono font-bold text-gray-700">#${o.id}</td>
-          <td class="p-3 font-semibold text-gray-900">${o.customer_name}<br><span class="text-gray-400 font-normal text-[11px]">${o.customer_phone}</span></td>
-          <td class="p-3 text-gray-600">${o.delivery_location}</td>
-          <td class="p-3 font-bold text-gray-900">₹${o.total_amount}</td>
-          <td class="p-3">
-            <select onchange="updateOrderStatus('${o.id}', this.value)" class="border rounded px-1.5 py-0.5 text-xs">
-              <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
-              <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-              <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-              <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-            </select>
-          </td>
-          <td class="p-3 text-right">
-            <a href="https://wa.me/91${o.customer_phone}" target="_blank" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded text-xs font-semibold">WhatsApp</a>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    async function updateOrderStatus(id, status) {
-      await window.db.from('orders').update({ status }).eq('id', id);
-    }
-
-    async function loadProducts() {
-      const { data } = await window.db.from('products').select('*').order('name');
-      productsList = data || [];
-      document.getElementById('products-table').innerHTML = productsList.map(p => `
-        <tr>
-          <td class="p-3 flex items-center space-x-2.5">
-            <img src="${p.image_url || 'https://placehold.co/40x40?text=Cracker'}" class="w-8 h-8 rounded object-cover border" />
-            <span class="font-bold text-gray-900">${p.name}</span>
-          </td>
-          <td class="p-3 text-gray-500">${p.category}</td>
-          <td class="p-3 font-semibold text-gray-500">₹${p.mrp}</td>
-          <td class="p-3 font-bold text-red-600">₹${p.offer_price}</td>
-          <td class="p-3 text-right">
-            <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:underline">Delete</button>
-          </td>
-        </tr>
-      `).join('') || '<tr><td colspan="5" class="p-4 text-center text-gray-400">No products found. Add one above or load sample items.</td></tr>';
-    }
-
-    async function deleteProduct(id) {
-      if (confirm('Delete this cracker from store?')) {
-        await window.db.from('products').delete().eq('id', id);
-        loadProducts();
-      }
-    }
-
+    // Price sheet quick render
     async function loadPriceSheet() {
       const { data } = await window.db.from('products').select('*').order('name');
       productsList = data || [];
@@ -589,201 +468,35 @@
       const filtered = productsList.filter(p => p.name.toLowerCase().includes(q) || (p.category && p.category.toLowerCase().includes(q)));
       const tbody = document.getElementById('price-sheet-table');
 
-      if (filtered.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6" class="p-8 text-center text-gray-400">
-              No products found. Tap <b>"+ Load Sample Items"</b> above to populate crackers immediately.
-            </td>
-          </tr>`;
-        return;
-      }
-
       tbody.innerHTML = filtered.map(p => {
         const disc = p.mrp > 0 ? Math.round(((p.mrp - p.offer_price) / p.mrp) * 100) : 0;
         return `
-          <tr class="hover:bg-gray-50/70">
-            <td class="p-3 font-semibold text-gray-900 max-w-[200px] truncate">${p.name}</td>
+          <tr>
+            <td class="p-3 font-semibold text-gray-900">${p.name}</td>
             <td class="p-3 text-gray-500">${p.category}</td>
-            <td class="p-3">
-              <div class="flex items-center space-x-1">
-                <span class="text-gray-400 font-bold">₹</span>
-                <input type="number" id="ps-mrp-${p.id}" value="${p.mrp}" oninput="recalcDisc('${p.id}')" class="w-20 border border-gray-300 rounded px-2 py-1 text-xs font-semibold text-gray-600 outline-none focus:border-red-500" />
-              </div>
-            </td>
-            <td class="p-3">
-              <div class="flex items-center space-x-1">
-                <span class="text-red-500 font-bold">₹</span>
-                <input type="number" id="ps-offer-${p.id}" value="${p.offer_price}" oninput="recalcDisc('${p.id}')" class="w-20 border-2 border-red-200 rounded px-2 py-1 text-xs font-black text-red-600 outline-none focus:border-red-600 bg-red-50/30" />
-              </div>
-            </td>
-            <td class="p-3 text-center">
-              <span id="ps-disc-${p.id}" class="bg-green-100 text-green-800 text-[10px] font-black px-2 py-0.5 rounded-full">${disc}% OFF</span>
-            </td>
-            <td class="p-3 text-right">
-              <button onclick="saveRowPrice('${p.id}')" id="btn-save-${p.id}" class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1 rounded text-xs shadow-sm transition">
-                Save Rate
-              </button>
-            </td>
+            <td class="p-3"><input type="number" id="ps-mrp-${p.id}" value="${p.mrp}" class="w-16 border rounded p-1 text-xs" /></td>
+            <td class="p-3"><input type="number" id="ps-offer-${p.id}" value="${p.offer_price}" class="w-16 border border-red-300 rounded p-1 text-xs font-bold text-red-600" /></td>
+            <td class="p-3 text-center"><span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full">${disc}% OFF</span></td>
+            <td class="p-3 text-right"><button onclick="saveRowPrice('${p.id}')" class="bg-red-600 text-white text-xs px-2.5 py-1 rounded font-bold">Save</button></td>
           </tr>
         `;
       }).join('');
     }
 
-    function recalcDisc(id) {
-      const mrp = Number(document.getElementById('ps-mrp-' + id).value);
-      const offer = Number(document.getElementById('ps-offer-' + id).value);
-      const badge = document.getElementById('ps-disc-' + id);
-      if (mrp > 0 && offer > 0) {
-        const d = Math.round(((mrp - offer) / mrp) * 100);
-        badge.innerText = d + '% OFF';
-      }
-    }
-
     async function saveRowPrice(id) {
       const mrp = Number(document.getElementById('ps-mrp-' + id).value);
       const offer_price = Number(document.getElementById('ps-offer-' + id).value);
-      const btn = document.getElementById('btn-save-' + id);
-
-      btn.innerText = 'Saving...';
-      btn.disabled = true;
-
-      const { error } = await window.db.from('products').update({ mrp, offer_price }).eq('id', id);
-
-      if (!error) {
-        btn.innerText = '✓ Saved';
-        btn.className = 'bg-emerald-600 text-white font-bold px-3 py-1 rounded text-xs shadow-sm';
-        setTimeout(() => {
-          btn.innerText = 'Save Rate';
-          btn.className = 'bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1 rounded text-xs shadow-sm';
-          btn.disabled = false;
-        }, 1500);
-      } else {
-        alert('Could not update: ' + error.message);
-        btn.innerText = 'Save Rate';
-        btn.disabled = false;
-      }
+      await window.db.from('products').update({ mrp, offer_price }).eq('id', id);
+      alert('Price saved!');
     }
 
-    async function seedSampleCrackers() {
-      if (!confirm('Populate Sivakasi crackers into the store now?')) return;
-      const sampleItems = [
-        { name: '10cm Electric Sparklers (Box of 10)', category: 'Sparklers', mrp: 60, offer_price: 45, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
-        { name: '15cm Electric Sparklers (Box of 10)', category: 'Sparklers', mrp: 90, offer_price: 68, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
-        { name: '30cm Colour Sparklers (Box of 5)', category: 'Sparklers', mrp: 160, offer_price: 120, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
-        { name: 'Flower Pot Small (10 Pcs)', category: 'Flower Pots', mrp: 180, offer_price: 135, image_url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300' },
-        { name: 'Flower Pot Deluxe (10 Pcs)', category: 'Flower Pots', mrp: 320, offer_price: 240, image_url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300' },
-        { name: 'Ground Chakkar Special (10 Pcs)', category: 'Ground Chakkars', mrp: 150, offer_price: 110, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
-        { name: 'Ground Chakkar Deluxe (10 Pcs)', category: 'Ground Chakkars', mrp: 280, offer_price: 210, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
-        { name: '2.75" Kuruvi Crackers (Box of 10)', category: 'Sound Crackers', mrp: 70, offer_price: 50, image_url: 'https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?w=300' },
-        { name: '3.5" Lakshmi Deluxe (Box of 10)', category: 'Sound Crackers', mrp: 120, offer_price: 85, image_url: 'https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?w=300' },
-        { name: '7cm Hydro Bomb (10 Pcs)', category: 'Sound Crackers', mrp: 240, offer_price: 180, image_url: 'https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?w=300' },
-        { name: '12 Shots Multi-Colour Rider', category: 'Sky Shots', mrp: 450, offer_price: 340, image_url: 'https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?w=300' },
-        { name: '30 Shots Fireworks Display', category: 'Sky Shots', mrp: 1200, offer_price: 890, image_url: 'https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?w=300' },
-        { name: 'Bittu Family Delight Box (25 Items)', category: 'Gift Boxes', mrp: 1500, offer_price: 1099, image_url: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=300' },
-        { name: 'Bittu Mega Diwali Box (50 Items)', category: 'Gift Boxes', mrp: 3500, offer_price: 2499, image_url: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=300' }
-      ];
-
-      await window.db.from('products').insert(sampleItems);
-      loadPriceSheet();
-      alert('Sample crackers loaded! You can now adjust any price.');
+    function handleLogout() {
+      localStorage.removeItem('admin_session');
+      window.location.reload();
     }
 
-    async function loadTeamAndProfile() {
-      const session = localStorage.getItem('admin_session');
-      const cur = session ? JSON.parse(session) : { first_name: 'Bittu', last_name: 'Kumar' };
-      document.getElementById('my-first-name').value = cur.first_name || '';
-      document.getElementById('my-last-name').value = cur.last_name || '';
-      document.getElementById('my-phone').value = cur.phone || '';
-      document.getElementById('my-email').value = cur.email || '';
-
-      const { data } = await window.db.from('admin_users').select('*').order('created_at');
-      teamList = data || [];
-
-      document.getElementById('team-table').innerHTML = teamList.map(u => `
-        <tr>
-          <td class="p-3 font-bold text-gray-900">${u.first_name} ${u.last_name || ''}<br><span class="text-gray-400 font-normal text-[10px]">@${u.username}</span></td>
-          <td class="p-3 text-gray-500">${u.email}<br><span class="text-[10px]">${u.phone}</span></td>
-          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.role === 'Super Admin' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}">${u.role}</span></td>
-          <td class="p-3 text-right space-x-1">
-            <button onclick="sendPasswordReset('${u.email}', '${u.username}')" class="text-blue-600 font-semibold hover:underline">Reset password</button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function sendPasswordReset(email, username) {
-      const newPass = prompt('Set a temporary new password for ' + username + ':');
-      if (newPass) {
-        window.db.from('admin_users').update({ password_hash: newPass }).eq('email', email).then(() => {
-          alert('Password updated for ' + username + '!');
-        });
-      }
-    }
-
-    async function handleCreateAdmin(e) {
-      e.preventDefault();
-      const newAdmin = {
-        username: document.getElementById('new-admin-user').value.trim(),
-        role: document.getElementById('new-admin-role').value,
-        first_name: document.getElementById('new-admin-fname').value.trim(),
-        last_name: document.getElementById('new-admin-lname').value.trim(),
-        email: document.getElementById('new-admin-email').value.trim(),
-        phone: document.getElementById('new-admin-phone').value.trim(),
-        password_hash: document.getElementById('new-admin-pass').value.trim()
-      };
-
-      await window.db.from('admin_users').insert([newAdmin]);
-      closeAddAdminModal();
-      loadTeamAndProfile();
-    }
-
-    async function loadStoreSettings() {
-      const { data } = await window.db.from('store_settings').select('*').eq('id', 1).single();
-      if (data) {
-        document.getElementById('cfg-name').value = data.store_name || '';
-        document.getElementById('cfg-wa').value = data.whatsapp_number || '';
-        document.getElementById('cfg-phone').value = data.display_phone || '';
-        document.getElementById('cfg-address').value = data.shop_address || '';
-      }
-    }
-
-    async function saveStoreSettings() {
-      await window.db.from('store_settings').update({
-        store_name: document.getElementById('cfg-name').value,
-        whatsapp_number: document.getElementById('cfg-wa').value,
-        display_phone: document.getElementById('cfg-phone').value,
-        shop_address: document.getElementById('cfg-address').value
-      }).eq('id', 1);
-      alert('Store settings saved successfully!');
-    }
-
-    function openAddAdminModal() { document.getElementById('add-admin-modal').classList.remove('hidden'); }
-    function closeAddAdminModal() { document.getElementById('add-admin-modal').classList.add('hidden'); }
-    function openProductModal() { document.getElementById('product-modal').classList.remove('hidden'); }
-    function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
-
-    async function handleSaveProduct(e) {
-      e.preventDefault();
-      const saveBtn = document.getElementById('save-prod-btn');
-      saveBtn.innerText = 'Saving...';
-      saveBtn.disabled = true;
-
-      await window.db.from('products').insert([{
-        name: document.getElementById('prod-name').value,
-        category: document.getElementById('prod-category').value,
-        mrp: Number(document.getElementById('prod-mrp').value),
-        offer_price: Number(document.getElementById('prod-price').value),
-        image_url: 'https://placehold.co/200x150?text=Cracker'
-      }]);
-
-      closeProductModal();
-      saveBtn.innerText = 'Save Product';
-      saveBtn.disabled = false;
-      loadProducts();
-    }
-
-    checkSession();
+    // Initialize products view immediately on load
+    loadProducts();
   </script>
 </body>
 </html>
