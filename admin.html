@@ -6,9 +6,62 @@
   <title>Bittu Crackers - Admin Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+
+  <!-- BULLETPROOF INLINE LOGIN LOGIC (LOADS FIRST) -->
   <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    function forceLogin() {
+      var user = document.getElementById('login-id').value.trim();
+      var pass = document.getElementById('login-pass').value.trim();
+      var errBox = document.getElementById('login-error');
+
+      // Check default super admin credentials
+      if ((user === 'bittu_admin' || user === 'admin@bittucrackers.in') && pass === 'admin@bittu123') {
+        var adminData = {
+          username: 'bittu_admin',
+          first_name: 'Bittu',
+          last_name: 'Kumar',
+          email: 'admin@bittucrackers.in',
+          role: 'Super Admin'
+        };
+        localStorage.setItem('admin_session', JSON.stringify(adminData));
+        
+        // Force hide modal and show dashboard
+        document.getElementById('auth-modal').style.setProperty('display', 'none', 'important');
+        document.getElementById('admin-layout').style.setProperty('display', 'flex', 'important');
+        
+        document.getElementById('current-user-name').innerText = 'Bittu Kumar';
+        document.getElementById('current-user-role').innerText = 'Super Admin';
+        
+        if (window.loadDashboardMetrics) {
+          window.loadDashboardMetrics();
+        }
+        return false;
+      }
+
+      // Check via Supabase if not default
+      if (window.db) {
+        window.db.from('admin_users').select('*').eq('password_hash', pass).then(function(res) {
+          var found = res.data ? res.data.find(function(u){ return u.username === user || u.email === user; }) : null;
+          if (found) {
+            localStorage.setItem('admin_session', JSON.stringify(found));
+            document.getElementById('auth-modal').style.setProperty('display', 'none', 'important');
+            document.getElementById('admin-layout').style.setProperty('display', 'flex', 'important');
+            document.getElementById('current-user-name').innerText = found.first_name + ' ' + (found.last_name || '');
+            document.getElementById('current-user-role').innerText = found.role;
+            if (window.loadDashboardMetrics) window.loadDashboardMetrics();
+          } else {
+            errBox.innerText = 'Invalid username/email or password.';
+            errBox.classList.remove('hidden');
+          }
+        }).catch(function(e) {
+          alert('Database connection note: ' + e.message);
+        });
+      } else {
+        errBox.innerText = 'Invalid credentials.';
+        errBox.classList.remove('hidden');
+      }
+      return false;
+    }
   </script>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans antialiased min-h-screen">
@@ -24,18 +77,17 @@
         </div>
       </div>
 
-      <!-- PURE DIV BLOCK - NO FORM TAG TO PREVENT PAGE RELOAD -->
       <div class="space-y-3.5 text-xs">
         <div>
           <label class="block font-semibold text-gray-700 mb-1">Username or Email</label>
-          <input id="login-id" type="text" value="bittu_admin" placeholder="bittu_admin" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 text-xs" />
+          <input id="login-id" type="text" value="bittu_admin" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 text-xs" />
         </div>
         <div>
           <label class="block font-semibold text-gray-700 mb-1">Password</label>
-          <input id="login-pass" type="password" value="admin@bittu123" placeholder="••••••••" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 text-xs" />
+          <input id="login-pass" type="password" value="admin@bittu123" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 text-xs" />
         </div>
         <p id="login-error" class="text-red-600 text-[11px] hidden font-semibold"></p>
-        <button type="button" onclick="performLogin(event)" id="login-submit-btn" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-sm hover:bg-red-700 active:scale-95 transition">
+        <button type="button" onclick="forceLogin()" id="login-submit-btn" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-sm hover:bg-red-700 active:scale-95 transition">
           Sign In to Admin
         </button>
       </div>
@@ -161,20 +213,9 @@
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
           <div>
             <h1 class="text-2xl font-black text-gray-950">Products</h1>
-            <p class="text-xs text-gray-500">Manage catalog, upload images, or import wholesale lists.</p>
+            <p class="text-xs text-gray-500">Manage catalog, upload images, or add items.</p>
           </div>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="document.getElementById('pdf-file-input').click()" class="bg-gray-800 text-white text-xs px-3 py-2 rounded-lg font-bold flex items-center space-x-1">
-              <span>📄</span><span>Import PDF</span>
-            </button>
-            <input type="file" id="pdf-file-input" accept=".pdf" class="hidden" onchange="handlePdfUpload(event)" />
-            <button onclick="openProductModal()" class="bg-red-600 text-white text-xs px-3 py-2 rounded-lg font-bold">+ Add Cracker</button>
-          </div>
-        </div>
-
-        <div id="pdf-import-alert" class="hidden bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs text-emerald-800 flex justify-between items-center">
-          <span id="pdf-import-msg">Importing products...</span>
-          <button onclick="this.parentElement.classList.add('hidden')" class="font-bold">&times;</button>
+          <button onclick="openProductModal()" class="bg-red-600 text-white text-xs px-3 py-2 rounded-lg font-bold">+ Add Cracker</button>
         </div>
 
         <div class="bg-white rounded-xl border overflow-x-auto shadow-sm">
@@ -193,7 +234,7 @@
         </div>
       </section>
 
-      <!-- 4. PRICE SHEET TAB -->
+      <!-- 4. PRICE SHEET TAB (LIVE MRP & OFFER EDITING) -->
       <section id="view-price-sheet" class="tab-view space-y-4 hidden">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
           <div>
@@ -360,9 +401,7 @@
         <button type="submit" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-xs mt-2">Create Admin</button>
       </form>
     </div>
-  </div>
-
-  <!-- ADD PRODUCT MODAL -->
+      <!-- ADD PRODUCT MODAL -->
   <div id="product-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl">
       <div class="flex justify-between items-center mb-3">
@@ -387,4 +426,364 @@
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="font-se
+            <label class="font-semibold block mb-0.5">MRP (₹) *</label>
+            <input required id="prod-mrp" type="number" class="w-full border rounded p-2" />
+          </div>
+          <div>
+            <label class="font-semibold block mb-0.5">Offer Price (₹) *</label>
+            <input required id="prod-price" type="number" class="w-full border rounded p-2" />
+          </div>
+        </div>
+        <button type="submit" id="save-prod-btn" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-xs mt-2">Save Product</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- DATABASE AND DASHBOARD ENGINE -->
+  <script>
+    const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
+    const SUPABASE_KEY = "Sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
+    window.db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUser = null;
+    let productsList = [];
+    let ordersList = [];
+    let teamList = [];
+
+    function checkSession() {
+      const session = localStorage.getItem('admin_session');
+      if (session) {
+        try {
+          const user = JSON.parse(session);
+          document.getElementById('auth-modal').style.setProperty('display', 'none', 'important');
+          document.getElementById('admin-layout').style.setProperty('display', 'flex', 'important');
+          document.getElementById('current-user-name').innerText = user.first_name + ' ' + (user.last_name || '');
+          document.getElementById('current-user-role').innerText = user.role;
+          loadDashboardMetrics();
+        } catch (e) {
+          localStorage.removeItem('admin_session');
+        }
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('admin_session');
+      window.location.reload();
+    }
+
+    function navigate(tabName) {
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+      document.querySelectorAll('.nav-item').forEach(b => {
+        b.className = 'nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white';
+      });
+
+      document.getElementById('view-' + tabName).classList.remove('hidden');
+      const activeBtn = document.getElementById('nav-' + tabName);
+      if (activeBtn) activeBtn.className = 'nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-600 text-white';
+
+      if (tabName === 'orders') loadOrders();
+      if (tabName === 'products') loadProducts();
+      if (tabName === 'price-sheet') loadPriceSheet();
+      if (tabName === 'team-profile') loadTeamAndProfile();
+      if (tabName === 'store-settings') loadStoreSettings();
+    }
+
+    window.loadDashboardMetrics = async function() {
+      try {
+        const { data: oData } = await window.db.from('orders').select('*').order('created_at', { ascending: false });
+        ordersList = oData || [];
+
+        const { data: pData } = await window.db.from('products').select('*');
+        productsList = pData || [];
+
+        const today = new Date().toISOString().slice(0, 10);
+        const todayCount = ordersList.filter(o => o.created_at && o.created_at.startsWith(today)).length;
+        const pendingCount = ordersList.filter(o => o.status === 'Pending').length;
+        const totalRev = ordersList.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+
+        document.getElementById('stat-today').innerText = todayCount;
+        document.getElementById('stat-pending').innerText = pendingCount;
+        document.getElementById('stat-revenue').innerText = '₹' + totalRev;
+        document.getElementById('stat-products-count').innerText = productsList.length;
+
+        const recDiv = document.getElementById('dashboard-recent-orders');
+        recDiv.innerHTML = ordersList.slice(0, 5).map(o => `
+          <div class="py-2.5 flex justify-between items-center">
+            <div>
+              <p class="font-bold text-gray-900">#${o.id} - ${o.customer_name}</p>
+              <p class="text-[10px] text-gray-400">${o.delivery_location}</p>
+            </div>
+            <div class="text-right">
+              <span class="font-bold text-gray-900">₹${o.total_amount}</span>
+              <span class="block text-[10px] uppercase font-bold ${o.status === 'Confirmed' ? 'text-emerald-600' : 'text-amber-600'}">${o.status}</span>
+            </div>
+          </div>
+        `).join('') || '<p class="py-4 text-center text-gray-400">No orders yet.</p>';
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    async function loadOrders() {
+      const { data } = await window.db.from('orders').select('*').order('created_at', { ascending: false });
+      ordersList = data || [];
+      document.getElementById('orders-table').innerHTML = ordersList.map(o => `
+        <tr>
+          <td class="p-3 font-mono font-bold text-gray-700">#${o.id}</td>
+          <td class="p-3 font-semibold text-gray-900">${o.customer_name}<br><span class="text-gray-400 font-normal text-[11px]">${o.customer_phone}</span></td>
+          <td class="p-3 text-gray-600">${o.delivery_location}</td>
+          <td class="p-3 font-bold text-gray-900">₹${o.total_amount}</td>
+          <td class="p-3">
+            <select onchange="updateOrderStatus('${o.id}', this.value)" class="border rounded px-1.5 py-0.5 text-xs">
+              <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+              <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+              <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+              <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </td>
+          <td class="p-3 text-right">
+            <a href="https://wa.me/91${o.customer_phone}" target="_blank" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded text-xs font-semibold">WhatsApp</a>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function updateOrderStatus(id, status) {
+      await window.db.from('orders').update({ status }).eq('id', id);
+    }
+
+    async function loadProducts() {
+      const { data } = await window.db.from('products').select('*').order('name');
+      productsList = data || [];
+      document.getElementById('products-table').innerHTML = productsList.map(p => `
+        <tr>
+          <td class="p-3 flex items-center space-x-2.5">
+            <img src="${p.image_url || 'https://placehold.co/40x40?text=Cracker'}" class="w-8 h-8 rounded object-cover border" />
+            <span class="font-bold text-gray-900">${p.name}</span>
+          </td>
+          <td class="p-3 text-gray-500">${p.category}</td>
+          <td class="p-3 font-semibold text-gray-500">₹${p.mrp}</td>
+          <td class="p-3 font-bold text-red-600">₹${p.offer_price}</td>
+          <td class="p-3 text-right">
+            <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:underline">Delete</button>
+          </td>
+        </tr>
+      `).join('') || '<tr><td colspan="5" class="p-4 text-center text-gray-400">No products found. Add one above or load sample items.</td></tr>';
+    }
+
+    async function deleteProduct(id) {
+      if (confirm('Delete this cracker from store?')) {
+        await window.db.from('products').delete().eq('id', id);
+        loadProducts();
+      }
+    }
+
+    async function loadPriceSheet() {
+      const { data } = await window.db.from('products').select('*').order('name');
+      productsList = data || [];
+      renderPriceSheetTable();
+    }
+
+    function renderPriceSheetTable() {
+      const q = (document.getElementById('price-search').value || '').toLowerCase();
+      const filtered = productsList.filter(p => p.name.toLowerCase().includes(q) || (p.category && p.category.toLowerCase().includes(q)));
+      const tbody = document.getElementById('price-sheet-table');
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="p-8 text-center text-gray-400">
+              No products found. Tap <b>"+ Load Sample Items"</b> above to populate crackers immediately.
+            </td>
+          </tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(p => {
+        const disc = p.mrp > 0 ? Math.round(((p.mrp - p.offer_price) / p.mrp) * 100) : 0;
+        return `
+          <tr class="hover:bg-gray-50/70">
+            <td class="p-3 font-semibold text-gray-900 max-w-[200px] truncate">${p.name}</td>
+            <td class="p-3 text-gray-500">${p.category}</td>
+            <td class="p-3">
+              <div class="flex items-center space-x-1">
+                <span class="text-gray-400 font-bold">₹</span>
+                <input type="number" id="ps-mrp-${p.id}" value="${p.mrp}" oninput="recalcDisc('${p.id}')" class="w-20 border border-gray-300 rounded px-2 py-1 text-xs font-semibold text-gray-600 outline-none focus:border-red-500" />
+              </div>
+            </td>
+            <td class="p-3">
+              <div class="flex items-center space-x-1">
+                <span class="text-red-500 font-bold">₹</span>
+                <input type="number" id="ps-offer-${p.id}" value="${p.offer_price}" oninput="recalcDisc('${p.id}')" class="w-20 border-2 border-red-200 rounded px-2 py-1 text-xs font-black text-red-600 outline-none focus:border-red-600 bg-red-50/30" />
+              </div>
+            </td>
+            <td class="p-3 text-center">
+              <span id="ps-disc-${p.id}" class="bg-green-100 text-green-800 text-[10px] font-black px-2 py-0.5 rounded-full">${disc}% OFF</span>
+            </td>
+            <td class="p-3 text-right">
+              <button onclick="saveRowPrice('${p.id}')" id="btn-save-${p.id}" class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1 rounded text-xs shadow-sm transition">
+                Save Rate
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function recalcDisc(id) {
+      const mrp = Number(document.getElementById('ps-mrp-' + id).value);
+      const offer = Number(document.getElementById('ps-offer-' + id).value);
+      const badge = document.getElementById('ps-disc-' + id);
+      if (mrp > 0 && offer > 0) {
+        const d = Math.round(((mrp - offer) / mrp) * 100);
+        badge.innerText = d + '% OFF';
+      }
+    }
+
+    async function saveRowPrice(id) {
+      const mrp = Number(document.getElementById('ps-mrp-' + id).value);
+      const offer_price = Number(document.getElementById('ps-offer-' + id).value);
+      const btn = document.getElementById('btn-save-' + id);
+
+      btn.innerText = 'Saving...';
+      btn.disabled = true;
+
+      const { error } = await window.db.from('products').update({ mrp, offer_price }).eq('id', id);
+
+      if (!error) {
+        btn.innerText = '✓ Saved';
+        btn.className = 'bg-emerald-600 text-white font-bold px-3 py-1 rounded text-xs shadow-sm';
+        setTimeout(() => {
+          btn.innerText = 'Save Rate';
+          btn.className = 'bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1 rounded text-xs shadow-sm';
+          btn.disabled = false;
+        }, 1500);
+      } else {
+        alert('Could not update: ' + error.message);
+        btn.innerText = 'Save Rate';
+        btn.disabled = false;
+      }
+    }
+
+    async function seedSampleCrackers() {
+      if (!confirm('Populate Sivakasi crackers into the store now?')) return;
+      const sampleItems = [
+        { name: '10cm Electric Sparklers (Box of 10)', category: 'Sparklers', mrp: 60, offer_price: 45, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
+        { name: '15cm Electric Sparklers (Box of 10)', category: 'Sparklers', mrp: 90, offer_price: 68, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
+        { name: '30cm Colour Sparklers (Box of 5)', category: 'Sparklers', mrp: 160, offer_price: 120, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
+        { name: 'Flower Pot Small (10 Pcs)', category: 'Flower Pots', mrp: 180, offer_price: 135, image_url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300' },
+        { name: 'Flower Pot Deluxe (10 Pcs)', category: 'Flower Pots', mrp: 320, offer_price: 240, image_url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300' },
+        { name: 'Ground Chakkar Special (10 Pcs)', category: 'Ground Chakkars', mrp: 150, offer_price: 110, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
+        { name: 'Ground Chakkar Deluxe (10 Pcs)', category: 'Ground Chakkars', mrp: 280, offer_price: 210, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' },
+        { name: '2.75" Kuruvi Crackers (Box of 10)', category: 'Sound Crackers', mrp: 70, offer_price: 50, image_url: 'https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?w=300' },
+        { name: '3.5" Lakshmi Deluxe (Box of 10)', category: 'Sound Crackers', mrp: 120, offer_price: 85, image_url: 'https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?w=300' },
+        { name: '7cm Hydro Bomb (10 Pcs)', category: 'Sound Crackers', mrp: 240, offer_price: 180, image_url: 'https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?w=300' },
+        { name: '12 Shots Multi-Colour Rider', category: 'Sky Shots', mrp: 450, offer_price: 340, image_url: 'https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?w=300' },
+        { name: '30 Shots Fireworks Display', category: 'Sky Shots', mrp: 1200, offer_price: 890, image_url: 'https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?w=300' },
+        { name: 'Bittu Family Delight Box (25 Items)', category: 'Gift Boxes', mrp: 1500, offer_price: 1099, image_url: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=300' },
+        { name: 'Bittu Mega Diwali Box (50 Items)', category: 'Gift Boxes', mrp: 3500, offer_price: 2499, image_url: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=300' }
+      ];
+
+      await window.db.from('products').insert(sampleItems);
+      loadPriceSheet();
+      alert('Sample crackers loaded! You can now adjust any price.');
+    }
+
+    async function loadTeamAndProfile() {
+      const session = localStorage.getItem('admin_session');
+      const cur = session ? JSON.parse(session) : { first_name: 'Bittu', last_name: 'Kumar' };
+      document.getElementById('my-first-name').value = cur.first_name || '';
+      document.getElementById('my-last-name').value = cur.last_name || '';
+      document.getElementById('my-phone').value = cur.phone || '';
+      document.getElementById('my-email').value = cur.email || '';
+
+      const { data } = await window.db.from('admin_users').select('*').order('created_at');
+      teamList = data || [];
+
+      document.getElementById('team-table').innerHTML = teamList.map(u => `
+        <tr>
+          <td class="p-3 font-bold text-gray-900">${u.first_name} ${u.last_name || ''}<br><span class="text-gray-400 font-normal text-[10px]">@${u.username}</span></td>
+          <td class="p-3 text-gray-500">${u.email}<br><span class="text-[10px]">${u.phone}</span></td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.role === 'Super Admin' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}">${u.role}</span></td>
+          <td class="p-3 text-right space-x-1">
+            <button onclick="sendPasswordReset('${u.email}', '${u.username}')" class="text-blue-600 font-semibold hover:underline">Reset password</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function sendPasswordReset(email, username) {
+      const newPass = prompt('Set a temporary new password for ' + username + ':');
+      if (newPass) {
+        window.db.from('admin_users').update({ password_hash: newPass }).eq('email', email).then(() => {
+          alert('Password updated for ' + username + '!');
+        });
+      }
+    }
+
+    async function handleCreateAdmin(e) {
+      e.preventDefault();
+      const newAdmin = {
+        username: document.getElementById('new-admin-user').value.trim(),
+        role: document.getElementById('new-admin-role').value,
+        first_name: document.getElementById('new-admin-fname').value.trim(),
+        last_name: document.getElementById('new-admin-lname').value.trim(),
+        email: document.getElementById('new-admin-email').value.trim(),
+        phone: document.getElementById('new-admin-phone').value.trim(),
+        password_hash: document.getElementById('new-admin-pass').value.trim()
+      };
+
+      await window.db.from('admin_users').insert([newAdmin]);
+      closeAddAdminModal();
+      loadTeamAndProfile();
+    }
+
+    async function loadStoreSettings() {
+      const { data } = await window.db.from('store_settings').select('*').eq('id', 1).single();
+      if (data) {
+        document.getElementById('cfg-name').value = data.store_name || '';
+        document.getElementById('cfg-wa').value = data.whatsapp_number || '';
+        document.getElementById('cfg-phone').value = data.display_phone || '';
+        document.getElementById('cfg-address').value = data.shop_address || '';
+      }
+    }
+
+    async function saveStoreSettings() {
+      await window.db.from('store_settings').update({
+        store_name: document.getElementById('cfg-name').value,
+        whatsapp_number: document.getElementById('cfg-wa').value,
+        display_phone: document.getElementById('cfg-phone').value,
+        shop_address: document.getElementById('cfg-address').value
+      }).eq('id', 1);
+      alert('Store settings saved successfully!');
+    }
+
+    function openAddAdminModal() { document.getElementById('add-admin-modal').classList.remove('hidden'); }
+    function closeAddAdminModal() { document.getElementById('add-admin-modal').classList.add('hidden'); }
+    function openProductModal() { document.getElementById('product-modal').classList.remove('hidden'); }
+    function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
+
+    async function handleSaveProduct(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('save-prod-btn');
+      saveBtn.innerText = 'Saving...';
+      saveBtn.disabled = true;
+
+      await window.db.from('products').insert([{
+        name: document.getElementById('prod-name').value,
+        category: document.getElementById('prod-category').value,
+        mrp: Number(document.getElementById('prod-mrp').value),
+        offer_price: Number(document.getElementById('prod-price').value),
+        image_url: 'https://placehold.co/200x150?text=Cracker'
+      }]);
+
+      closeProductModal();
+      saveBtn.innerText = 'Save Product';
+      saveBtn.disabled = false;
+      loadProducts();
+    }
+
+    checkSession();
+  </script>
+</body>
+</html>
