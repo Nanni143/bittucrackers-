@@ -732,61 +732,84 @@
 
     function changeSort(val) { currentSort = val; renderProducts(); }
 
-        function renderProducts() {
+            function setViewMode(mode) {
+      currentViewMode = mode;
+
+      // Update button active highlighting
+      document.querySelectorAll('.view-btn').forEach(b => {
+        b.className = "view-btn px-2 py-1 rounded text-gray-600";
+      });
+      const activeBtn = document.getElementById('btn-view-' + mode);
+      if (activeBtn) {
+        activeBtn.className = "view-btn px-2 py-1 rounded bg-white font-bold text-red-600 shadow-sm";
+      }
+
+      renderProducts();
+    }
+
+    function renderProducts() {
       const container = document.getElementById('product-list');
       let filtered = activeCategory === 'All' ? [...allProducts] : allProducts.filter(p => p.category === activeCategory);
 
+      // Sorting
       if (currentSort === 'price-asc') filtered.sort((a, b) => Number(a.offer_price) - Number(b.offer_price));
       else if (currentSort === 'price-desc') filtered.sort((a, b) => Number(b.offer_price) - Number(a.offer_price));
 
       if (filtered.length === 0) {
         container.className = "w-full";
-        container.innerHTML = '<div class="text-center text-xs text-gray-400 py-12">No products found.</div>';
+        container.innerHTML = '<div class="text-center text-xs text-gray-400 py-12">No products found in this category.</div>';
         return;
       }
 
-      // 1. Grid/Flex Container Styles per Mode
-      if (currentViewMode === 'big') {
-        container.className = "flex flex-col space-y-3.5";
-      } else if (currentViewMode === 'list') {
-        container.className = "flex flex-col space-y-2";
+      // 1. RECONFIGURE THE PARENT CONTAINER CLASS COMPLETELY
+      if (currentViewMode === 'list') {
+        // Strip any grid classes: pure vertical column list
+        container.className = "w-full flex flex-col space-y-2";
+      } else if (currentViewMode === 'big') {
+        container.className = "w-full flex flex-col space-y-3.5";
       } else if (currentViewMode === 'small') {
-        container.className = "grid grid-cols-3 gap-2";
+        container.className = "w-full grid grid-cols-3 gap-2";
       } else {
-        // Default medium (2 columns)
-        container.className = "grid grid-cols-2 gap-2.5";
+        // Medium default (2 columns)
+        container.className = "w-full grid grid-cols-2 gap-2.5";
       }
 
+      // 2. RENDER THE ITEMS ACCORDING TO VIEW MODE
       container.innerHTML = filtered.map(p => {
         const inCartItem = cart.find(c => c.id === p.id);
         const qty = inCartItem ? inCartItem.qty : 0;
 
-        // Reusable in-card quantity stepper
+        // Interactive in-card quantity button
         const qtyButtonHtml = qty > 0 ? `
           <div class="flex items-center justify-between border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-8 w-full">
-            <button onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
+            <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-7 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
             <span class="font-black text-red-700 text-xs px-1">${qty}</span>
-            <button onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
+            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-7 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
           </div>
         ` : `
-          <button onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
+          <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
             + Add
           </button>
         `;
 
-        // ================= A. HORIZONTAL LIST VIEW =================
+        // ================= LIST VIEW (IMAGE LEFT, DETAILS CENTER, QTY RIGHT) =================
         if (currentViewMode === 'list') {
           return `
-            <div class="bg-white border rounded-xl p-2.5 flex items-center space-x-3 shadow-2xs">
-              <img src="${p.image_url || 'https://placehold.co/120x120?text=Cracker'}" class="w-16 h-16 object-cover rounded-lg shrink-0 border" />
-              <div class="flex-1 min-w-0">
-                <span class="text-[9px] text-gray-400 uppercase font-bold tracking-wider">${p.category}</span>
-                <h3 class="font-bold text-xs text-gray-900 truncate">${p.name}</h3>
+            <div class="bg-white border border-gray-200 rounded-xl p-2.5 flex items-center justify-between shadow-xs w-full">
+              <!-- Left: Small Square Image -->
+              <img src="${p.image_url || 'https://placehold.co/120x120?text=Cracker'}" class="w-16 h-16 rounded-lg object-cover border shrink-0 mr-3" />
+              
+              <!-- Center: Product Info -->
+              <div class="flex-1 min-w-0 pr-2">
+                <span class="text-[9px] text-gray-400 font-black uppercase tracking-wider block">${p.category}</span>
+                <h3 class="font-bold text-xs text-gray-900 truncate leading-snug">${p.name}</h3>
                 <div class="flex items-center space-x-1.5 mt-0.5">
-                  <span class="font-extrabold text-red-600 text-sm">₹${p.offer_price}</span>
+                  <span class="font-black text-red-600 text-sm">₹${p.offer_price}</span>
                   <span class="line-through text-gray-400 text-[10px]">₹${p.mrp}</span>
                 </div>
               </div>
+
+              <!-- Right: Quantity Stepper or Add Button -->
               <div class="w-24 shrink-0">
                 ${qtyButtonHtml}
               </div>
@@ -794,25 +817,25 @@
           `;
         }
 
-        // ================= B. BIG SINGLE-COLUMN VIEW =================
+        // ================= BIG VIEW (1 COLUMN FULL-WIDTH) =================
         if (currentViewMode === 'big') {
           const disc = p.mrp > 0 ? Math.round(((p.mrp - p.offer_price) / p.mrp) * 100) : 0;
           return `
-            <div class="bg-white border rounded-2xl p-3.5 shadow-2xs space-y-2.5">
+            <div class="bg-white border border-gray-200 rounded-2xl p-3 shadow-xs space-y-2 w-full">
               <div class="relative">
-                <img src="${p.image_url || 'https://placehold.co/400x240?text=Cracker'}" class="w-full h-44 object-cover rounded-xl border" />
+                <img src="${p.image_url || 'https://placehold.co/400x200?text=Cracker'}" class="w-full h-40 object-cover rounded-xl" />
                 ${disc > 0 ? `<span class="absolute top-2 left-2 bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">${disc}% OFF</span>` : ''}
               </div>
               <div class="flex justify-between items-start pt-1">
-                <div>
-                  <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">${p.category}</span>
-                  <h3 class="font-extrabold text-sm text-gray-950">${p.name}</h3>
-                  <div class="flex items-center space-x-2 mt-1">
+                <div class="flex-1 pr-2">
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${p.category}</span>
+                  <h3 class="font-black text-sm text-gray-900">${p.name}</h3>
+                  <div class="flex items-center space-x-2 mt-0.5">
                     <span class="font-black text-red-600 text-base">₹${p.offer_price}</span>
                     <span class="line-through text-gray-400 text-xs">₹${p.mrp}</span>
                   </div>
                 </div>
-                <div class="w-28 shrink-0 pt-2">
+                <div class="w-28 shrink-0">
                   ${qtyButtonHtml}
                 </div>
               </div>
@@ -820,13 +843,13 @@
           `;
         }
 
-        // ================= C. SMALL (3 COLUMNS) VIEW =================
+        // ================= SMALL VIEW (3 COLUMNS COMPACT) =================
         if (currentViewMode === 'small') {
           return `
-            <div class="bg-white border rounded-xl p-2 flex flex-col justify-between shadow-2xs">
+            <div class="bg-white border border-gray-200 rounded-xl p-2 flex flex-col justify-between shadow-xs">
               <div>
-                <img src="${p.image_url || 'https://placehold.co/150x120?text=Cracker'}" class="w-full h-16 object-cover rounded-md mb-1.5 border" />
-                <span class="text-[8px] text-gray-400 uppercase font-bold tracking-wider block truncate">${p.category}</span>
+                <img src="${p.image_url || 'https://placehold.co/150x120?text=Cracker'}" class="w-full h-16 object-cover rounded-lg mb-1.5" />
+                <span class="text-[8px] text-gray-400 uppercase font-black tracking-wider block truncate">${p.category}</span>
                 <h3 class="font-bold text-[11px] leading-tight text-gray-900 line-clamp-2 h-7">${p.name}</h3>
                 <div class="mt-1">
                   <span class="font-black text-red-600 text-xs">₹${p.offer_price}</span>
@@ -840,11 +863,11 @@
           `;
         }
 
-        // ================= D. MEDIUM (2 COLUMNS) DEFAULT =================
+        // ================= MEDIUM VIEW (2 COLUMNS DEFAULT) =================
         return `
-          <div class="bg-white border rounded-xl p-3 flex flex-col justify-between shadow-2xs">
+          <div class="bg-white border border-gray-200 rounded-xl p-3 flex flex-col justify-between shadow-xs">
             <div>
-              <img src="${p.image_url || 'https://placehold.co/200x150?text=Cracker'}" class="w-full h-24 object-cover rounded-lg mb-2 border" />
+              <img src="${p.image_url || 'https://placehold.co/200x150?text=Cracker'}" class="w-full h-24 object-cover rounded-lg mb-2" />
               <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${p.category}</div>
               <h3 class="font-bold text-xs mt-0.5 leading-snug line-clamp-2 h-8">${p.name}</h3>
               <div class="flex items-center space-x-1.5 mt-1.5">
@@ -859,8 +882,8 @@
         `;
       }).join('');
     }
+                
 
-    }
 
     function updateItemQty(id, change) {
       const prod = allProducts.find(p => p.id === id);
