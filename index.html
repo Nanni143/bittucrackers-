@@ -16,7 +16,7 @@
   <header class="bg-white border-b px-4 py-3 flex items-center justify-between sticky top-0 z-40">
     <div class="flex items-center space-x-2">
       <span class="bg-red-600 text-white font-bold px-2.5 py-1 rounded-md text-sm">B</span>
-      <span class="font-extrabold text-base tracking-tight text-gray-900">BITTU CRACKERS</span>
+      <span class="store-name-text font-extrabold text-base tracking-tight text-gray-900">BITTU CRACKERS</span>
     </div>
     <button onclick="toggleCart()" class="bg-red-600 text-white px-3.5 py-1.5 rounded-lg text-sm font-semibold flex items-center space-x-1.5 shadow-sm">
       <span>Cart</span>
@@ -26,8 +26,13 @@
 
   <section class="p-4 bg-orange-50/60 border-b">
     <span class="text-[10px] font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">First online cracker booking in Kavali</span>
-    <h1 class="text-2xl font-black text-gray-950 mt-2 leading-tight">BITTU CRACKERS<br><span class="text-red-600">Festival crackers, booked online.</span></h1>
-    <p class="text-xs text-gray-600 mt-2 leading-relaxed">Sivakasi-quality crackers at honest offer prices. Add to cart, book with your name and phone number — we confirm on WhatsApp and deliver across SPSR Nellore District.</p>
+    <h1 class="text-2xl font-black text-gray-950 mt-2 leading-tight">
+      <span class="store-name-text">BITTU CRACKERS</span><br>
+      <span class="text-red-600">Festival crackers, booked online.</span>
+    </h1>
+    <p class="text-xs text-gray-600 mt-2 leading-relaxed">
+      Sivakasi-quality crackers at honest offer prices. Add to cart, book with your name and phone number — we confirm on WhatsApp and deliver from our store: <span class="store-address-text font-semibold text-gray-800">Vengal Rao Nagar, Kavali, SPSR Nellore District</span>.
+    </p>
   </section>
 
   <!-- Categories -->
@@ -91,14 +96,37 @@
 
   <script>
     const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
-    const SUPABASE_KEY = "Sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
-    const WHATSAPP_STORE_PHONE = "917829978883";
+    const SUPABASE_KEY = "sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
+    let storeWhatsAppNumber = "917829978883";
 
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let allProducts = [];
     let cart = [];
     let activeCategory = 'All';
+
+    // Synchronize Store Settings Live from Supabase
+    async function syncStoreSettings() {
+      try {
+        const { data, error } = await db.from('store_settings').select('*').eq('id', 1).single();
+        if (!error && data) {
+          if (data.store_name) {
+            document.querySelectorAll('.store-name-text').forEach(el => el.innerText = data.store_name);
+          }
+          if (data.display_phone) {
+            document.querySelectorAll('.store-phone-text').forEach(el => el.innerText = data.display_phone);
+          }
+          if (data.shop_address) {
+            document.querySelectorAll('.store-address-text').forEach(el => el.innerText = data.shop_address);
+          }
+          if (data.whatsapp_number) {
+            storeWhatsAppNumber = data.whatsapp_number.replace(/\D/g, '');
+          }
+        }
+      } catch (err) {
+        console.warn('Could not sync store settings:', err);
+      }
+    }
 
     async function loadLiveProducts() {
       const { data, error } = await db.from('products').select('*');
@@ -233,9 +261,11 @@
         `*Total Pay on Delivery:* ₹${total}`
       );
 
-      window.location.href = `https://wa.me/${WHATSAPP_STORE_PHONE}?text=${message}`;
+      window.location.href = `https://wa.me/${storeWhatsAppNumber}?text=${message}`;
     }
 
+    // Run both on page launch
+    syncStoreSettings();
     loadLiveProducts();
   </script>
 </body>
