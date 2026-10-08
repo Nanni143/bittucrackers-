@@ -55,7 +55,7 @@
     <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Gift Boxes</button>
   </div>
 
-  <!-- View Switcher & Sort Toolbar -->
+  <!-- View Switcher (Big, Medium, Small) & Sort Toolbar -->
   <div class="px-3.5 py-2 flex items-center justify-between bg-white border-b text-xs">
     <div class="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg">
       <button onclick="setViewMode('big')" id="btn-view-big" title="Big (1 by 1)" class="view-btn px-2 py-1 rounded text-gray-600">
@@ -66,9 +66,6 @@
       </button>
       <button onclick="setViewMode('small')" id="btn-view-small" title="Small (3 items)" class="view-btn px-2 py-1 rounded text-gray-600">
         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 4a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1H10a1 1 0 011 1v12a1 1 0 01-1 1H7.5a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H13a1 1 0 01-1-1V4z"/></svg>
-      </button>
-      <button onclick="setViewMode('list')" id="btn-view-list" title="List View" class="view-btn px-2 py-1 rounded text-gray-600">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
       </button>
     </div>
     <div class="flex items-center space-x-1.5">
@@ -162,7 +159,7 @@
     </div>
   </div>
 
-  <!-- ================= SUCCESS CONFIRMATION MODAL ================= -->
+ <!-- ================= SUCCESS CONFIRMATION MODAL ================= -->
   <div id="order-success-modal" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center space-y-4">
       <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl font-black">
@@ -317,7 +314,22 @@
     </div>
   </div>
 
-  <!-- ================= JAVASCRIPT LOGIC ================= -->
+            <div class="flex items-start space-x-2.5">
+            <span class="text-base text-gray-700 mt-0.5">📍</span>
+            <div class="text-xs">
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-gray-900">${a.name}</span>
+                ${selectedAddress && selectedAddress.id === a.id ? '<span class="bg-blue-100 text-blue-700 font-bold text-[9px] px-1.5 py-0.2 rounded">Selected</span>' : ''}
+              </div>
+              <p class="text-gray-600 mt-0.5 text-[11px]">${a.house ? a.house + ', ' : ''}${a.area}</p>
+              <p class="text-gray-500 font-semibold mt-0.5 text-[11px]">📞 ${a.phone}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+      <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
     const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
     const SUPABASE_KEY = "sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
@@ -330,7 +342,7 @@
     let deliveryZones = [];
     let cart = [];
     let activeCategory = 'All';
-    let currentViewMode = 'medium';
+    let currentViewMode = 'medium'; // 'big' | 'medium' | 'small'
     let currentSort = 'popular';
 
     let savedAddresses = [];
@@ -440,7 +452,7 @@
     function openAddressSelectModal() { document.getElementById('address-select-modal').classList.remove('hidden'); }
     function closeAddressSelectModal() { document.getElementById('address-select-modal').classList.add('hidden'); }
 
-    // ================= MAP PIN PICKER (FULLSCREEN & IN-BOUNDS) =================
+    // ================= MAP PIN PICKER =================
     function startAddNewAddressFlow() {
       closeAddressSelectModal();
       document.getElementById('map-pin-modal').classList.remove('hidden');
@@ -720,7 +732,7 @@
       }
     }
 
-    // ================= VIEW SWITCHER & PRODUCT RENDERING =================
+     // ================= VIEW SWITCHER (BIG, MEDIUM, SMALL) =================
     function setViewMode(mode) {
       currentViewMode = mode;
       document.querySelectorAll('.view-btn').forEach(b => b.className = "view-btn px-2 py-1 rounded text-gray-600");
@@ -744,72 +756,35 @@
         return;
       }
 
-      // 1. Dynamic Parent Layout Classes
-      if (currentViewMode === 'list') {
-        container.className = "w-full flex flex-col space-y-3";
-      } else if (currentViewMode === 'big') {
+      // Container layouts for Big, Medium, and Small
+      if (currentViewMode === 'big') {
         container.className = "w-full flex flex-col space-y-3.5";
       } else if (currentViewMode === 'small') {
         container.className = "w-full grid grid-cols-3 gap-2";
       } else {
+        // Default medium (2 columns)
         container.className = "w-full grid grid-cols-2 gap-2.5";
       }
 
-      // 2. Render Cards
       container.innerHTML = filtered.map(p => {
         const inCartItem = cart.find(c => c.id === p.id);
         const qty = inCartItem ? inCartItem.qty : 0;
         const savings = (p.mrp > p.offer_price) ? (p.mrp - p.offer_price) : 0;
 
-        // Clean Stepper Button
-        const listStepperHtml = qty > 0 ? `
-          <div class="flex items-center border border-gray-200 bg-gray-50 rounded-lg overflow-hidden h-7">
-            <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-7 h-full flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200 text-sm active:scale-95 transition">−</button>
-            <span class="font-bold text-xs px-2.5 text-gray-800">${qty}</span>
-            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-7 h-full flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200 text-sm active:scale-95 transition">+</button>
-          </div>
-        ` : `
-          <button type="button" onclick="updateItemQty('${p.id}', 1)" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded-lg text-xs border border-red-200 active:scale-95 transition">
-            + Add
-          </button>
-        `;
-
-        // ================= EXACT PIC 1: CLEAN HORIZONTAL ROW =================
-        if (currentViewMode === 'list') {
-          return `
-            <div class="bg-white border border-gray-100 rounded-2xl p-3.5 shadow-sm flex items-start space-x-3.5 w-full">
-              <!-- Left: Small Square Image -->
-              <div class="w-16 h-16 shrink-0 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex items-center justify-center">
-                <img src="${p.image_url || 'https://placehold.co/120x120?text=Cracker'}" class="w-full h-full object-cover" />
-              </div>
-
-              <!-- Center/Right Details -->
-              <div class="flex-1 min-w-0">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h3 class="font-bold text-xs text-gray-900 leading-snug line-clamp-2">${p.name}</h3>
-                    <p class="text-[10px] text-gray-400 uppercase font-semibold mt-0.5 tracking-wider">${p.category}</p>
-                  </div>
-                </div>
-
-                <!-- Price and Savings row (Like Pic 1) -->
-                <div class="mt-1 flex items-baseline space-x-1.5">
-                  <span class="text-[11px] text-gray-400">MRP: <span class="line-through">₹${p.mrp}</span></span>
-                  <span class="font-extrabold text-gray-950 text-sm">₹${p.offer_price}</span>
-                </div>
-                ${savings > 0 ? `<p class="text-[11px] font-bold text-amber-600 mt-0.5">You save: ₹${savings}</p>` : ''}
-
-                <!-- Stepper pinned to bottom right -->
-                <div class="mt-2 flex justify-end">
-                  ${listStepperHtml}
-                </div>
-              </div>
-            </div>
-          `;
-        }
-
         // ================= BIG VIEW (Single Column) =================
         if (currentViewMode === 'big') {
+          const bigStepperHtml = qty > 0 ? `
+            <div class="flex items-center border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-8 w-28">
+              <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
+              <span class="font-black text-red-700 text-xs px-2">${qty}</span>
+              <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
+            </div>
+          ` : `
+            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-28 bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
+              + Add
+            </button>
+          `;
+
           return `
             <div class="bg-white border border-gray-200 rounded-2xl p-3.5 shadow-xs space-y-2.5 w-full">
               <div class="relative">
@@ -826,7 +801,7 @@
                   </div>
                 </div>
                 <div class="shrink-0 pt-1">
-                  ${listStepperHtml}
+                  ${bigStepperHtml}
                 </div>
               </div>
             </div>
@@ -835,6 +810,18 @@
 
         // ================= SMALL VIEW (3 Columns) =================
         if (currentViewMode === 'small') {
+          const smallStepperHtml = qty > 0 ? `
+            <div class="flex items-center justify-between border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-7 w-full">
+              <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-6 h-full flex items-center justify-center font-extrabold text-red-600 text-xs active:scale-95 transition">−</button>
+              <span class="font-black text-red-700 text-[11px] px-1">${qty}</span>
+              <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-6 h-full flex items-center justify-center font-extrabold text-red-600 text-xs active:scale-95 transition">+</button>
+            </div>
+          ` : `
+            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold h-7 rounded-lg text-[11px] border border-red-200 active:scale-95 transition">
+              + Add
+            </button>
+          `;
+
           return `
             <div class="bg-white border border-gray-200 rounded-xl p-2 flex flex-col justify-between shadow-xs">
               <div>
@@ -846,8 +833,8 @@
                   <span class="line-through text-gray-400 text-[9px]">₹${p.mrp}</span>
                 </div>
               </div>
-              <div class="mt-2 flex justify-center">
-                ${listStepperHtml}
+              <div class="mt-2">
+                ${smallStepperHtml}
               </div>
             </div>
           `;
@@ -856,12 +843,12 @@
         // ================= MEDIUM VIEW (2 Columns Default) =================
         const gridQtyButtonHtml = qty > 0 ? `
           <div class="flex items-center justify-between border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-8 w-full">
-            <button onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
+            <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
             <span class="font-black text-red-700 text-xs px-1">${qty}</span>
-            <button onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
+            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
           </div>
         ` : `
-          <button onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
+          <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
             + Add
           </button>
         `;
