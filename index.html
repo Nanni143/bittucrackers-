@@ -10,7 +10,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     .leaflet-control-attribution { display: none !important; }
-    /* Ensure Leaflet stays strictly behind custom UI overlays */
     .leaflet-pane { z-index: 10 !important; }
     .leaflet-top, .leaflet-bottom { z-index: 11 !important; }
   </style>
@@ -33,6 +32,7 @@
       </div>
     </div>
 
+    <!-- Cart Button -->
     <button onclick="openCartView()" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm active:scale-95 transition shrink-0">
       <span>Cart</span>
       <span id="cart-count" class="bg-white text-red-600 rounded-full px-1.5 py-0.2 text-[10px] font-black">0</span>
@@ -58,10 +58,18 @@
   <!-- View Switcher & Sort Toolbar -->
   <div class="px-3.5 py-2 flex items-center justify-between bg-white border-b text-xs">
     <div class="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg">
-      <button onclick="setViewMode('big')" id="btn-view-big" class="view-btn px-2 py-1 rounded text-gray-600"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"/></svg></button>
-      <button onclick="setViewMode('medium')" id="btn-view-medium" class="view-btn px-2 py-1 rounded bg-white font-bold text-red-600 shadow-sm"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h4a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm8 0a1 1 0 011-1h4a1 1 0 011 1v12a1 1 0 01-1 1h-4a1 1 0 01-1-1V4z"/></svg></button>
-      <button onclick="setViewMode('small')" id="btn-view-small" class="view-btn px-2 py-1 rounded text-gray-600"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 4a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1H10a1 1 0 011 1v12a1 1 0 01-1 1H7.5a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H13a1 1 0 01-1-1V4z"/></svg></button>
-      <button onclick="setViewMode('list')" id="btn-view-list" class="view-btn px-2 py-1 rounded text-gray-600"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg></button>
+      <button onclick="setViewMode('big')" id="btn-view-big" title="Big (1 by 1)" class="view-btn px-2 py-1 rounded text-gray-600">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"/></svg>
+      </button>
+      <button onclick="setViewMode('medium')" id="btn-view-medium" title="Medium (2 items)" class="view-btn px-2 py-1 rounded bg-white font-bold text-red-600 shadow-sm">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h4a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm8 0a1 1 0 011-1h4a1 1 0 011 1v12a1 1 0 01-1 1h-4a1 1 0 01-1-1V4z"/></svg>
+      </button>
+      <button onclick="setViewMode('small')" id="btn-view-small" title="Small (3 items)" class="view-btn px-2 py-1 rounded text-gray-600">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 4a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1H10a1 1 0 011 1v12a1 1 0 01-1 1H7.5a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H13a1 1 0 01-1-1V4z"/></svg>
+      </button>
+      <button onclick="setViewMode('list')" id="btn-view-list" title="List View" class="view-btn px-2 py-1 rounded text-gray-600">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+      </button>
     </div>
     <div class="flex items-center space-x-1.5">
       <span class="text-gray-400 font-medium">Sort:</span>
@@ -73,14 +81,14 @@
     </div>
   </div>
 
-  <!-- Products Main Grid -->
-  <main class="p-3" id="product-container">
-    <div id="product-list" class="grid grid-cols-2 gap-2.5">
-      <div class="col-span-full text-center text-xs text-gray-400 py-12">Loading crackers catalog...</div>
+  <!-- Dynamic Catalog Container -->
+  <main class="p-3 max-w-2xl mx-auto" id="product-container">
+    <div id="product-list" class="w-full">
+      <div class="text-center text-xs text-gray-400 py-12">Loading crackers catalog...</div>
     </div>
   </main>
 
-  <!-- ================= CHECKOUT / CONFIRM DETAILS VIEW ================= -->
+  <!-- ================= CHECKOUT / CONFIRM DETAILS MODAL ================= -->
   <div id="cart-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-xs z-50 hidden flex justify-end">
     <div class="bg-gray-50 w-full max-w-md h-full flex flex-col overflow-y-auto">
       
@@ -207,7 +215,6 @@
 
   <!-- ================= FULLSCREEN INTERACTIVE MAP PIN PICKER ================= -->
   <div id="map-pin-modal" class="fixed inset-0 bg-white z-50 hidden flex flex-col h-screen w-screen">
-    <!-- Top Bar -->
     <div class="px-4 py-3 border-b flex items-center justify-between bg-white z-30 shadow-xs shrink-0">
       <div class="flex items-center space-x-3">
         <button onclick="closeMapPinModal()" class="text-gray-700 text-lg font-bold">←</button>
@@ -216,9 +223,7 @@
       <span class="text-[11px] text-gray-400 font-semibold">Step 1 of 2</span>
     </div>
 
-    <!-- Map Viewport -->
     <div class="relative flex-1 w-full h-full overflow-hidden">
-      <!-- Fullscreen Leaflet Container -->
       <div id="interactive-map" class="absolute inset-0 w-full h-full"></div>
 
       <!-- Center Fixed Map Pin Overlay -->
@@ -312,7 +317,7 @@
     </div>
   </div>
 
-   <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
     const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
     const SUPABASE_KEY = "sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
@@ -440,10 +445,9 @@
       closeAddressSelectModal();
       document.getElementById('map-pin-modal').classList.remove('hidden');
 
-      // Allow DOM to paint fullscreen modal before sizing map
       setTimeout(() => {
         initMapPicker();
-        triggerGPSCurrentLocation(); // Prompt and center immediately
+        triggerGPSCurrentLocation();
       }, 250);
     }
 
@@ -465,7 +469,6 @@
         });
       }
 
-      // Force Leaflet to recalculate container bounds
       leafletMap.invalidateSize();
       leafletMap.setView([startLat, startLon], 16);
       reverseGeocodeMapCenter(startLat, startLon);
@@ -503,7 +506,6 @@
         const state = addr.state || "";
         const pincode = addr.postcode ? ` - ${addr.postcode}` : "";
 
-        // Build accurate address string from geocoded response
         const addressParts = [areaTitle, district, state].filter(Boolean);
         const fullAddress = addressParts.join(', ') + pincode;
 
@@ -616,6 +618,7 @@
         </div>
       `).join('');
     }
+
     function updateTotal() {
       const itemsCount = cart.reduce((sum, i) => sum + i.qty, 0);
       const mrpSubtotal = cart.reduce((sum, i) => sum + (Number(i.mrp || i.offer_price) * i.qty), 0);
@@ -717,22 +720,18 @@
       }
     }
 
-        function setViewMode(mode) {
+    // ================= VIEW SWITCHER & PRODUCT RENDERING =================
+    function setViewMode(mode) {
       currentViewMode = mode;
-      document.querySelectorAll('.view-btn').forEach(b => {
-        b.className = "view-btn px-2 py-1 rounded text-gray-600";
-      });
+      document.querySelectorAll('.view-btn').forEach(b => b.className = "view-btn px-2 py-1 rounded text-gray-600");
       const activeBtn = document.getElementById('btn-view-' + mode);
-      if (activeBtn) {
-        activeBtn.className = "view-btn px-2 py-1 rounded bg-white font-bold text-red-600 shadow-sm";
-      }
+      if (activeBtn) activeBtn.className = "view-btn px-2 py-1 rounded bg-white font-bold text-red-600 shadow-sm";
       renderProducts();
     }
 
-
     function changeSort(val) { currentSort = val; renderProducts(); }
 
-                function renderProducts() {
+    function renderProducts() {
       const container = document.getElementById('product-list');
       let filtered = activeCategory === 'All' ? [...allProducts] : allProducts.filter(p => p.category === activeCategory);
 
@@ -741,94 +740,105 @@
 
       if (filtered.length === 0) {
         container.className = "w-full";
-        container.innerHTML = '<div class="text-center text-xs text-gray-400 py-12">No products found in this category.</div>';
+        container.innerHTML = '<div class="text-center text-xs text-gray-400 py-12">No products found.</div>';
         return;
       }
 
-      // Explicit Layout Containers
+      // 1. Dynamic Parent Layout Classes
       if (currentViewMode === 'list') {
-        container.className = "w-full flex flex-col space-y-2";
-      } else if (currentViewMode === 'big') {
         container.className = "w-full flex flex-col space-y-3";
+      } else if (currentViewMode === 'big') {
+        container.className = "w-full flex flex-col space-y-3.5";
       } else if (currentViewMode === 'small') {
         container.className = "w-full grid grid-cols-3 gap-2";
       } else {
         container.className = "w-full grid grid-cols-2 gap-2.5";
       }
 
+      // 2. Render Cards
       container.innerHTML = filtered.map(p => {
         const inCartItem = cart.find(c => c.id === p.id);
         const qty = inCartItem ? inCartItem.qty : 0;
+        const savings = (p.mrp > p.offer_price) ? (p.mrp - p.offer_price) : 0;
 
-        const qtyButtonHtml = qty > 0 ? `
-          <div class="flex items-center justify-between border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-8 w-24">
-            <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-7 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
-            <span class="font-black text-red-700 text-xs px-1">${qty}</span>
-            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-7 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
+        // Clean Stepper Button
+        const listStepperHtml = qty > 0 ? `
+          <div class="flex items-center border border-gray-200 bg-gray-50 rounded-lg overflow-hidden h-7">
+            <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-7 h-full flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200 text-sm active:scale-95 transition">−</button>
+            <span class="font-bold text-xs px-2.5 text-gray-800">${qty}</span>
+            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-7 h-full flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200 text-sm active:scale-95 transition">+</button>
           </div>
         ` : `
-          <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-24 bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
+          <button type="button" onclick="updateItemQty('${p.id}', 1)" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded-lg text-xs border border-red-200 active:scale-95 transition">
             + Add
           </button>
         `;
 
-        // ================= 1. VERTICAL LIST ROW (Image Left, Info Center, Qty Right) =================
+        // ================= EXACT PIC 1: CLEAN HORIZONTAL ROW =================
         if (currentViewMode === 'list') {
           return `
-            <div class="bg-white border border-gray-200 rounded-xl p-2.5 flex items-center justify-between shadow-xs w-full">
-              <!-- Left: Small Image -->
-              <img src="${p.image_url || 'https://placehold.co/120x120?text=Cracker'}" class="w-16 h-16 rounded-lg object-cover border shrink-0 mr-3" />
-              
-              <!-- Center: Name & Price -->
-              <div class="flex-1 min-w-0 pr-2">
-                <span class="text-[9px] text-gray-400 font-black uppercase tracking-wider block">${p.category}</span>
-                <h3 class="font-bold text-xs text-gray-900 truncate leading-snug">${p.name}</h3>
-                <div class="flex items-center space-x-1.5 mt-0.5">
-                  <span class="font-black text-red-600 text-sm">₹${p.offer_price}</span>
-                  <span class="line-through text-gray-400 text-[10px]">₹${p.mrp}</span>
-                </div>
+            <div class="bg-white border border-gray-100 rounded-2xl p-3.5 shadow-sm flex items-start space-x-3.5 w-full">
+              <!-- Left: Small Square Image -->
+              <div class="w-16 h-16 shrink-0 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex items-center justify-center">
+                <img src="${p.image_url || 'https://placehold.co/120x120?text=Cracker'}" class="w-full h-full object-cover" />
               </div>
 
-              <!-- Right: Quantity Button -->
-              <div class="shrink-0">
-                ${qtyButtonHtml}
+              <!-- Center/Right Details -->
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h3 class="font-bold text-xs text-gray-900 leading-snug line-clamp-2">${p.name}</h3>
+                    <p class="text-[10px] text-gray-400 uppercase font-semibold mt-0.5 tracking-wider">${p.category}</p>
+                  </div>
+                </div>
+
+                <!-- Price and Savings row (Like Pic 1) -->
+                <div class="mt-1 flex items-baseline space-x-1.5">
+                  <span class="text-[11px] text-gray-400">MRP: <span class="line-through">₹${p.mrp}</span></span>
+                  <span class="font-extrabold text-gray-950 text-sm">₹${p.offer_price}</span>
+                </div>
+                ${savings > 0 ? `<p class="text-[11px] font-bold text-amber-600 mt-0.5">You save: ₹${savings}</p>` : ''}
+
+                <!-- Stepper pinned to bottom right -->
+                <div class="mt-2 flex justify-end">
+                  ${listStepperHtml}
+                </div>
               </div>
             </div>
           `;
         }
 
-        // ================= 2. BIG VIEW (1 Column Card) =================
+        // ================= BIG VIEW (Single Column) =================
         if (currentViewMode === 'big') {
-          const disc = p.mrp > 0 ? Math.round(((p.mrp - p.offer_price) / p.mrp) * 100) : 0;
           return `
-            <div class="bg-white border border-gray-200 rounded-2xl p-3 shadow-xs space-y-2 w-full">
+            <div class="bg-white border border-gray-200 rounded-2xl p-3.5 shadow-xs space-y-2.5 w-full">
               <div class="relative">
-                <img src="${p.image_url || 'https://placehold.co/400x200?text=Cracker'}" class="w-full h-40 object-cover rounded-xl" />
-                ${disc > 0 ? `<span class="absolute top-2 left-2 bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">${disc}% OFF</span>` : ''}
+                <img src="${p.image_url || 'https://placehold.co/400x200?text=Cracker'}" class="w-full h-44 object-cover rounded-xl" />
+                ${savings > 0 ? `<span class="absolute top-2 left-2 bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">Save ₹${savings}</span>` : ''}
               </div>
               <div class="flex justify-between items-start pt-1">
                 <div class="flex-1 pr-2">
                   <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${p.category}</span>
-                  <h3 class="font-black text-sm text-gray-900">${p.name}</h3>
-                  <div class="flex items-center space-x-2 mt-0.5">
+                  <h3 class="font-extrabold text-sm text-gray-900">${p.name}</h3>
+                  <div class="flex items-center space-x-2 mt-1">
                     <span class="font-black text-red-600 text-base">₹${p.offer_price}</span>
                     <span class="line-through text-gray-400 text-xs">₹${p.mrp}</span>
                   </div>
                 </div>
                 <div class="shrink-0 pt-1">
-                  ${qtyButtonHtml}
+                  ${listStepperHtml}
                 </div>
               </div>
             </div>
           `;
         }
 
-        // ================= 3. SMALL VIEW (3 Columns Grid) =================
+        // ================= SMALL VIEW (3 Columns) =================
         if (currentViewMode === 'small') {
           return `
             <div class="bg-white border border-gray-200 rounded-xl p-2 flex flex-col justify-between shadow-xs">
               <div>
-                <img src="${p.image_url || 'https://placehold.co/150x120?text=Cracker'}" class="w-full h-16 object-cover rounded-md mb-1.5" />
+                <img src="${p.image_url || 'https://placehold.co/150x120?text=Cracker'}" class="w-full h-16 object-cover rounded-lg mb-1.5" />
                 <span class="text-[8px] text-gray-400 uppercase font-black tracking-wider block truncate">${p.category}</span>
                 <h3 class="font-bold text-[11px] leading-tight text-gray-900 line-clamp-2 h-7">${p.name}</h3>
                 <div class="mt-1">
@@ -837,15 +847,27 @@
                 </div>
               </div>
               <div class="mt-2 flex justify-center">
-                ${qtyButtonHtml}
+                ${listStepperHtml}
               </div>
             </div>
           `;
         }
 
-        // ================= 4. MEDIUM VIEW (2 Columns Grid) =================
+        // ================= MEDIUM VIEW (2 Columns Default) =================
+        const gridQtyButtonHtml = qty > 0 ? `
+          <div class="flex items-center justify-between border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-8 w-full">
+            <button onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
+            <span class="font-black text-red-700 text-xs px-1">${qty}</span>
+            <button onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
+          </div>
+        ` : `
+          <button onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
+            + Add
+          </button>
+        `;
+
         return `
-          <div class="bg-white border border-gray-200 rounded-xl p-3 flex flex-col justify-between shadow-xs">
+          <div class="bg-white border rounded-xl p-3 flex flex-col justify-between shadow-2xs">
             <div>
               <img src="${p.image_url || 'https://placehold.co/200x150?text=Cracker'}" class="w-full h-24 object-cover rounded-lg mb-2" />
               <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${p.category}</div>
@@ -855,16 +877,11 @@
                 <span class="line-through text-gray-400 text-[11px]">₹${p.mrp}</span>
               </div>
             </div>
-            <div class="mt-2.5 flex justify-center">
-              ${qtyButtonHtml}
-            </div>
+            <div class="mt-2.5">${gridQtyButtonHtml}</div>
           </div>
         `;
       }).join('');
-              
-        }
-    
-
+    }
 
     function updateItemQty(id, change) {
       const prod = allProducts.find(p => p.id === id);
