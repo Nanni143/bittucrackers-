@@ -6,68 +6,62 @@
   <title>Bittu Crackers - Online Booking</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Leaflet Map CSS/JS for Zepto-style pin picker -->
+  <!-- Leaflet Map CSS/JS for Flipkart/Amazon Style Exact Pin Picker -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    .leaflet-control-attribution { display: none !important; }
+  </style>
 </head>
-<body class="bg-gray-50 text-gray-800 pb-24">
+<body class="bg-gray-100 text-gray-800 pb-28">
 
-  <!-- ================= 1. ZEPTO/BLINKIT TOP LOCATION BAR ================= -->
-  <div class="bg-white border-b px-3.5 py-2 sticky top-0 z-40 shadow-xs flex items-center justify-between">
-    <div onclick="openLocationPickerModal()" class="flex items-center space-x-2 cursor-pointer flex-1 min-w-0 pr-2">
-      <div class="bg-red-50 text-red-600 p-1.5 rounded-lg shrink-0">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+  <!-- ================= TOP FLIPKART-STYLE LOCATION HEADER ================= -->
+  <header class="bg-white border-b px-4 py-2.5 sticky top-0 z-40 shadow-xs flex items-center justify-between">
+    <div onclick="openAddressSelectModal()" class="flex items-center space-x-2.5 cursor-pointer flex-1 min-w-0 pr-2">
+      <div class="bg-red-50 text-red-600 p-2 rounded-xl shrink-0">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
       </div>
       <div class="truncate">
         <div class="flex items-center space-x-1">
-          <span class="text-[11px] font-black text-gray-900 uppercase tracking-wider">Delivering to:</span>
-          <span id="header-area-name" class="text-[11px] font-bold text-red-600 truncate">Kavali (Tap to Detect)</span>
-          <span class="text-[10px] text-gray-400">▼</span>
+          <span class="text-[10px] font-black text-gray-400 uppercase tracking-wider">Delivering to</span>
+          <span id="top-loc-name" class="text-xs font-black text-gray-900 truncate">Select Address</span>
+          <span class="text-[9px] text-gray-400">▼</span>
         </div>
-        <p id="header-full-address" class="text-[10px] text-gray-500 truncate">Tap to set GPS location for accurate delivery fee</p>
+        <p id="top-loc-desc" class="text-[11px] text-gray-500 truncate">Tap to set delivery location</p>
       </div>
     </div>
 
-    <!-- Cart Button -->
-    <button onclick="toggleCart()" class="bg-red-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm active:scale-95 transition shrink-0">
+    <!-- Cart Button with Pill Badge -->
+    <button onclick="openCartView()" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm active:scale-95 transition shrink-0">
       <span>Cart</span>
-      <span id="cart-count" class="bg-white text-red-600 rounded-full px-1.5 py-0.2 text-[11px] font-black">0</span>
+      <span id="cart-count" class="bg-white text-red-600 rounded-full px-1.5 py-0.2 text-[10px] font-black">0</span>
     </button>
-  </div>
+  </header>
 
-  <!-- Announcement Bar -->
+  <!-- Notice Banner -->
   <div class="bg-red-800 text-white text-[11px] text-center py-1.5 px-3 font-medium">
-    Kavali's #1 Online Festival Cracker Store — Book Online, Pay on Delivery!
+    Online booking open in Kavali & SPSR Nellore — Sivakasi crackers, pay on delivery.
   </div>
 
   <!-- Categories Bar -->
-  <div class="px-3 pt-3 pb-1 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs">
-    <button onclick="filterCategory('All')" class="cat-btn bg-red-600 text-white px-3.5 py-1.5 rounded-full font-semibold">All</button>
-    <button onclick="filterCategory('Sparklers')" class="cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Sparklers</button>
-    <button onclick="filterCategory('Sound Crackers')" class="cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Sound Crackers</button>
-    <button onclick="filterCategory('Ground Chakkars')" class="cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Ground Chakkars</button>
-    <button onclick="filterCategory('Flower Pots')" class="cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Flower Pots</button>
-    <button onclick="filterCategory('Sky Shots')" class="cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Sky Shots</button>
-    <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Gift Boxes</button>
+  <div class="px-3 pt-3 pb-1 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs bg-white border-b">
+    <button onclick="filterCategory('All')" class="cat-btn bg-red-600 text-white px-3.5 py-1.5 rounded-full font-bold">All</button>
+    <button onclick="filterCategory('Sparklers')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Sparklers</button>
+    <button onclick="filterCategory('Sound Crackers')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Sound Crackers</button>
+    <button onclick="filterCategory('Ground Chakkars')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Ground Chakkars</button>
+    <button onclick="filterCategory('Flower Pots')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Flower Pots</button>
+    <button onclick="filterCategory('Sky Shots')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Sky Shots</button>
+    <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Gift Boxes</button>
   </div>
 
-  <!-- View Layout & Sort Toolbar -->
-  <div class="px-3.5 py-2 flex items-center justify-between border-b bg-white text-xs">
+  <!-- View Switcher & Sort Toolbar -->
+  <div class="px-3.5 py-2 flex items-center justify-between bg-white border-b text-xs">
     <div class="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg">
-      <button onclick="setViewMode('big')" id="btn-view-big" class="view-btn px-2 py-1 rounded text-gray-600">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"/></svg>
-      </button>
-      <button onclick="setViewMode('medium')" id="btn-view-medium" class="view-btn px-2 py-1 rounded bg-white font-bold text-red-600 shadow-sm">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h4a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm8 0a1 1 0 011-1h4a1 1 0 011 1v12a1 1 0 01-1 1h-4a1 1 0 01-1-1V4z"/></svg>
-      </button>
-      <button onclick="setViewMode('small')" id="btn-view-small" class="view-btn px-2 py-1 rounded text-gray-600">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 4a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1H10a1 1 0 011 1v12a1 1 0 01-1 1H7.5a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H13a1 1 0 01-1-1V4z"/></svg>
-      </button>
-      <button onclick="setViewMode('list')" id="btn-view-list" class="view-btn px-2 py-1 rounded text-gray-600">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
-      </button>
+      <button onclick="setViewMode('big')" id="btn-view-big" class="view-btn px-2 py-1 rounded text-gray-600"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"/></svg></button>
+      <button onclick="setViewMode('medium')" id="btn-view-medium" class="view-btn px-2 py-1 rounded bg-white font-bold text-red-600 shadow-sm"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h4a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm8 0a1 1 0 011-1h4a1 1 0 011 1v12a1 1 0 01-1 1h-4a1 1 0 01-1-1V4z"/></svg></button>
+      <button onclick="setViewMode('small')" id="btn-view-small" class="view-btn px-2 py-1 rounded text-gray-600"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 4a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1H10a1 1 0 011 1v12a1 1 0 01-1 1H7.5a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H13a1 1 0 01-1-1V4z"/></svg></button>
+      <button onclick="setViewMode('list')" id="btn-view-list" class="view-btn px-2 py-1 rounded text-gray-600"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg></button>
     </div>
-
     <div class="flex items-center space-x-1.5">
       <span class="text-gray-400 font-medium">Sort:</span>
       <select id="sort-select" onchange="changeSort(this.value)" class="border rounded-lg px-2 py-1 bg-white text-xs font-semibold outline-none focus:border-red-600">
@@ -78,111 +72,235 @@
     </div>
   </div>
 
-  <!-- Dynamic Product Grid -->
+  <!-- Products Main Grid -->
   <main class="p-3" id="product-container">
     <div id="product-list" class="grid grid-cols-2 gap-2.5">
-      <div class="col-span-full text-center text-xs text-gray-400 py-10">Loading crackers...</div>
+      <div class="col-span-full text-center text-xs text-gray-400 py-12">Loading crackers catalog...</div>
     </div>
   </main>
 
-  <!-- ================= 2. ZEPTO/BLINKIT STYLE LOCATION MODAL ================= -->
-  <div id="location-picker-modal" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl flex flex-col space-y-3.5 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center pb-2 border-b">
-        <div>
-          <h2 class="text-base font-extrabold text-gray-900">Choose Delivery Location</h2>
-          <p class="text-[11px] text-gray-500">Delivery charge will be automatically calculated</p>
+  <!-- ================= FLIPKART STYLE CHECKOUT / CART VIEW (Images 1 & 2) ================= -->
+  <div id="cart-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-xs z-50 hidden flex justify-end">
+    <div class="bg-gray-50 w-full max-w-md h-full flex flex-col overflow-y-auto">
+      
+      <!-- Top Step Header -->
+      <div class="bg-white px-4 py-3 border-b flex items-center justify-between sticky top-0 z-10 shadow-2xs">
+        <div class="flex items-center space-x-3">
+          <button onclick="closeCartView()" class="text-gray-600 hover:text-black font-bold text-lg">←</button>
+          <h2 class="text-base font-extrabold text-gray-900">Confirm details</h2>
         </div>
-        <button onclick="closeLocationPickerModal()" class="text-gray-400 hover:text-gray-900 text-2xl font-bold">&times;</button>
-      </div>
-
-      <!-- Quick GPS Auto-Detect Button (Zepto Style) -->
-      <button type="button" onclick="detectGPSLocation(true)" id="btn-gps-detect" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-sm active:scale-95 transition">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18l-6-6m0 0l6-6m-6 6h18"/></svg>
-        <span>📍 Use Current Location (GPS)</span>
-      </button>
-
-      <!-- Mini Leaflet Map -->
-      <div class="rounded-xl overflow-hidden border border-gray-200">
-        <div id="map-container" class="w-full h-44 bg-gray-100"></div>
-        <div class="p-2 bg-gray-50 text-[10px] text-gray-500 flex justify-between items-center border-t">
-          <span>Move pin or tap map to update location</span>
-          <span id="pin-coords" class="font-mono text-gray-700">Kavali</span>
+        <div class="flex items-center space-x-4 text-[11px] font-bold text-gray-400">
+          <span class="text-blue-600 flex items-center space-x-1"><span>✓</span><span>Address</span></span>
+          <span class="text-blue-600 font-black">② Confirm</span>
+          <span>③ Book</span>
         </div>
       </div>
 
-      <!-- Address Input -->
-      <div>
-        <label class="block text-[11px] font-bold text-gray-700 mb-1">Detected Area / Village / Town:</label>
-        <input id="modal-detected-area" class="w-full border rounded-lg p-2.5 text-xs bg-gray-50 outline-none focus:border-red-600" placeholder="e.g. Vengal Rao Nagar, Kavali" />
+      <div class="flex-1 p-3.5 space-y-3 overflow-y-auto">
+        <!-- 1. Flipkart-style "Delivering to" Address Card (Image 1) -->
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-2xs space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-black text-gray-900 uppercase tracking-wide">Delivering to</span>
+            <button type="button" onclick="openAddressSelectModal()" class="text-blue-600 font-bold text-xs hover:underline">Change</button>
+          </div>
+
+          <div class="flex items-start space-x-2 pt-1">
+            <span class="text-gray-900 mt-0.5 text-sm">📍</span>
+            <div class="flex-1 text-xs">
+              <h3 id="card-cust-name" class="font-extrabold text-gray-900 text-sm">B.v.sravan</h3>
+              <p id="card-cust-address" class="text-gray-600 mt-0.5 leading-relaxed">11-33-979, Vengal rao nagar, Kavali, Andhra Pradesh</p>
+              <p id="card-cust-phone" class="text-gray-500 mt-1 font-semibold flex items-center space-x-1">
+                <span>📞</span><span id="card-cust-phone-val">9493525447</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Ordered Items List with Stepper Quantity -->
+        <div class="bg-white rounded-2xl p-3 border border-gray-200 shadow-2xs space-y-2.5">
+          <h3 class="text-xs font-black text-gray-900 uppercase tracking-wide border-b pb-2">Order Items</h3>
+          <div id="cart-items-list" class="divide-y space-y-2"></div>
+        </div>
+
+        <!-- 3. Price Details Card (Flipkart Summary) -->
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-2xs space-y-2 text-xs">
+          <h3 class="font-black text-gray-900 uppercase tracking-wide border-b pb-2">Price Details</h3>
+          <div class="flex justify-between text-gray-600">
+            <span>Price (<span id="summary-items-count">0</span> items)</span>
+            <span id="summary-mrp-total">₹0</span>
+          </div>
+          <div class="flex justify-between text-emerald-600 font-semibold">
+            <span>Discount</span>
+            <span id="summary-discount-val">- ₹0</span>
+          </div>
+          <div class="flex justify-between text-gray-600 items-center">
+            <div class="flex items-center space-x-1">
+              <span>Delivery Charges</span>
+              <span id="delivery-zone-badge" class="bg-gray-100 text-gray-600 px-1.5 py-0.2 rounded text-[10px] font-bold">Kavali</span>
+            </div>
+            <span id="summary-delivery-charge" class="font-bold text-gray-900">FREE</span>
+          </div>
+          <div class="border-t pt-2 flex justify-between items-center text-sm font-black text-gray-950">
+            <span>Total Payable Amount</span>
+            <span id="summary-grand-total" class="text-red-600 text-base">₹0</span>
+          </div>
+          <div class="bg-emerald-50 text-emerald-700 p-2 rounded-xl text-[11px] font-bold text-center">
+            🎉 You will save <span id="summary-savings-text">₹0</span> on this festival order
+          </div>
+        </div>
       </div>
 
-      <!-- Current Delivery Charge Preview -->
-      <div class="bg-red-50 border border-red-200 rounded-xl p-3 flex justify-between items-center text-xs">
+      <!-- Bottom Sticky Booking Button -->
+      <div class="bg-white border-t p-3 sticky bottom-0 shadow-lg flex items-center justify-between">
         <div>
-          <span class="text-[10px] font-bold text-red-500 uppercase block">Calculated Delivery Fee</span>
-          <span id="modal-zone-name" class="font-bold text-gray-900">Kavali City & Town (Local)</span>
+          <span class="text-[10px] text-gray-400 font-bold uppercase block">Pay on Delivery</span>
+          <span id="bottom-bar-total" class="text-lg font-black text-gray-950">₹0</span>
         </div>
-        <div class="text-right">
-          <span id="modal-delivery-rate" class="text-base font-black text-red-600">FREE</span>
-        </div>
-      </div>
-
-      <button type="button" onclick="confirmSelectedLocation()" class="w-full bg-neutral-900 hover:bg-black text-white font-bold py-3 rounded-xl text-xs active:scale-95 transition">
-        Confirm & Set Location
-      </button>
-    </div>
-  </div>
-
-  <!-- ================= 3. CART MODAL ================= -->
-  <div id="cart-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex justify-end">
-    <div class="bg-white w-full max-w-sm h-full flex flex-col p-4 overflow-y-auto">
-      <div class="flex justify-between items-center border-b pb-3">
-        <h2 class="text-base font-bold text-gray-900">Your Booking Cart</h2>
-        <button onclick="toggleCart()" class="text-gray-500 font-bold text-2xl">&times;</button>
-      </div>
-
-      <!-- Delivery Area Pill in Cart -->
-      <div onclick="openLocationPickerModal()" class="mt-2.5 bg-orange-50 border border-orange-200 rounded-xl p-2.5 flex justify-between items-center cursor-pointer">
-        <div>
-          <span class="text-[10px] font-black text-orange-600 uppercase block">Delivery To:</span>
-          <span id="cart-delivery-badge" class="font-bold text-xs text-gray-900">Kavali Town</span>
-        </div>
-        <span class="text-xs text-red-600 font-bold">Change ➔</span>
-      </div>
-
-      <div id="cart-items" class="flex-1 py-4 space-y-3 overflow-y-auto"></div>
-
-      <form id="checkout-form" onsubmit="handleCheckout(event)" class="space-y-3 border-t pt-3">
-        <div>
-          <label class="text-[11px] font-semibold text-gray-600 block">Your Name *</label>
-          <input required id="cust-name" type="text" class="w-full text-xs p-2.5 border rounded-lg mt-0.5 outline-none focus:border-red-600" placeholder="Full Name" />
-        </div>
-        <div>
-          <label class="text-[11px] font-semibold text-gray-600 block">Phone Number *</label>
-          <input required id="cust-phone" type="tel" class="w-full text-xs p-2.5 border rounded-lg mt-0.5 outline-none focus:border-red-600" placeholder="10-digit number" />
-        </div>
-        <div>
-          <label class="text-[11px] font-semibold text-gray-600 block">Delivery Address (House / Street / Landmark) *</label>
-          <textarea required id="cust-address" class="w-full text-xs p-2 border rounded-lg mt-0.5 outline-none focus:border-red-600" rows="2" placeholder="House no, Street name, Landmark"></textarea>
-        </div>
-
-        <div class="border-t pt-2 text-xs space-y-1">
-          <div class="flex justify-between text-gray-600"><span>Items Subtotal:</span><span id="subtotal">₹0</span></div>
-          <div class="flex justify-between text-gray-600"><span>Delivery Fee:</span><span id="delivery-fee" class="font-bold text-gray-900">FREE</span></div>
-          <div class="flex justify-between font-bold text-base text-red-600 pt-1 border-t"><span>Total to Pay:</span><span id="total-val">₹0</span></div>
-        </div>
-
-        <button type="submit" id="checkout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl text-xs mt-2 active:scale-95 transition shadow-sm">
-          Place Order & Book on WhatsApp
+        <button type="button" onclick="confirmOrderAndWhatsApp()" id="btn-submit-order" class="bg-amber-400 hover:bg-amber-500 active:scale-95 text-gray-950 font-black px-6 py-3 rounded-xl text-xs uppercase tracking-wide shadow-sm transition">
+          Continue & Book on WhatsApp
         </button>
-      </form>
+      </div>
+
     </div>
   </div>
 
+  <!-- ================= FLIPKART SAVED ADDRESSES BOTTOM SHEET (Image 2) ================= -->
+  <div id="address-select-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-2xs z-50 hidden flex items-end justify-center p-0">
+    <div class="bg-white w-full max-w-md rounded-t-3xl p-4 shadow-2xl flex flex-col max-h-[85vh] space-y-3">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="text-sm font-extrabold text-gray-900">Select delivery address</h3>
+        <button onclick="closeAddressSelectModal()" class="text-gray-400 hover:text-black text-2xl font-bold">&times;</button>
+      </div>
+
+      <!-- "+ Add New Address" Button (Image 2) -->
+      <button onclick="startAddNewAddressFlow()" class="w-full bg-blue-50 border border-blue-200 text-blue-700 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-between hover:bg-blue-100 transition">
+        <span class="flex items-center space-x-2">
+          <span class="text-base font-black">+</span>
+          <span>Add New</span>
+        </span>
+        <span>➔</span>
+      </button>
+
+      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Saved addresses</span>
+      <div id="saved-addresses-list" class="space-y-2 overflow-y-auto max-h-64 pr-1"></div>
+    </div>
+  </div>
+
+  <!-- ================= FLIPKART INTERACTIVE MAP PIN PICKER (Images 3 & 4) ================= -->
+  <div id="map-pin-modal" class="fixed inset-0 bg-white z-50 hidden flex flex-col">
+    <!-- Header -->
+    <div class="px-4 py-3 border-b flex items-center justify-between bg-white z-10 shadow-2xs">
+      <div class="flex items-center space-x-3">
+        <button onclick="closeMapPinModal()" class="text-gray-700 text-lg font-bold">←</button>
+        <h3 class="font-extrabold text-sm text-gray-900">Add new address</h3>
+      </div>
+      <span class="text-[11px] text-gray-400 font-semibold">Step 1 of 2</span>
+    </div>
+
+    <!-- Map Area with Center Pin (Image 4) -->
+    <div class="relative flex-1 w-full bg-gray-200">
+      <div id="interactive-map" class="w-full h-full"></div>
+
+      <!-- Center Fixed Map Pin (Flipkart Style) -->
+      <div class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center z-20 pb-8">
+        <div class="bg-neutral-900 text-white font-bold text-[10px] px-3 py-1 rounded-full shadow-lg mb-1 animate-bounce">
+          Place pin on the exact location
+        </div>
+        <div class="text-red-600 text-4xl drop-shadow-md">📍</div>
+      </div>
+
+      <!-- Floating "Use my current location" Pill (Image 4) -->
+      <div class="absolute bottom-4 inset-x-0 flex justify-center z-20 px-4">
+        <button type="button" onclick="triggerGPSCurrentLocation()" id="btn-use-gps-pill" class="bg-white hover:bg-gray-50 text-blue-600 border border-blue-200 font-bold text-xs px-4 py-2.5 rounded-full shadow-xl flex items-center space-x-2 active:scale-95 transition">
+          <span>🎯</span>
+          <span>Use my current location</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Deliver To Summary Box (Image 4) -->
+    <div class="bg-white border-t p-4 space-y-3 z-10 shadow-lg">
+      <div>
+        <span class="text-[10px] text-gray-400 font-bold uppercase block">Deliver To</span>
+        <div class="flex justify-between items-start mt-0.5">
+          <div class="pr-2">
+            <h4 id="map-detected-title" class="font-extrabold text-gray-900 text-xs">Vengal Rao Nagar</h4>
+            <p id="map-detected-full" class="text-[11px] text-gray-500 line-clamp-2 mt-0.5">Kavali, SPSR Nellore District, Andhra Pradesh</p>
+          </div>
+          <span id="map-zone-rate-pill" class="bg-emerald-50 text-emerald-700 font-bold text-[10px] px-2 py-0.5 rounded-full shrink-0">FREE Delivery</span>
+        </div>
+      </div>
+
+      <button type="button" onclick="proceedToAddressDetailsForm()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-xs shadow-md active:scale-95 transition">
+        Add address Details
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= FLIPKART "DELIVER TO" DETAILS FORM (Image 5) ================= -->
+  <div id="address-form-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-2xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl flex flex-col space-y-3.5 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="text-sm font-extrabold text-gray-900">Deliver To</h3>
+        <button onclick="closeAddressFormModal()" class="text-gray-400 hover:text-black text-2xl font-bold">&times;</button>
+      </div>
+
+      <div class="bg-amber-50 text-amber-800 text-[10px] p-2 rounded-xl flex items-center space-x-1 border border-amber-200">
+        <span>ℹ️</span>
+        <span>Ensure your address details are accurate for a smooth festival delivery experience</span>
+      </div>
+
+      <!-- Flat/House/Building Name * -->
+      <div>
+        <label class="block text-[11px] font-bold text-gray-700 mb-0.5">Flat/House/building name *</label>
+        <input id="input-house-no" type="text" placeholder="e.g. 11-33-979, Near Reddy Sangam" class="w-full border border-gray-300 rounded-lg p-2.5 text-xs outline-none focus:border-blue-600" />
+      </div>
+
+      <!-- Area/Sector/Locality (Auto-filled from Pin) -->
+      <div class="bg-gray-50 border rounded-xl p-2.5 flex justify-between items-center text-xs">
+        <div>
+          <span class="text-[9px] font-bold text-gray-400 uppercase block">Area / Locality</span>
+          <p id="form-locality-text" class="font-semibold text-gray-800 text-[11px] truncate max-w-[240px]">Vengal Rao Nagar, Kavali</p>
+        </div>
+        <button type="button" onclick="reopenMapPicker()" class="text-blue-600 font-bold text-xs hover:underline">Change</button>
+      </div>
+
+      <!-- Name & Mobile Number * -->
+      <div>
+        <label class="block text-[11px] font-bold text-gray-700 mb-0.5">Enter your full name *</label>
+        <input id="input-name" type="text" placeholder="Your Name" class="w-full border border-gray-300 rounded-lg p-2.5 text-xs outline-none focus:border-blue-600" />
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold text-gray-700 mb-0.5">10-digit mobile number *</label>
+        <input id="input-phone" type="tel" placeholder="Mobile Number" class="w-full border border-gray-300 rounded-lg p-2.5 text-xs outline-none focus:border-blue-600" />
+      </div>
+
+      <!-- Address Type (Home / Work) -->
+      <div>
+        <span class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Type of address</span>
+        <div class="flex space-x-2 text-xs">
+          <label class="flex items-center space-x-1.5 border px-3 py-1.5 rounded-lg cursor-pointer bg-blue-50 border-blue-300 text-blue-700 font-bold">
+            <input type="radio" name="addr-type" value="Home" checked class="hidden" />
+            <span>🏠 Home</span>
+          </label>
+          <label class="flex items-center space-x-1.5 border px-3 py-1.5 rounded-lg cursor-pointer bg-gray-50 text-gray-700 font-medium">
+            <input type="radio" name="addr-type" value="Work" class="hidden" />
+            <span>🏢 Work</span>
+          </label>
+        </div>
+      </div>
+
+      <button type="button" onclick="saveAndApplyAddress()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-xs shadow-md active:scale-95 transition">
+        Save address
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
     const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
     const SUPABASE_KEY = "sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
+    const KAVALI_BASE_COORDS = { lat: 14.9132, lon: 79.9928 }; // Origin Store
     let storeWhatsAppNumber = "917829978883";
 
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -194,27 +312,39 @@
     let currentViewMode = 'medium';
     let currentSort = 'popular';
 
-    // Active Location & Delivery state
-    let activeLocation = {
-      town: "Kavali",
-      fullAddress: "Kavali Town, SPSR Nellore District",
-      lat: 14.9132,
-      lon: 79.9928,
-      zoneName: "Kavali City & Town (Local)",
-      deliveryCharge: 0
-    };
+    // Saved Addresses (Flipkart Style)
+    let savedAddresses = [
+      {
+        id: "addr_1",
+        name: "B.v.sravan",
+        phone: "9493525447",
+        house: "11-33-979",
+        area: "Vengal rao nagar, Kavali, Andhra Pradesh",
+        lat: 14.9132,
+        lon: 79.9928,
+        zoneName: "Kavali City & Town (Local)",
+        deliveryCharge: 0
+      }
+    ];
+    let selectedAddress = savedAddresses[0];
 
     let leafletMap = null;
-    let mapMarker = null;
+    let tempMapCoords = { ...KAVALI_BASE_COORDS };
+    let tempDetectedInfo = { areaName: "Vengal Rao Nagar, Kavali", fullAddress: "Kavali, SPSR Nellore District, Andhra Pradesh", zoneName: "Kavali City & Town (Local)", deliveryCharge: 0 };
 
-    // 1. INITIALIZE & FETCH LIVE DELIVERY ZONES FROM DATABASE
-    async function initStore() {
-      // Load delivery zones configured in Supabase
+    // 1. INITIAL SETUP
+    async function init() {
+      // Load saved addresses from browser storage if present
+      const stored = localStorage.getItem('bittu_saved_addresses');
+      if (stored) {
+        try { savedAddresses = JSON.parse(stored); selectedAddress = savedAddresses[0]; } catch(e){}
+      }
+
+      // Sync Delivery Zones from Supabase
       const { data: zData } = await db.from('delivery_zones').select('*');
       if (zData && zData.length > 0) {
         deliveryZones = zData;
       } else {
-        // Fallback default zones
         deliveryZones = [
           { zone_name: 'Kavali City & Town (Local)', area_keywords: 'kavali, vengal, musunuru, maddurupadu, rudrakota', delivery_charge: 0 },
           { zone_name: 'Kavali Rural & Mandals', area_keywords: 'bogole, bitragunta, jaladanki, allur, dagadarthi, kaligiri, vinjamur', delivery_charge: 99 },
@@ -223,163 +353,304 @@
         ];
       }
 
-      // Sync store settings
+      // Sync WhatsApp from Store Settings
       const { data: sData } = await db.from('store_settings').select('*').eq('id', 1).single();
-      if (sData && sData.whatsapp_number) {
-        storeWhatsAppNumber = sData.whatsapp_number.replace(/\D/g, '');
-      }
+      if (sData && sData.whatsapp_number) storeWhatsAppNumber = sData.whatsapp_number.replace(/\D/g, '');
 
-      // Check if user already stored location previously
-      const savedLoc = localStorage.getItem('user_delivery_location');
-      if (savedLoc) {
-        try {
-          activeLocation = JSON.parse(savedLoc);
-          updateHeaderLocationUI();
-        } catch (e) {}
-      } else {
-        // Auto-detect on first visit silently
-        detectGPSLocation(false);
-      }
-
+      renderSavedAddressesList();
+      applySelectedAddress(selectedAddress);
       loadLiveProducts();
     }
 
-    // 2. LOCATION PICKER MODAL & MAP
-    function openLocationPickerModal() {
-      document.getElementById('location-picker-modal').classList.remove('hidden');
-      setTimeout(initMap, 200);
+    // 2. FLIPKART ADDRESS MANAGEMENT & MODALS
+    function renderSavedAddressesList() {
+      const container = document.getElementById('saved-addresses-list');
+      container.innerHTML = savedAddresses.map(a => `
+        <div onclick="selectAddressById('${a.id}')" class="p-3 border rounded-xl cursor-pointer flex items-start justify-between ${selectedAddress.id === a.id ? 'border-blue-500 bg-blue-50/50' : 'bg-white hover:bg-gray-50'}">
+          <div class="flex items-start space-x-2.5">
+            <span class="text-base text-gray-700 mt-0.5">📍</span>
+            <div class="text-xs">
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-gray-900">${a.name}</span>
+                ${selectedAddress.id === a.id ? '<span class="bg-blue-100 text-blue-700 font-bold text-[9px] px-1.5 py-0.2 rounded">Selected</span>' : ''}
+              </div>
+              <p class="text-gray-600 mt-0.5 text-[11px] leading-snug">${a.house ? a.house + ', ' : ''}${a.area}</p>
+              <p class="text-gray-500 font-semibold mt-0.5 text-[11px]">📞 ${a.phone}</p>
+            </div>
+          </div>
+          <span class="text-gray-400 text-xs">⋮</span>
+        </div>
+      `).join('');
     }
 
-    function closeLocationPickerModal() {
-      document.getElementById('location-picker-modal').classList.add('hidden');
+    function selectAddressById(id) {
+      const matched = savedAddresses.find(a => a.id === id);
+      if (matched) {
+        applySelectedAddress(matched);
+        closeAddressSelectModal();
+      }
     }
 
-    function initMap() {
-      const lat = activeLocation.lat || 14.9132;
-      const lon = activeLocation.lon || 79.9928;
+    function applySelectedAddress(addr) {
+      selectedAddress = addr;
+      document.getElementById('top-loc-name').innerText = addr.name + ' - ' + (addr.house || addr.area.split(',')[0]);
+      document.getElementById('top-loc-desc').innerText = addr.area;
+
+      document.getElementById('card-cust-name').innerText = addr.name;
+      document.getElementById('card-cust-address').innerText = `${addr.house ? addr.house + ', ' : ''}${addr.area}`;
+      document.getElementById('card-cust-phone-val').innerText = addr.phone;
+      document.getElementById('delivery-zone-badge').innerText = addr.zoneName || 'Local';
+
+      updateTotal();
+    }
+
+    function openAddressSelectModal() { document.getElementById('address-select-modal').classList.remove('hidden'); }
+    function closeAddressSelectModal() { document.getElementById('address-select-modal').classList.add('hidden'); }
+
+    // 3. MAP PIN PICKER (Images 3 & 4)
+    function startAddNewAddressFlow() {
+      closeAddressSelectModal();
+      document.getElementById('map-pin-modal').classList.remove('hidden');
+      setTimeout(initMapPicker, 200);
+    }
+
+    function closeMapPinModal() { document.getElementById('map-pin-modal').classList.add('hidden'); }
+
+    function initMapPicker() {
+      const startLat = selectedAddress.lat || KAVALI_BASE_COORDS.lat;
+      const startLon = selectedAddress.lon || KAVALI_BASE_COORDS.lon;
+      tempMapCoords = { lat: startLat, lon: startLon };
 
       if (!leafletMap) {
-        leafletMap = L.map('map-container').setView([lat, lon], 14);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 18,
-          attribution: '© OpenStreetMap'
-        }).addTo(leafletMap);
+        leafletMap = L.map('interactive-map', { zoomControl: false }).setView([startLat, startLon], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
 
-        mapMarker = L.marker([lat, lon], { draggable: true }).addTo(leafletMap);
-
-        mapMarker.on('dragend', function (e) {
-          const pos = mapMarker.getLatLng();
-          reverseGeocode(pos.lat, pos.lng);
-        });
-
-        leafletMap.on('click', function (e) {
-          mapMarker.setLatLng(e.latlng);
-          reverseGeocode(e.latlng.lat, e.latlng.lng);
+        // When user drags map, pin stays fixed in center (Images 3 & 4)
+        leafletMap.on('moveend', function() {
+          const center = leafletMap.getCenter();
+          tempMapCoords = { lat: center.lat, lon: center.lng };
+          reverseGeocodeMapCenter(center.lat, center.lng);
         });
       } else {
         leafletMap.invalidateSize();
-        leafletMap.setView([lat, lon], 14);
-        mapMarker.setLatLng([lat, lon]);
+        leafletMap.setView([startLat, startLon], 15);
       }
+      reverseGeocodeMapCenter(startLat, startLon);
     }
 
-    // Zepto-style GPS Detect
-    function detectGPSLocation(interactive = true) {
-      if (!navigator.geolocation) {
-        if (interactive) alert('Geolocation not supported by browser.');
-        return;
-      }
-
-      const btn = document.getElementById('btn-gps-detect');
-      if (interactive && btn) btn.innerText = 'Detecting GPS...';
-
-      navigator.geolocation.getCurrentPosition(async (pos) => {
+    function triggerGPSCurrentLocation() {
+      const pill = document.getElementById('btn-use-gps-pill');
+      pill.innerText = "Finding GPS location...";
+      navigator.geolocation.getCurrentPosition((pos) => {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
-        activeLocation.lat = lat;
-        activeLocation.lon = lon;
-
-        if (leafletMap && mapMarker) {
-          leafletMap.setView([lat, lon], 15);
-          mapMarker.setLatLng([lat, lon]);
-        }
-
-        await reverseGeocode(lat, lon);
-        if (interactive && btn) btn.innerHTML = '<span>📍 Use Current Location (GPS)</span>';
-      }, (err) => {
-        if (interactive) alert('Please allow location permission to auto-detect your area.');
-        if (interactive && btn) btn.innerHTML = '<span>📍 Use Current Location (GPS)</span>';
-      }, { enableHighAccuracy: true, timeout: 8000 });
+        tempMapCoords = { lat, lon };
+        if (leafletMap) leafletMap.setView([lat, lon], 16);
+        reverseGeocodeMapCenter(lat, lon);
+        pill.innerHTML = "<span>🎯</span><span>Use my current location</span>";
+      }, () => {
+        alert("Please enable location permission on your phone to auto-detect.");
+        pill.innerHTML = "<span>🎯</span><span>Use my current location</span>";
+      }, { enableHighAccuracy: true });
     }
 
-    // Reverse Geocode and Match with Configured Supabase Zones
-    async function reverseGeocode(lat, lon) {
-      document.getElementById('pin-coords').innerText = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+    async function reverseGeocodeMapCenter(lat, lon) {
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
         const data = await res.json();
         const addr = data.address || {};
 
-        const town = addr.suburb || addr.town || addr.village || addr.city_district || addr.county || addr.city || 'Kavali';
-        const road = addr.road || addr.neighbourhood || '';
-        const fullAddr = `${road ? road + ', ' : ''}${town}, SPSR Nellore District`;
+        const areaTitle = addr.suburb || addr.neighbourhood || addr.village || addr.road || addr.town || "Kavali Area";
+        const district = addr.county || addr.city_district || "SPSR Nellore District";
+        const state = addr.state || "Andhra Pradesh";
+        const pincode = addr.postcode ? ` - ${addr.postcode}` : "";
 
-        activeLocation.town = town;
-        activeLocation.fullAddress = fullAddr;
+        const fullAddress = `${areaTitle}, ${district}, ${state}${pincode}`;
 
-        // MATCH WITH DATABASE DELIVERY ZONES
-        calculateDeliveryZoneRate(fullAddr + ' ' + JSON.stringify(addr));
+        // Calculate delivery zone
+        const zoneInfo = evaluateDeliveryCharge(fullAddress, lat, lon);
 
-        // Update modal UI
-        document.getElementById('modal-detected-area').value = fullAddr;
-        document.getElementById('modal-zone-name').innerText = activeLocation.zoneName;
-        document.getElementById('modal-delivery-rate').innerText = activeLocation.deliveryCharge === 0 ? 'FREE' : `₹${activeLocation.deliveryCharge}`;
-      } catch (err) {
-        console.warn('Geocoding delay:', err);
+        tempDetectedInfo = {
+          areaName: areaTitle,
+          fullAddress: fullAddress,
+          zoneName: zoneInfo.zoneName,
+          deliveryCharge: zoneInfo.charge
+        };
+
+        document.getElementById('map-detected-title').innerText = areaTitle;
+        document.getElementById('map-detected-full').innerText = fullAddress;
+        document.getElementById('map-zone-rate-pill').innerText = zoneInfo.charge === 0 ? "FREE Delivery" : `₹${zoneInfo.charge} Delivery`;
+        document.getElementById('map-zone-rate-pill').className = zoneInfo.charge === 0 ? "bg-emerald-50 text-emerald-700 font-bold text-[10px] px-2 py-0.5 rounded-full" : "bg-blue-50 text-blue-700 font-bold text-[10px] px-2 py-0.5 rounded-full";
+      } catch (e) {
+        console.warn("Geocoding note:", e);
       }
     }
 
-    function calculateDeliveryZoneRate(locationText) {
-      const lower = locationText.toLowerCase();
-      let matchedZone = null;
-
-      // Look through deliveryZones from Supabase
-      for (const zone of deliveryZones) {
-        const keywords = (zone.area_keywords || '').split(',').map(k => k.trim().toLowerCase());
-        const isMatch = keywords.some(k => k && lower.includes(k));
-        if (isMatch) {
-          matchedZone = zone;
-          break;
+    function evaluateDeliveryCharge(addressString, lat, lon) {
+      const lower = addressString.toLowerCase();
+      // Match keywords in configured delivery_zones
+      for (const z of deliveryZones) {
+        const keys = (z.area_keywords || '').split(',').map(k => k.trim().toLowerCase());
+        if (keys.some(k => k && lower.includes(k))) {
+          return { zoneName: z.zone_name, charge: Number(z.delivery_charge || 0) };
         }
       }
+      return { zoneName: "Regional Delivery", charge: 99 };
+    }
 
-      if (!matchedZone) {
-        // Fallback to highest tier or default
-        matchedZone = deliveryZones[deliveryZones.length - 1] || { zone_name: 'Standard Regional', delivery_charge: 99 };
+    // 4. STEP 2: ADDRESS DETAILS FORM (Image 5)
+    function proceedToAddressDetailsForm() {
+      closeMapPinModal();
+      document.getElementById('form-locality-text').innerText = tempDetectedInfo.fullAddress;
+      document.getElementById('input-name').value = selectedAddress.name || "";
+      document.getElementById('input-phone').value = selectedAddress.phone || "";
+      document.getElementById('address-form-modal').classList.remove('hidden');
+    }
+
+    function closeAddressFormModal() { document.getElementById('address-form-modal').classList.add('hidden'); }
+
+    function reopenMapPicker() {
+      closeAddressFormModal();
+      document.getElementById('map-pin-modal').classList.remove('hidden');
+    }
+
+    function saveAndApplyAddress() {
+      const houseNo = document.getElementById('input-house-no').value.trim();
+      const name = document.getElementById('input-name').value.trim();
+      const phone = document.getElementById('input-phone').value.trim();
+
+      if (!houseNo) return alert("Please enter Flat / House / Building name.");
+      if (!name) return alert("Please enter your name.");
+      if (!phone || phone.length < 10) return alert("Please enter a valid 10-digit mobile number.");
+
+      const newAddr = {
+        id: "addr_" + Date.now(),
+        name: name,
+        phone: phone,
+        house: houseNo,
+        area: tempDetectedInfo.fullAddress,
+        lat: tempMapCoords.lat,
+        lon: tempMapCoords.lon,
+        zoneName: tempDetectedInfo.zoneName,
+        deliveryCharge: tempDetectedInfo.deliveryCharge
+      };
+
+      savedAddresses.unshift(newAddr);
+      localStorage.setItem('bittu_saved_addresses', JSON.stringify(savedAddresses));
+
+      renderSavedAddressesList();
+      applySelectedAddress(newAddr);
+      closeAddressFormModal();
+    }
+
+    // 5. CART & BILLING CALCULATIONS
+    function openCartView() {
+      renderCartItems();
+      updateTotal();
+      document.getElementById('cart-modal').classList.remove('hidden');
+    }
+
+    function closeCartView() { document.getElementById('cart-modal').classList.add('hidden'); }
+
+    function renderCartItems() {
+      const container = document.getElementById('cart-items-list');
+      if (cart.length === 0) {
+        container.innerHTML = '<p class="text-xs text-gray-400 text-center py-6">Your cart is empty.</p>';
+        return;
       }
 
-      activeLocation.zoneName = matchedZone.zone_name;
-      activeLocation.deliveryCharge = Number(matchedZone.delivery_charge || 0);
+      container.innerHTML = cart.map(item => `
+        <div class="py-2.5 flex items-center justify-between text-xs">
+          <div class="flex-1 pr-2">
+            <h4 class="font-bold text-gray-900 leading-tight">${item.name}</h4>
+            <div class="flex items-center space-x-1.5 mt-0.5">
+              <span class="font-extrabold text-red-600">₹${item.offer_price}</span>
+              <span class="line-through text-gray-400 text-[10px]">₹${item.mrp}</span>
+            </div>
+          </div>
+          <!-- In-cart quantity stepper -->
+          <div class="flex items-center space-x-2">
+            <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden h-7">
+              <button onclick="updateItemQty('${item.id}', -1)" class="w-6 h-full font-black text-gray-600 hover:bg-gray-100 flex items-center justify-center">−</button>
+              <span class="font-bold text-xs px-2 text-gray-900">${item.qty}</span>
+              <button onclick="updateItemQty('${item.id}', 1)" class="w-6 h-full font-black text-gray-600 hover:bg-gray-100 flex items-center justify-center">+</button>
+            </div>
+            <span class="font-black text-xs text-gray-900 w-12 text-right">₹${item.offer_price * item.qty}</span>
+          </div>
+        </div>
+      `).join('');
     }
 
-    function confirmSelectedLocation() {
-      const userText = document.getElementById('modal-detected-area').value.trim();
-      if (userText) activeLocation.fullAddress = userText;
+    function updateTotal() {
+      const itemsCount = cart.reduce((sum, i) => sum + i.qty, 0);
+      const mrpSubtotal = cart.reduce((sum, i) => sum + (Number(i.mrp || i.offer_price) * i.qty), 0);
+      const offerSubtotal = cart.reduce((sum, i) => sum + (Number(i.offer_price) * i.qty), 0);
+      const discount = mrpSubtotal - offerSubtotal;
+      const deliveryFee = Number(selectedAddress.deliveryCharge || 0);
+      const grandTotal = offerSubtotal + deliveryFee;
 
-      localStorage.setItem('user_delivery_location', JSON.stringify(activeLocation));
-      updateHeaderLocationUI();
-      closeLocationPickerModal();
-      updateTotal();
+      document.getElementById('cart-count').innerText = itemsCount;
+      document.getElementById('summary-items-count').innerText = itemsCount;
+      document.getElementById('summary-mrp-total').innerText = `₹${mrpSubtotal.toFixed(0)}`;
+      document.getElementById('summary-discount-val').innerText = `- ₹${discount.toFixed(0)}`;
+      document.getElementById('summary-delivery-charge').innerText = deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`;
+      document.getElementById('summary-grand-total').innerText = `₹${grandTotal.toFixed(0)}`;
+      document.getElementById('bottom-bar-total').innerText = `₹${grandTotal.toFixed(0)}`;
+      document.getElementById('summary-savings-text').innerText = `₹${discount.toFixed(0)}`;
     }
 
-    function updateHeaderLocationUI() {
-      document.getElementById('header-area-name').innerText = activeLocation.town || 'Kavali';
-      document.getElementById('header-full-address').innerText = activeLocation.fullAddress;
-      document.getElementById('cart-delivery-badge').innerText = `${activeLocation.town} (${activeLocation.deliveryCharge === 0 ? 'FREE Delivery' : '₹' + activeLocation.deliveryCharge})`;
-      document.getElementById('cust-address').value = activeLocation.fullAddress;
+    // 6. WHATSAPP CONFIRMATION (Image 1 Final Step)
+    async function confirmOrderAndWhatsApp() {
+      if (cart.length === 0) return alert("Your cart is empty. Please add items.");
+
+      const btn = document.getElementById('btn-submit-order');
+      btn.disabled = true;
+      btn.innerText = "Creating Booking...";
+
+      const orderId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const itemsCount = cart.reduce((sum, i) => sum + i.qty, 0);
+      const offerSubtotal = cart.reduce((sum, i) => sum + (Number(i.offer_price) * i.qty), 0);
+      const deliveryFee = Number(selectedAddress.deliveryCharge || 0);
+      const grandTotal = offerSubtotal + deliveryFee;
+
+      // Exact map link from pin coordinates
+      const mapPinUrl = `https://maps.google.com/?q=${selectedAddress.lat},${selectedAddress.lon}`;
+
+      // Insert into Supabase Orders table
+      await db.from('orders').insert([{
+        id: orderId,
+        customer_name: selectedAddress.name,
+        customer_phone: selectedAddress.phone,
+        delivery_address: `${selectedAddress.house ? selectedAddress.house + ', ' : ''}${selectedAddress.area}`,
+        delivery_location: `${selectedAddress.zoneName} (${mapPinUrl})`,
+        delivery_fee: deliveryFee,
+        total_amount: grandTotal,
+        items: cart,
+        status: 'Pending'
+      }]);
+
+      const itemLines = cart.map(i => `• ${i.name} (x${i.qty}) = ₹${i.offer_price * i.qty}`).join('\n');
+
+      const message = encodeURIComponent(
+        `*NEW FESTIVAL ORDER #${orderId}*\n` +
+        `---------------------------------\n` +
+        `*Customer Name:* ${selectedAddress.name}\n` +
+        `*Phone:* ${selectedAddress.phone}\n` +
+        `*Delivery Address:* ${selectedAddress.house ? selectedAddress.house + ', ' : ''}${selectedAddress.area}\n` +
+        `*Exact Google Maps Pin:* ${mapPinUrl}\n` +
+        `*Delivery Zone:* ${selectedAddress.zoneName}\n` +
+        `---------------------------------\n` +
+        `*Items Ordered (${itemsCount} items):*\n${itemLines}\n` +
+        `---------------------------------\n` +
+        `*Delivery Fee:* ${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}\n` +
+        `*Total Pay on Delivery:* ₹${grandTotal.toFixed(0)}\n\n` +
+        `Please confirm my festival crackers booking! 🎉`
+      );
+
+      window.location.href = `https://wa.me/${storeWhatsAppNumber}?text=${message}`;
     }
 
-     // 3. PRODUCT & CART LOGIC
+    // 7. PRODUCT RENDERING & STEPPER
     async function loadLiveProducts() {
       const { data, error } = await db.from('products').select('*');
       if (!error && data) {
@@ -396,10 +667,7 @@
       renderProducts();
     }
 
-    function changeSort(val) {
-      currentSort = val;
-      renderProducts();
-    }
+    function changeSort(val) { currentSort = val; renderProducts(); }
 
     function renderProducts() {
       const container = document.getElementById('product-list');
@@ -425,68 +693,18 @@
 
         const qtyButtonHtml = qty > 0 ? `
           <div class="flex items-center justify-between border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-8 w-full">
-            <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
+            <button onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
             <span class="font-black text-red-700 text-xs px-1">${qty}</span>
-            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
+            <button onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
           </div>
         ` : `
-          <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
+          <button onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
             + Add
           </button>
         `;
 
-        if (currentViewMode === 'list') {
-          return `
-            <div class="bg-white border rounded-xl p-2.5 flex items-center space-x-3 shadow-sm">
-              <img src="${p.image_url || 'https://placehold.co/120x120?text=Cracker'}" class="w-16 h-16 object-cover rounded-lg shrink-0" />
-              <div class="flex-1 min-w-0">
-                <span class="text-[9px] text-gray-400 uppercase font-bold tracking-wider">${p.category}</span>
-                <h3 class="font-bold text-xs text-gray-900 truncate">${p.name}</h3>
-                <div class="flex items-center space-x-1.5 mt-0.5">
-                  <span class="font-extrabold text-red-600 text-sm">₹${p.offer_price}</span>
-                  <span class="line-through text-gray-400 text-[10px]">₹${p.mrp}</span>
-                </div>
-              </div>
-              <div class="w-24 shrink-0">${qtyButtonHtml}</div>
-            </div>`;
-        }
-
-        if (currentViewMode === 'small') {
-          return `
-            <div class="bg-white border rounded-xl p-2 flex flex-col justify-between shadow-sm">
-              <div>
-                <img src="${p.image_url || 'https://placehold.co/150x120?text=Cracker'}" class="w-full h-16 object-cover rounded-md mb-1.5" />
-                <span class="text-[8px] text-gray-400 uppercase font-bold tracking-wider block truncate">${p.category}</span>
-                <h3 class="font-bold text-[11px] leading-tight text-gray-900 line-clamp-2 h-7">${p.name}</h3>
-                <div class="mt-1">
-                  <span class="font-black text-red-600 text-xs">₹${p.offer_price}</span>
-                  <span class="line-through text-gray-400 text-[9px]">₹${p.mrp}</span>
-                </div>
-              </div>
-              <div class="mt-2">${qtyButtonHtml}</div>
-            </div>`;
-        }
-
-        if (currentViewMode === 'big') {
-          return `
-            <div class="bg-white border rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-4 items-center">
-              <img src="${p.image_url || 'https://placehold.co/400x300?text=Cracker'}" class="w-full sm:w-48 h-44 object-cover rounded-xl" />
-              <div class="flex-1 w-full flex flex-col justify-between">
-                <div>
-                  <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">${p.category}</span>
-                  <h3 class="font-black text-base text-gray-900 mt-1">${p.name}</h3>
-                  <div class="flex items-center space-x-2 mt-2">
-                    <span class="font-black text-red-600 text-xl">₹${p.offer_price}</span>
-                    <span class="line-through text-gray-400 text-sm">₹${p.mrp}</span>
-                  </div>
-                </div>
-                <div class="mt-4 max-w-xs">${qtyButtonHtml}</div>
-              </div>
-            </div>`;
-        }
-
         return `
-          <div class="bg-white border rounded-xl p-3 flex flex-col justify-between shadow-sm">
+          <div class="bg-white border rounded-xl p-3 flex flex-col justify-between shadow-2xs">
             <div>
               <img src="${p.image_url || 'https://placehold.co/200x150?text=Cracker'}" class="w-full h-24 object-cover rounded-lg mb-2" />
               <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${p.category}</div>
@@ -497,7 +715,8 @@
               </div>
             </div>
             <div class="mt-2.5">${qtyButtonHtml}</div>
-          </div>`;
+          </div>
+        `;
       }).join('');
     }
 
@@ -510,105 +729,22 @@
       } else if (change > 0) {
         cart.push({ ...prod, qty: 1 });
       }
-      updateCartUI();
       renderProducts();
-    }
-
-    function updateCartUI() {
-      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
-      document.getElementById('cart-count').innerText = totalCount;
-      const cartItemsDiv = document.getElementById('cart-items');
-
-      if (cart.length === 0) {
-        cartItemsDiv.innerHTML = '<p class="text-xs text-gray-400 text-center py-6">Your cart is empty.</p>';
-      } else {
-        cartItemsDiv.innerHTML = cart.map(item => `
-          <div class="flex justify-between items-center text-xs border-b pb-2">
-            <div>
-              <p class="font-semibold text-gray-800">${item.name}</p>
-              <p class="text-gray-500">₹${item.offer_price} × ${item.qty}</p>
-            </div>
-            <div class="flex items-center space-x-2">
-              <span class="font-bold">₹${item.offer_price * item.qty}</span>
-              <button type="button" onclick="updateItemQty('${item.id}', -item.qty)" class="text-red-500 font-bold text-sm px-1">&times;</button>
-            </div>
-          </div>
-        `).join('');
-      }
+      renderCartItems();
       updateTotal();
-    }
-
-    function updateTotal() {
-      const itemsTotal = cart.reduce((sum, item) => sum + (item.offer_price * item.qty), 0);
-      const deliveryFee = Number(activeLocation.deliveryCharge || 0);
-      const grandTotal = itemsTotal + deliveryFee;
-
-      document.getElementById('subtotal').innerText = `₹${itemsTotal.toFixed(2)}`;
-      document.getElementById('delivery-fee').innerText = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
-      document.getElementById('total-val').innerText = `₹${grandTotal.toFixed(2)}`;
     }
 
     function filterCategory(cat) {
       activeCategory = cat;
       document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.className = btn.innerText === cat 
-          ? "cat-btn bg-red-600 text-white px-3.5 py-1.5 rounded-full font-semibold" 
-          : "cat-btn bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-medium";
+          ? "cat-btn bg-red-600 text-white px-3.5 py-1.5 rounded-full font-bold" 
+          : "cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium";
       });
       renderProducts();
     }
 
-    function toggleCart() {
-      document.getElementById('cart-modal').classList.toggle('hidden');
-    }
-
-    async function handleCheckout(e) {
-      e.preventDefault();
-      if (cart.length === 0) return alert('Your cart is empty');
-
-      const btn = document.getElementById('checkout-btn');
-      btn.disabled = true;
-      btn.innerText = 'Creating Booking...';
-
-      const orderId = Math.random().toString(36).substring(2, 8).toUpperCase();
-      const name = document.getElementById('cust-name').value.trim();
-      const phone = document.getElementById('cust-phone').value.trim();
-      const address = document.getElementById('cust-address').value.trim();
-      const deliveryFee = Number(activeLocation.deliveryCharge || 0);
-      const itemsTotal = cart.reduce((sum, item) => sum + (item.offer_price * item.qty), 0);
-      const total = itemsTotal + deliveryFee;
-
-      const mapLink = activeLocation.lat ? `\n📍 Map Pin: https://maps.google.com/?q=${activeLocation.lat},${activeLocation.lon}` : '';
-
-      await db.from('orders').insert([{
-        id: orderId,
-        customer_name: name,
-        customer_phone: phone,
-        delivery_address: address,
-        delivery_location: `${activeLocation.town} (${activeLocation.zoneName})`,
-        delivery_fee: deliveryFee,
-        total_amount: total,
-        items: cart,
-        status: 'Pending'
-      }]);
-
-      const itemLines = cart.map(i => `• ${i.name} (x${i.qty}) - ₹${i.offer_price * i.qty}`).join('\n');
-      const message = encodeURIComponent(
-        `*NEW ORDER #${orderId}*\n\n` +
-        `*Customer Details:*\n` +
-        `Name: ${name}\n` +
-        `Phone: ${phone}\n` +
-        `Address: ${address}${mapLink}\n` +
-        `Region / Zone: ${activeLocation.zoneName}\n\n` +
-        `*Items Ordered:*\n${itemLines}\n\n` +
-        `*Delivery Charge:* ${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}\n` +
-        `*Total Pay on Delivery:* ₹${total.toFixed(2)}`
-      );
-
-      window.location.href = `https://wa.me/${storeWhatsAppNumber}?text=${message}`;
-    }
-
-    initStore();
+    init();
   </script>
 </body>
 </html>
