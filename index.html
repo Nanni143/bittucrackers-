@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bittu Crackers - Online Booking</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 pb-20">
+
+  <div class="bg-red-800 text-white text-xs text-center py-2 px-3 font-medium">
+    Online booking open for the FIRST TIME in Kavali — book online, pay on delivery.
+  </div>
+
+  <header class="bg-white border-b px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+    <div class="flex items-center space-x-2">
+      <span class="bg-red-600 text-white font-bold px-2.5 py-1 rounded-md text-sm">B</span>
+      <span class="font-extrabold text-base tracking-tight text-gray-900">BITTU CRACKERS</span>
+    </div>
+    <button onclick="toggleCart()" class="bg-red-600 text-white px-3.5 py-1.5 rounded-lg text-sm font-semibold flex items-center space-x-1.5 shadow-sm">
+      <span>Cart</span>
+      <span id="cart-count" class="bg-white text-red-600 rounded-full px-1.5 py-0.2 text-xs font-bold">0</span>
+    </button>
+  </header>
+
+  <section class="p-4 bg-orange-50/60 border-b">
+    <span class="text-[10px] font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">First online cracker booking in Kavali</span>
+    <h1 class="text-2xl font-black text-gray-950 mt-2 leading-tight">BITTU CRACKERS<br><span class="text-red-600">Festival crackers, booked online.</span></h1>
+    <p class="text-xs text-gray-600 mt-2 leading-relaxed">Sivakasi-quality crackers at honest offer prices. Add to cart, book with your name and phone number — we confirm on WhatsApp and deliver across SPSR Nellore District.</p>
+  </section>
+
+  <!-- Categories -->
+  <div class="p-4 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs">
+    <button onclick="filterCategory('All')" class="cat-btn bg-red-600 text-white px-3 py-1.5 rounded-full font-medium">All</button>
+    <button onclick="filterCategory('Sparklers')" class="cat-btn bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium">Sparklers</button>
+    <button onclick="filterCategory('Sound Crackers')" class="cat-btn bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium">Sound Crackers</button>
+    <button onclick="filterCategory('Flower Pots')" class="cat-btn bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium">Flower Pots</button>
+    <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium">Gift Boxes</button>
+  </div>
+
+  <!-- Products Grid -->
+  <main class="p-4 grid grid-cols-2 gap-3" id="product-list">
+    <div class="col-span-2 text-center text-xs text-gray-400 py-10">Loading crackers...</div>
+  </main>
+
+  <!-- Cart Modal -->
+  <div id="cart-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex justify-end">
+    <div class="bg-white w-full max-w-sm h-full flex flex-col p-4 overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h2 class="text-base font-bold text-gray-900">Your Booking Cart</h2>
+        <button onclick="toggleCart()" class="text-gray-500 font-bold text-2xl">&times;</button>
+      </div>
+
+      <div id="cart-items" class="flex-1 py-4 space-y-3 overflow-y-auto"></div>
+
+      <form id="checkout-form" onsubmit="handleCheckout(event)" class="space-y-3 border-t pt-3">
+        <div>
+          <label class="text-[11px] font-semibold text-gray-600 block">Your Name *</label>
+          <input required id="cust-name" type="text" class="w-full text-xs p-2 border rounded-lg mt-0.5" placeholder="Full Name" />
+        </div>
+        <div>
+          <label class="text-[11px] font-semibold text-gray-600 block">Phone Number *</label>
+          <input required id="cust-phone" type="tel" class="w-full text-xs p-2 border rounded-lg mt-0.5" placeholder="10-digit number" />
+        </div>
+        <div>
+          <label class="text-[11px] font-semibold text-gray-600 block">Delivery Address *</label>
+          <textarea required id="cust-address" class="w-full text-xs p-2 border rounded-lg mt-0.5" rows="2" placeholder="House no, Street name, landmark"></textarea>
+        </div>
+        <div>
+          <label class="text-[11px] font-semibold text-gray-600 block">Delivery Location *</label>
+          <select id="cust-location" onchange="updateTotal()" class="w-full text-xs p-2 border rounded-lg mt-0.5">
+            <option value="0">Kavali (City) — FREE</option>
+            <option value="150">Nellore City — ₹150</option>
+            <option value="200">Other District Towns — ₹200</option>
+          </select>
+        </div>
+
+        <div class="border-t pt-2 text-xs space-y-1">
+          <div class="flex justify-between text-gray-600"><span>Items Subtotal:</span><span id="subtotal">₹0</span></div>
+          <div class="flex justify-between text-gray-600"><span>Delivery:</span><span id="delivery-fee">FREE</span></div>
+          <div class="flex justify-between font-bold text-sm text-red-600"><span>Total:</span><span id="total-val">₹0</span></div>
+        </div>
+
+        <button type="submit" id="checkout-btn" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-xs mt-2">
+          Place Order & Book on WhatsApp
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
+    const SUPABASE_KEY = "Sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
+    const WHATSAPP_STORE_PHONE = "917829978883";
+
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let allProducts = [];
+    let cart = [];
+    let activeCategory = 'All';
+
+    async function loadLiveProducts() {
+      const { data, error } = await db.from('products').select('*');
+      if (!error && data) {
+        allProducts = data;
+        renderProducts();
+      }
+    }
+
+    function renderProducts() {
+      const container = document.getElementById('product-list');
+      const filtered = activeCategory === 'All' ? allProducts : allProducts.filter(p => p.category === activeCategory);
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="col-span-2 text-center text-xs text-gray-400 py-10">No products found.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(p => `
+        <div class="bg-white border rounded-xl p-3 flex flex-col justify-between shadow-sm">
+          <div>
+            <img src="${p.image_url || 'https://placehold.co/200x150?text=Cracker'}" class="w-full h-24 object-cover rounded-lg mb-2" />
+            <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${p.category}</div>
+            <h3 class="font-bold text-xs mt-0.5 leading-snug line-clamp-2">${p.name}</h3>
+            <div class="flex items-center space-x-1.5 mt-1.5">
+              <span class="font-extrabold text-red-600 text-sm">₹${p.offer_price}</span>
+              <span class="line-through text-gray-400 text-[11px]">₹${p.mrp}</span>
+            </div>
+          </div>
+          <button onclick="addToCart('${p.id}')" class="w-full bg-red-50 text-red-600 font-bold py-1.5 rounded-lg text-xs mt-2.5 border border-red-200">
+            + Add
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function addToCart(id) {
+      const prod = allProducts.find(p => p.id === id);
+      const existing = cart.find(c => c.id === id);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ ...prod, qty: 1 });
+      }
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      document.getElementById('cart-count').innerText = cart.reduce((sum, item) => sum + item.qty, 0);
+      const cartItemsDiv = document.getElementById('cart-items');
+
+      if (cart.length === 0) {
+        cartItemsDiv.innerHTML = '<p class="text-xs text-gray-400 text-center py-6">Your cart is empty.</p>';
+      } else {
+        cartItemsDiv.innerHTML = cart.map(item => `
+          <div class="flex justify-between items-center text-xs border-b pb-2">
+            <div>
+              <p class="font-semibold text-gray-800">${item.name}</p>
+              <p class="text-gray-500">₹${item.offer_price} × ${item.qty}</p>
+            </div>
+            <span class="font-bold">₹${item.offer_price * item.qty}</span>
+          </div>
+        `).join('');
+      }
+      updateTotal();
+    }
+
+    function updateTotal() {
+      const itemsTotal = cart.reduce((sum, item) => sum + (item.offer_price * item.qty), 0);
+      const deliveryFee = parseInt(document.getElementById('cust-location').value || '0', 10);
+      const grandTotal = itemsTotal + deliveryFee;
+
+      document.getElementById('subtotal').innerText = `₹${itemsTotal}`;
+      document.getElementById('delivery-fee').innerText = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
+      document.getElementById('total-val').innerText = `₹${grandTotal}`;
+    }
+
+    function filterCategory(cat) {
+      activeCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.className = btn.innerText === cat 
+          ? "cat-btn bg-red-600 text-white px-3 py-1.5 rounded-full font-medium" 
+          : "cat-btn bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium";
+      });
+      renderProducts();
+    }
+
+    function toggleCart() {
+      document.getElementById('cart-modal').classList.toggle('hidden');
+    }
+
+    async function handleCheckout(e) {
+      e.preventDefault();
+      if (cart.length === 0) return alert('Your cart is empty');
+
+      const btn = document.getElementById('checkout-btn');
+      btn.disabled = true;
+      btn.innerText = 'Creating Booking...';
+
+      const orderId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const name = document.getElementById('cust-name').value;
+      const phone = document.getElementById('cust-phone').value;
+      const address = document.getElementById('cust-address').value;
+      const select = document.getElementById('cust-location');
+      const locationText = select.options[select.selectedIndex].text;
+      const deliveryFee = parseInt(select.value, 10);
+      const itemsTotal = cart.reduce((sum, item) => sum + (item.offer_price * item.qty), 0);
+      const total = itemsTotal + deliveryFee;
+
+      await db.from('orders').insert([{
+        id: orderId,
+        customer_name: name,
+        customer_phone: phone,
+        delivery_address: address,
+        delivery_location: locationText,
+        delivery_fee: deliveryFee,
+        total_amount: total,
+        items: cart,
+        status: 'Pending'
+      }]);
+
+      const itemLines = cart.map(i => `• ${i.name} (x${i.qty}) - ₹${i.offer_price * i.qty}`).join('\n');
+      const message = encodeURIComponent(
+        `*NEW ORDER #${orderId}*\n\n` +
+        `*Customer Details:*\n` +
+        `Name: ${name}\n` +
+        `Phone: ${phone}\n` +
+        `Address: ${address}\n` +
+        `Location: ${locationText}\n\n` +
+        `*Items Ordered:*\n${itemLines}\n\n` +
+        `*Delivery:* ${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}\n` +
+        `*Total Pay on Delivery:* ₹${total}`
+      );
+
+      window.location.href = `https://wa.me/${WHATSAPP_STORE_PHONE}?text=${message}`;
+    }
+
+    loadLiveProducts();
+  </script>
+</body>
+</html>
