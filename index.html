@@ -51,7 +51,6 @@
 
   <!-- View Layout & Sort Toolbar -->
   <div class="px-4 py-2.5 flex items-center justify-between border-b bg-white text-xs">
-    <!-- View Switcher (1 col / 2 cols / 3 cols / List) -->
     <div class="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg">
       <button onclick="setViewMode('big')" id="btn-view-big" title="Big (1 by 1)" class="view-btn px-2 py-1 rounded text-gray-600 hover:text-black">
         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"/></svg>
@@ -67,7 +66,6 @@
       </button>
     </div>
 
-    <!-- Sort Dropdown -->
     <div class="flex items-center space-x-1.5">
       <span class="text-gray-400 font-medium">Sort:</span>
       <select id="sort-select" onchange="changeSort(this.value)" class="border rounded-lg px-2 py-1 bg-white text-xs font-semibold outline-none focus:border-red-600">
@@ -85,7 +83,7 @@
     </div>
   </main>
 
-  <!-- Cart Modal -->
+  <!-- Cart Modal with GPS Location Auto-Detection -->
   <div id="cart-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex justify-end">
     <div class="bg-white w-full max-w-sm h-full flex flex-col p-4 overflow-y-auto">
       <div class="flex justify-between items-center border-b pb-3">
@@ -98,32 +96,44 @@
       <form id="checkout-form" onsubmit="handleCheckout(event)" class="space-y-3 border-t pt-3">
         <div>
           <label class="text-[11px] font-semibold text-gray-600 block">Your Name *</label>
-          <input required id="cust-name" type="text" class="w-full text-xs p-2 border rounded-lg mt-0.5" placeholder="Full Name" />
+          <input required id="cust-name" type="text" class="w-full text-xs p-2.5 border rounded-lg mt-0.5 outline-none focus:border-red-600" placeholder="Full Name" />
         </div>
         <div>
           <label class="text-[11px] font-semibold text-gray-600 block">Phone Number *</label>
-          <input required id="cust-phone" type="tel" class="w-full text-xs p-2 border rounded-lg mt-0.5" placeholder="10-digit number" />
+          <input required id="cust-phone" type="tel" class="w-full text-xs p-2.5 border rounded-lg mt-0.5 outline-none focus:border-red-600" placeholder="10-digit number" />
         </div>
+
+        <!-- Address with GPS Live Location Auto-Fill -->
         <div>
-          <label class="text-[11px] font-semibold text-gray-600 block">Delivery Address *</label>
-          <textarea required id="cust-address" class="w-full text-xs p-2 border rounded-lg mt-0.5" rows="2" placeholder="House no, Street name, landmark"></textarea>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-[11px] font-semibold text-gray-600">Delivery Address *</label>
+            <button type="button" onclick="detectLiveLocation()" id="btn-detect-loc" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded text-[11px] flex items-center space-x-1 border border-red-200">
+              <span>📍</span>
+              <span id="loc-btn-text">Detect My Location</span>
+            </button>
+          </div>
+          <textarea required id="cust-address" class="w-full text-xs p-2 border rounded-lg mt-0.5 outline-none focus:border-red-600" rows="2" placeholder="House no, Street name, landmark, village/area"></textarea>
+          <p id="geo-status" class="text-[10px] text-gray-400 mt-0.5"></p>
         </div>
+
+        <!-- Region & Delivery Tier -->
         <div>
-          <label class="text-[11px] font-semibold text-gray-600 block">Delivery Location *</label>
-          <select id="cust-location" onchange="updateTotal()" class="w-full text-xs p-2 border rounded-lg mt-0.5">
-            <option value="0">Kavali (City) — FREE</option>
-            <option value="150">Nellore City — ₹150</option>
-            <option value="200">Other District Towns — ₹200</option>
+          <label class="text-[11px] font-semibold text-gray-600 block">Delivery Region / Location *</label>
+          <select id="cust-location" onchange="updateTotal()" class="w-full text-xs p-2.5 border rounded-lg mt-0.5 font-medium outline-none focus:border-red-600 bg-white">
+            <option value="0" data-zone="Zone 1">Kavali Town & Local Villages (FREE)</option>
+            <option value="99" data-zone="Zone 2">Kavali Mandals & Rural (Bogole, Bitragunta, Jaladanki, Allur) — ₹99</option>
+            <option value="150" data-zone="Zone 3">Nellore City & Towns (Kovur, Dagadarthi, Atmakur) — ₹150</option>
+            <option value="199" data-zone="Zone 4">Prakasam Border & Distant Towns (Kandukur, Gudur) — ₹199</option>
           </select>
         </div>
 
         <div class="border-t pt-2 text-xs space-y-1">
           <div class="flex justify-between text-gray-600"><span>Items Subtotal:</span><span id="subtotal">₹0</span></div>
-          <div class="flex justify-between text-gray-600"><span>Delivery:</span><span id="delivery-fee">FREE</span></div>
-          <div class="flex justify-between font-bold text-sm text-red-600"><span>Total:</span><span id="total-val">₹0</span></div>
+          <div class="flex justify-between text-gray-600"><span>Delivery Fee:</span><span id="delivery-fee" class="font-semibold text-gray-900">FREE</span></div>
+          <div class="flex justify-between font-bold text-base text-red-600 pt-1 border-t"><span>Total to Pay:</span><span id="total-val">₹0</span></div>
         </div>
 
-        <button type="submit" id="checkout-btn" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-xs mt-2 active:scale-95 transition">
+        <button type="submit" id="checkout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl text-xs mt-2 active:scale-95 transition shadow-sm">
           Place Order & Book on WhatsApp
         </button>
       </form>
@@ -140,26 +150,21 @@
     let allProducts = [];
     let cart = [];
     let activeCategory = 'All';
-    let currentViewMode = 'medium'; // 'big' | 'medium' | 'small' | 'list'
+    let currentViewMode = 'medium';
     let currentSort = 'popular';
+    let detectedCoordinates = null;
 
     // Synchronize Store Settings from Supabase
     async function syncStoreSettings() {
       try {
         const { data, error } = await db.from('store_settings').select('*').eq('id', 1).single();
         if (!error && data) {
-          if (data.store_name) {
-            document.querySelectorAll('.store-name-text').forEach(el => el.innerText = data.store_name);
-          }
-          if (data.shop_address) {
-            document.querySelectorAll('.store-address-text').forEach(el => el.innerText = data.shop_address);
-          }
-          if (data.whatsapp_number) {
-            storeWhatsAppNumber = data.whatsapp_number.replace(/\D/g, '');
-          }
+          if (data.store_name) document.querySelectorAll('.store-name-text').forEach(el => el.innerText = data.store_name);
+          if (data.shop_address) document.querySelectorAll('.store-address-text').forEach(el => el.innerText = data.shop_address);
+          if (data.whatsapp_number) storeWhatsAppNumber = data.whatsapp_number.replace(/\D/g, '');
         }
       } catch (err) {
-        console.warn('Could not sync store settings:', err);
+        console.warn('Store settings sync note:', err);
       }
     }
 
@@ -182,7 +187,6 @@
       renderProducts();
     }
 
-    // Sort Handler
     function changeSort(val) {
       currentSort = val;
       renderProducts();
@@ -192,7 +196,6 @@
       const container = document.getElementById('product-list');
       let filtered = activeCategory === 'All' ? [...allProducts] : allProducts.filter(p => p.category === activeCategory);
 
-      // Apply Sort
       if (currentSort === 'price-asc') {
         filtered.sort((a, b) => Number(a.offer_price) - Number(b.offer_price));
       } else if (currentSort === 'price-desc') {
@@ -205,35 +208,27 @@
         return;
       }
 
-      // Configure Grid/List Layout Container
-      if (currentViewMode === 'big') {
-        container.className = "grid grid-cols-1 gap-4";
-      } else if (currentViewMode === 'medium') {
-        container.className = "grid grid-cols-2 gap-2.5";
-      } else if (currentViewMode === 'small') {
-        container.className = "grid grid-cols-3 gap-2";
-      } else if (currentViewMode === 'list') {
-        container.className = "flex flex-col space-y-2.5";
-      }
+      if (currentViewMode === 'big') container.className = "grid grid-cols-1 gap-4";
+      else if (currentViewMode === 'medium') container.className = "grid grid-cols-2 gap-2.5";
+      else if (currentViewMode === 'small') container.className = "grid grid-cols-3 gap-2";
+      else if (currentViewMode === 'list') container.className = "flex flex-col space-y-2.5";
 
       container.innerHTML = filtered.map(p => {
         const inCartItem = cart.find(c => c.id === p.id);
         const qty = inCartItem ? inCartItem.qty : 0;
 
-        // In-Card Quantity Stepper Button
         const qtyButtonHtml = qty > 0 ? `
           <div class="flex items-center justify-between border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-8 w-full">
-            <button onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
+            <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
             <span class="font-black text-red-700 text-xs px-1">${qty}</span>
-            <button onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
+            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
           </div>
         ` : `
-          <button onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
+          <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
             + Add
           </button>
         `;
 
-        // 1. LIST VIEW CARD
         if (currentViewMode === 'list') {
           return `
             <div class="bg-white border rounded-xl p-2.5 flex items-center space-x-3 shadow-sm">
@@ -246,14 +241,10 @@
                   <span class="line-through text-gray-400 text-[10px]">₹${p.mrp}</span>
                 </div>
               </div>
-              <div class="w-24 shrink-0">
-                ${qtyButtonHtml}
-              </div>
-            </div>
-          `;
+              <div class="w-24 shrink-0">${qtyButtonHtml}</div>
+            </div>`;
         }
 
-        // 2. SMALL (3 COLUMNS) CARD
         if (currentViewMode === 'small') {
           return `
             <div class="bg-white border rounded-xl p-2 flex flex-col justify-between shadow-sm">
@@ -266,14 +257,10 @@
                   <span class="line-through text-gray-400 text-[9px]">₹${p.mrp}</span>
                 </div>
               </div>
-              <div class="mt-2">
-                ${qtyButtonHtml}
-              </div>
-            </div>
-          `;
+              <div class="mt-2">${qtyButtonHtml}</div>
+            </div>`;
         }
 
-        // 3. BIG (1 COLUMN) CARD
         if (currentViewMode === 'big') {
           return `
             <div class="bg-white border rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-4 items-center">
@@ -286,19 +273,16 @@
                     <span class="font-black text-red-600 text-xl">₹${p.offer_price}</span>
                     <span class="line-through text-gray-400 text-sm">₹${p.mrp}</span>
                     <span class="bg-green-100 text-green-800 text-[10px] font-black px-2 py-0.5 rounded-full">
-                      ${Math.round(((p.mrp - p.offer_price) / p.mrp) * 100)}% OFF
+                      ${p.mrp > 0 ? Math.round(((p.mrp - p.offer_price) / p.mrp) * 100) : 0}% OFF
                     </span>
                   </div>
                 </div>
-                <div class="mt-4 max-w-xs">
-                  ${qtyButtonHtml}
-                </div>
+                <div class="mt-4 max-w-xs">${qtyButtonHtml}</div>
               </div>
-            </div>
-          `;
+            </div>`;
         }
 
-        // 4. MEDIUM (2 COLUMNS) DEFAULT CARD
+        // Default 2-column Medium
         return `
           <div class="bg-white border rounded-xl p-3 flex flex-col justify-between shadow-sm">
             <div>
@@ -310,15 +294,11 @@
                 <span class="line-through text-gray-400 text-[11px]">₹${p.mrp}</span>
               </div>
             </div>
-            <div class="mt-2.5">
-              ${qtyButtonHtml}
-            </div>
-          </div>
-        `;
+            <div class="mt-2.5">${qtyButtonHtml}</div>
+          </div>`;
       }).join('');
     }
 
-    // Direct Quantity Stepper Handler
     function updateItemQty(id, change) {
       const prod = allProducts.find(p => p.id === id);
       const existing = cart.find(c => c.id === id);
@@ -333,7 +313,7 @@
       }
 
       updateCartUI();
-      renderProducts(); // Refresh in-card step counters immediately
+      renderProducts();
     }
 
     function updateCartUI() {
@@ -352,7 +332,7 @@
             </div>
             <div class="flex items-center space-x-2">
               <span class="font-bold">₹${item.offer_price * item.qty}</span>
-              <button onclick="updateItemQty('${item.id}', -item.qty)" class="text-red-500 font-bold text-sm px-1">&times;</button>
+              <button type="button" onclick="updateItemQty('${item.id}', -item.qty)" class="text-red-500 font-bold text-sm px-1">&times;</button>
             </div>
           </div>
         `).join('');
@@ -365,9 +345,72 @@
       const deliveryFee = parseInt(document.getElementById('cust-location').value || '0', 10);
       const grandTotal = itemsTotal + deliveryFee;
 
-      document.getElementById('subtotal').innerText = `₹${itemsTotal}`;
+      document.getElementById('subtotal').innerText = `₹${itemsTotal.toFixed(2)}`;
       document.getElementById('delivery-fee').innerText = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
-      document.getElementById('total-val').innerText = `₹${grandTotal}`;
+      document.getElementById('total-val').innerText = `₹${grandTotal.toFixed(2)}`;
+    }
+
+    // ================= LIVE GPS AUTO-LOCATION & REGION MAPPING =================
+    function detectLiveLocation() {
+      const btnText = document.getElementById('loc-btn-text');
+      const status = document.getElementById('geo-status');
+
+      if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser.');
+        return;
+      }
+
+      btnText.innerText = 'Detecting...';
+      status.innerText = 'Acquiring GPS location...';
+
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        detectedCoordinates = { lat, lon };
+
+        try {
+          status.innerText = 'Resolving village / town name...';
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+          const data = await res.json();
+
+          const addr = data.address || {};
+          const detectedTown = addr.suburb || addr.town || addr.village || addr.city_district || addr.county || addr.city || 'Kavali';
+          const road = addr.road || addr.neighbourhood || '';
+          const postcode = addr.postcode ? ` - ${addr.postcode}` : '';
+
+          const fullDetectedAddress = `${road ? road + ', ' : ''}${detectedTown}, SPSR Nellore District${postcode}`;
+          
+          // Auto-fill address box
+          document.getElementById('cust-address').value = fullDetectedAddress;
+
+          // Determine Delivery Zone automatically based on detected keywords
+          const textToCheck = (JSON.stringify(addr) + ' ' + detectedTown).toLowerCase();
+          const select = document.getElementById('cust-location');
+
+          if (textToCheck.includes('kavali') || textToCheck.includes('vengal') || textToCheck.includes('musunuru') || textToCheck.includes('maddurupadu') || textToCheck.includes('rudrakota')) {
+            select.value = '0'; // Zone 1
+            status.innerText = `📍 Auto-detected: ${detectedTown} (Zone 1: Local Kavali — FREE Delivery)`;
+          } else if (textToCheck.includes('bogole') || textToCheck.includes('bitragunta') || textToCheck.includes('jaladanki') || textToCheck.includes('allur') || textToCheck.includes('dagadarthi') || textToCheck.includes('kaligiri') || textToCheck.includes('vinjamur')) {
+            select.value = '99'; // Zone 2
+            status.innerText = `📍 Auto-detected: ${detectedTown} (Zone 2: Kavali Mandal & Rural — ₹99 Delivery)`;
+          } else if (textToCheck.includes('nellore') || textToCheck.includes('kovur') || textToCheck.includes('buchi') || textToCheck.includes('atmakur')) {
+            select.value = '150'; // Zone 3
+            status.innerText = `📍 Auto-detected: ${detectedTown} (Zone 3: Nellore City & Towns — ₹150 Delivery)`;
+          } else {
+            select.value = '199'; // Zone 4
+            status.innerText = `📍 Auto-detected: ${detectedTown} (Zone 4: Distant Area / District Border — ₹199 Delivery)`;
+          }
+
+          updateTotal();
+          btnText.innerText = 'Detected ✓';
+        } catch (err) {
+          status.innerText = 'GPS resolved, but reverse lookup was delayed. Please confirm region from dropdown.';
+          btnText.innerText = 'Detect My Location';
+        }
+      }, (err) => {
+        status.innerText = 'Location permission denied. Please select your region manually from dropdown below.';
+        btnText.innerText = 'Detect My Location';
+      }, { enableHighAccuracy: true, timeout: 10000 });
     }
 
     function filterCategory(cat) {
@@ -393,14 +436,16 @@
       btn.innerText = 'Creating Booking...';
 
       const orderId = Math.random().toString(36).substring(2, 8).toUpperCase();
-      const name = document.getElementById('cust-name').value;
-      const phone = document.getElementById('cust-phone').value;
-      const address = document.getElementById('cust-address').value;
+      const name = document.getElementById('cust-name').value.trim();
+      const phone = document.getElementById('cust-phone').value.trim();
+      const address = document.getElementById('cust-address').value.trim();
       const select = document.getElementById('cust-location');
       const locationText = select.options[select.selectedIndex].text;
       const deliveryFee = parseInt(select.value, 10);
       const itemsTotal = cart.reduce((sum, item) => sum + (item.offer_price * item.qty), 0);
       const total = itemsTotal + deliveryFee;
+
+      const mapLink = detectedCoordinates ? `\nhttps://maps.google.com/?q=${detectedCoordinates.lat},${detectedCoordinates.lon}` : '';
 
       await db.from('orders').insert([{
         id: orderId,
@@ -420,11 +465,11 @@
         `*Customer Details:*\n` +
         `Name: ${name}\n` +
         `Phone: ${phone}\n` +
-        `Address: ${address}\n` +
-        `Location: ${locationText}\n\n` +
+        `Address: ${address}${mapLink}\n` +
+        `Location / Region: ${locationText}\n\n` +
         `*Items Ordered:*\n${itemLines}\n\n` +
-        `*Delivery:* ${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}\n` +
-        `*Total Pay on Delivery:* ₹${total}`
+        `*Delivery Charge:* ${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}\n` +
+        `*Total Pay on Delivery:* ₹${total.toFixed(2)}`
       );
 
       window.location.href = `https://wa.me/${storeWhatsAppNumber}?text=${message}`;
