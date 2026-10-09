@@ -288,7 +288,7 @@
       <!-- ================= 4. PRODUCTS & DELIVERY RATE FIXER TAB ================= -->
       <section id="view-products" class="tab-view space-y-6 hidden">
         
-        <!-- SECTION A: AREA & PINCODE DELIVERY RATE FIXER WITH EDIT AND INLINE SAVE -->
+        <!-- SECTION A: AREA & PINCODE DELIVERY RATE FIXER -->
         <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b pb-3">
             <div>
@@ -349,25 +349,37 @@
         </div>
       </section>
 
-      <!-- ================= 5. PRICE SHEET TAB ================= -->
+      <!-- ================= 5. LIVE PRICE SHEET & NAME EDITOR (WITH CATEGORY FILTER) ================= -->
       <section id="view-price-sheet" class="tab-view space-y-4 hidden">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
           <div>
-            <h1 class="text-2xl font-black text-stone-950">Live Price Sheet Editor</h1>
-            <p class="text-xs text-stone-500">Directly modify MRP and Offer rates; synchronizes to storefront instantly.</p>
+            <h1 class="text-2xl font-black text-stone-950">Live Price Sheet & Name Editor</h1>
+            <p class="text-xs text-stone-500">Directly modify Item Name, MRP, and Offer Price; syncs to the storefront instantly.</p>
           </div>
-          <div class="flex items-center space-x-2">
-            <button onclick="loadPriceSheet()" class="bg-stone-200 text-stone-800 text-xs px-3 py-2 rounded-xl font-semibold">Refresh</button>
-          </div>
+          <button onclick="loadPriceSheet()" class="bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs px-3.5 py-2 rounded-xl font-bold active:scale-95 transition">
+            🔄 Refresh Items
+          </button>
         </div>
 
-        <input type="text" id="price-search" placeholder="Search cracker name..." oninput="renderPriceSheetTable()" class="w-full text-xs border rounded-xl p-3 bg-white" />
+        <!-- Filter Bar: Search + Category Dropdown (Image 2) -->
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <input type="text" id="price-search" placeholder="Search cracker name..." oninput="renderPriceSheetTable()" class="flex-1 text-xs border border-stone-300 rounded-xl p-3 bg-white outline-none focus:border-red-700" />
+          <select id="price-category-filter" onchange="renderPriceSheetTable()" class="text-xs border border-stone-300 rounded-xl p-3 bg-white font-bold text-stone-700 outline-none focus:border-red-700">
+            <option value="All">All Categories (Filter)</option>
+            <option value="Sparklers">Sparklers</option>
+            <option value="Sound Crackers">Sound Crackers</option>
+            <option value="Ground Chakkars">Ground Chakkars</option>
+            <option value="Flower Pots">Flower Pots</option>
+            <option value="Sky Shots">Sky Shots</option>
+            <option value="Gift Boxes">Gift Boxes</option>
+          </select>
+        </div>
 
         <div class="bg-white rounded-2xl border border-stone-200 overflow-x-auto shadow-xs">
           <table class="w-full text-left text-xs whitespace-nowrap">
             <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
               <tr>
-                <th class="p-3">Item Name</th>
+                <th class="p-3 w-80">Item Name (Editable)</th>
                 <th class="p-3">Category</th>
                 <th class="p-3 w-28">MRP (₹)</th>
                 <th class="p-3 w-28">Offer Price (₹)</th>
@@ -916,369 +928,4 @@
             <td class="p-3 font-bold text-red-700">${sold}</td>
             <td class="p-3">${statusBadge}</td>
             <td class="p-3 text-right space-x-1">
-              <button onclick="adjustProductStock('${p.id}', 10)" class="bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold px-2 py-1 rounded text-xs">+10</button>
-              <button onclick="adjustProductStock('${p.id}', 50)" class="bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold px-2 py-1 rounded text-xs">+50</button>
-              <button onclick="adjustProductStock('${p.id}', 100)" class="bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold px-2 py-1 rounded text-xs">+100</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    async function adjustProductStock(id, addUnits) {
-      const item = productsList.find(p => p.id === id);
-      if (!item) return;
-      const newStock = (Number(item.stock_qty) || 0) + addUnits;
-      await window.db.from('products').update({ stock_qty: newStock }).eq('id', id);
-      item.stock_qty = newStock;
-      renderInventorySection();
-    }
-
-    // 7. AREA & PINCODE DELIVERY RATE FIXER (INLINE + MODAL EDIT)
-    function openDeliveryRateModal(editId = null) {
-      const modal = document.getElementById('rate-modal');
-      const title = document.getElementById('rate-modal-title');
-      const btn = document.getElementById('btn-save-delivery-rate');
-      const editInput = document.getElementById('editing-rate-id');
-
-      if (editId) {
-        const item = deliveryZonesList.find(z => z.id.toString() === editId.toString());
-        if (item) {
-          title.innerText = 'Edit Delivery Rate';
-          btn.innerText = 'Update Delivery Rate';
-          editInput.value = item.id;
-          document.getElementById('rate-zone-name').value = item.zone_name || '';
-          document.getElementById('rate-pincode').value = item.pincode || '';
-          document.getElementById('rate-keywords').value = item.area_keywords || '';
-          document.getElementById('rate-charge').value = item.delivery_charge !== undefined ? item.delivery_charge : 0;
-        }
-      } else {
-        title.innerText = 'Add Delivery Rate';
-        btn.innerText = 'Save Delivery Rate';
-        editInput.value = '';
-        document.getElementById('rate-zone-name').value = '';
-        document.getElementById('rate-pincode').value = '';
-        document.getElementById('rate-keywords').value = '';
-        document.getElementById('rate-charge').value = '';
-      }
-
-      modal.style.display = 'flex';
-    }
-
-    function closeDeliveryRateModal() {
-      document.getElementById('rate-modal').style.display = 'none';
-      document.getElementById('editing-rate-id').value = '';
-    }
-
-    async function handleSaveDeliveryRate() {
-      const editId = document.getElementById('editing-rate-id').value;
-      const zone_name = document.getElementById('rate-zone-name').value.trim();
-      const pincode = document.getElementById('rate-pincode').value.trim();
-      const area_keywords = document.getElementById('rate-keywords').value.trim();
-      const delivery_charge = Number(document.getElementById('rate-charge').value);
-
-      if (!zone_name || !area_keywords || isNaN(delivery_charge)) {
-        return alert('Please fill in Zone Name, Keywords, and Delivery Charge.');
-      }
-
-      const payload = {
-        zone_name,
-        pincode: pincode || 'Any',
-        area_keywords,
-        delivery_charge
-      };
-
-      let error = null;
-      if (editId) {
-        const res = await window.db.from('delivery_zones').update(payload).eq('id', editId);
-        error = res.error;
-      } else {
-        const res = await window.db.from('delivery_zones').insert([payload]);
-        error = res.error;
-      }
-
-      if (error) {
-        alert('Error saving rate: ' + error.message);
-      } else {
-        closeDeliveryRateModal();
-        await loadDeliveryZones();
-        alert(editId ? 'Delivery rate updated successfully!' : 'New delivery rate added live!');
-      }
-    }
-
-    async function saveInlineDeliveryRate(id) {
-      const input = document.getElementById(`inline-rate-${id}`);
-      const newCharge = Number(input.value);
-
-      if (isNaN(newCharge) || newCharge < 0) {
-        return alert('Please enter a valid rate (0 or higher).');
-      }
-
-      const { error } = await window.db.from('delivery_zones').update({
-        delivery_charge: newCharge
-      }).eq('id', id);
-
-      if (error) {
-        alert('Failed to update rate: ' + error.message);
-      } else {
-        const item = deliveryZonesList.find(z => z.id.toString() === id.toString());
-        if (item) item.delivery_charge = newCharge;
-        renderDeliveryZonesTable();
-        alert('Delivery rate updated to ₹' + newCharge + '!');
-      }
-    }
-
-    function renderDeliveryZonesTable() {
-      const tbody = document.getElementById('delivery-rates-table');
-      if (!tbody) return;
-
-      if (deliveryZonesList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-stone-400">No custom delivery rates added yet.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = deliveryZonesList.map(z => `
-        <tr class="hover:bg-stone-50">
-          <td class="p-3 font-bold text-stone-900">${z.zone_name}</td>
-          <td class="p-3 font-mono font-bold text-amber-700">${z.pincode || 'Any'}</td>
-          <td class="p-3 text-stone-500 max-w-xs truncate" title="${z.area_keywords}">${z.area_keywords}</td>
-          <td class="p-3">
-            <div class="flex items-center space-x-1.5">
-              <span class="text-stone-400 font-bold">₹</span>
-              <input type="number" id="inline-rate-${z.id}" value="${z.delivery_charge || 0}" class="w-20 border border-stone-300 rounded-lg p-1.5 text-xs font-black text-red-700 bg-white outline-none focus:border-red-700" />
-              <button onclick="saveInlineDeliveryRate('${z.id}')" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-2 py-1 rounded-lg text-[11px] shadow-xs active:scale-95 transition">
-                Save
-              </button>
-            </div>
-          </td>
-          <td class="p-3 text-right space-x-2">
-            <button onclick="openDeliveryRateModal('${z.id}')" class="text-blue-600 hover:text-blue-800 font-bold hover:underline">
-              Edit
-            </button>
-            <button onclick="deleteDeliveryZone('${z.id}')" class="text-red-700 hover:text-red-900 font-bold hover:underline">
-              Delete
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    async function deleteDeliveryZone(id) {
-      if (!confirm('Are you sure you want to delete this delivery rate rule?')) return;
-      const { error } = await window.db.from('delivery_zones').delete().eq('id', id);
-      if (error) {
-        alert('Could not delete: ' + error.message);
-      } else {
-        deliveryZonesList = deliveryZonesList.filter(z => z.id.toString() !== id.toString());
-        renderDeliveryZonesTable();
-      }
-    }
-
-    // 8. PRODUCTS CATALOG (WITH PHOTO UPLOAD & VIDEO URL SUPPORT)
-    function openProductModal(editId = null) {
-      const modal = document.getElementById('product-modal');
-      const title = document.getElementById('product-modal-title');
-      const btn = document.getElementById('btn-save-product');
-      const editInput = document.getElementById('editing-prod-id');
-
-      if (editId) {
-        const item = productsList.find(p => p.id.toString() === editId.toString());
-        if (item) {
-          title.innerText = 'Edit Cracker Item';
-          btn.innerText = 'Update Cracker';
-          editInput.value = item.id;
-          document.getElementById('prod-name').value = item.name || '';
-          document.getElementById('prod-category').value = item.category || 'Sparklers';
-          document.getElementById('prod-mrp').value = item.mrp || 0;
-          document.getElementById('prod-price').value = item.offer_price || 0;
-          document.getElementById('prod-initial-stock').value = item.stock_qty || 100;
-          document.getElementById('prod-video-url').value = item.video_url || '';
-          
-          if (item.image_url) {
-            currentImageData = item.image_url;
-            document.getElementById('preview-img').src = item.image_url;
-            document.getElementById('image-preview-box').classList.remove('hidden');
-          }
-        }
-      } else {
-        title.innerText = 'Add New Cracker';
-        btn.innerText = 'Save Cracker to Catalog';
-        editInput.value = '';
-        document.getElementById('prod-name').value = '';
-        document.getElementById('prod-mrp').value = '';
-        document.getElementById('prod-price').value = '';
-        document.getElementById('prod-initial-stock').value = '100';
-        document.getElementById('prod-video-url').value = '';
-        document.getElementById('prod-gallery-file').value = '';
-        document.getElementById('image-preview-box').classList.add('hidden');
-        currentImageData = 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300';
-      }
-      modal.style.display = 'flex';
-    }
-
-    function closeProductModal() {
-      document.getElementById('product-modal').style.display = 'none';
-      document.getElementById('editing-prod-id').value = '';
-    }
-
-    function previewGalleryImage(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          const maxDim = 400;
-          let w = img.width, h = img.height;
-          if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
-          else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
-          canvas.width = w; canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          currentImageData = canvas.toDataURL('image/jpeg', 0.7);
-
-          document.getElementById('preview-img').src = currentImageData;
-          document.getElementById('image-preview-box').classList.remove('hidden');
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    async function handleSaveProduct() {
-      const editId = document.getElementById('editing-prod-id').value;
-      const name = document.getElementById('prod-name').value.trim();
-      const category = document.getElementById('prod-category').value;
-      const mrp = Number(document.getElementById('prod-mrp').value);
-      const offer_price = Number(document.getElementById('prod-price').value);
-      const stock_qty = Number(document.getElementById('prod-initial-stock').value) || 100;
-      const video_url = document.getElementById('prod-video-url').value.trim();
-
-      if (!name || !mrp || !offer_price) return alert('Please enter Name, MRP, and Offer Price.');
-
-      const payload = {
-        name,
-        category,
-        mrp,
-        offer_price,
-        stock_qty,
-        image_url: currentImageData,
-        video_url: video_url || null
-      };
-
-      let error = null;
-      if (editId) {
-        const res = await window.db.from('products').update(payload).eq('id', editId);
-        error = res.error;
-      } else {
-        payload.sold_qty = 0;
-        const res = await window.db.from('products').insert([payload]);
-        error = res.error;
-      }
-
-      if (error) {
-        alert('Error: ' + error.message);
-      } else {
-        closeProductModal();
-        await loadProducts();
-        alert(editId ? 'Cracker updated successfully!' : 'Cracker added to catalog!');
-      }
-    }
-
-    function renderProductsTable() {
-      const tbody = document.getElementById('products-table');
-      if (!tbody) return;
-
-      tbody.innerHTML = productsList.map(p => `
-        <tr class="hover:bg-stone-50">
-          <td class="p-3 flex items-center space-x-2.5">
-            <img src="${p.image_url || 'https://placehold.co/40x40?text=Cracker'}" class="w-9 h-9 rounded-lg object-cover border" />
-            <div>
-              <span class="font-bold text-stone-900 block">${p.name}</span>
-              ${p.video_url ? '<span class="text-[9px] bg-red-100 text-red-800 font-bold px-1.5 py-0.2 rounded-full">🎬 Video included</span>' : ''}
-            </div>
-          </td>
-          <td class="p-3 text-stone-500">${p.category}</td>
-          <td class="p-3 text-stone-400 font-bold">₹${p.mrp}</td>
-          <td class="p-3 text-red-700 font-black">₹${p.offer_price}</td>
-          <td class="p-3 font-bold">${p.stock_qty || 0}</td>
-          <td class="p-3 text-right space-x-2">
-            <button onclick="openProductModal('${p.id}')" class="text-blue-600 hover:text-blue-800 font-bold hover:underline">Edit</button>
-            <button onclick="deleteProduct('${p.id}')" class="text-red-700 hover:text-red-900 font-bold hover:underline">Delete</button>
-          </td>
-        </tr>
-      `).join('') || '<tr><td colspan="6" class="p-4 text-center text-stone-400">No products found.</td></tr>';
-    }
-
-    async function deleteProduct(id) {
-      if (!confirm('Delete this cracker?')) return;
-      await window.db.from('products').delete().eq('id', id);
-      loadProducts();
-    }
-
-    // 9. PRICE SHEET
-    function loadPriceSheet() { renderPriceSheetTable(); }
-
-    function renderPriceSheetTable() {
-      const q = (document.getElementById('price-search').value || '').toLowerCase();
-      const filtered = productsList.filter(p => p.name.toLowerCase().includes(q) || (p.category && p.category.toLowerCase().includes(q)));
-      const tbody = document.getElementById('price-sheet-table');
-
-      tbody.innerHTML = filtered.map(p => {
-        const disc = p.mrp > 0 ? Math.round(((p.mrp - p.offer_price) / p.mrp) * 100) : 0;
-        return `
-          <tr class="hover:bg-stone-50">
-            <td class="p-3 font-bold text-stone-900">${p.name}</td>
-            <td class="p-3 text-stone-500">${p.category}</td>
-            <td class="p-3"><input type="number" id="ps-mrp-${p.id}" value="${p.mrp}" class="w-16 border rounded p-1 text-xs" /></td>
-            <td class="p-3"><input type="number" id="ps-offer-${p.id}" value="${p.offer_price}" class="w-16 border border-red-300 rounded p-1 text-xs font-bold text-red-700" /></td>
-            <td class="p-3 text-center"><span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">${disc}% OFF</span></td>
-            <td class="p-3 text-right"><button onclick="saveRowPrice('${p.id}')" class="bg-red-700 text-amber-300 font-bold text-xs px-2.5 py-1 rounded-lg">Save</button></td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    async function saveRowPrice(id) {
-      const mrp = Number(document.getElementById('ps-mrp-' + id).value);
-      const offer_price = Number(document.getElementById('ps-offer-' + id).value);
-      await window.db.from('products').update({ mrp, offer_price }).eq('id', id);
-      const p = productsList.find(x => x.id === id);
-      if (p) { p.mrp = mrp; p.offer_price = offer_price; }
-      alert('Price saved live!');
-    }
-
-    // 10. STORE SETTINGS
-    async function loadStoreSettings() {
-      try {
-        const { data } = await window.db.from('store_settings').select('*').eq('id', 1).single();
-        if (data) {
-          document.getElementById('cfg-name').value = data.store_name || 'BITTU CRACKERS';
-          document.getElementById('cfg-wa').value = data.whatsapp_number || '+917829978883';
-          document.getElementById('cfg-phone-1').value = data.phone_1 || '7993659115';
-          document.getElementById('cfg-phone-2').value = data.phone_2 || '9848104866';
-          document.getElementById('cfg-phone-3').value = data.phone_3 || '7661869408';
-          document.getElementById('cfg-address').value = data.shop_address || 'Vengal Rao Nagar, Kavali, SPSR Nellore District, Andhra Pradesh - 524201';
-        }
-      } catch(e) {}
-    }
-
-    async function saveStoreSettings() {
-      const store_name = document.getElementById('cfg-name').value.trim();
-      const whatsapp_number = document.getElementById('cfg-wa').value.trim();
-      const phone_1 = document.getElementById('cfg-phone-1').value.trim();
-      const phone_2 = document.getElementById('cfg-phone-2').value.trim();
-      const phone_3 = document.getElementById('cfg-phone-3').value.trim();
-      const shop_address = document.getElementById('cfg-address').value.trim();
-
-      await window.db.from('store_settings').upsert({
-        id: 1, store_name, whatsapp_number, display_phone: phone_1, phone_1, phone_2, phone_3, shop_address
-      });
-      alert('Store settings saved successfully!');
-    }
-
-    checkSession();
-  </script>
-</body>
-</html>
+              <button onclick="adjustProductStock('${p.id}', 10)" class="bg-stone-100 hover:bg-stone-200 text-stone-8
