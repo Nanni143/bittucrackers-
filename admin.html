@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- PDF & Excel Parsing Engines -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
@@ -20,9 +21,10 @@
 </head>
 <body class="bg-stone-100 text-stone-800 font-sans antialiased h-screen overflow-hidden">
 
-  <!-- ================= AUTH MODAL ================= -->
+  <!-- ================= AUTHENTICATION MODAL ================= -->
   <div id="auth-modal" style="display: flex;" class="fixed inset-0 bg-neutral-950/90 backdrop-blur-sm z-50 items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-stone-200">
+      
       <div class="flex items-center space-x-3 mb-5">
         <span class="bg-red-700 text-amber-300 font-black px-3 py-1.5 rounded-xl text-base border border-amber-400">B</span>
         <div>
@@ -30,19 +32,25 @@
           <p class="text-[10px] text-amber-600 font-black uppercase tracking-wider">Admin Management Portal</p>
         </div>
       </div>
+
       <div class="space-y-3.5 text-xs">
         <div>
           <label class="block font-bold text-stone-700 mb-1">Username or Email</label>
           <input id="login-id" type="text" placeholder="e.g. bittu_admin, Virat, Megha" class="w-full border border-stone-300 rounded-xl p-3 outline-none focus:border-red-700 text-xs font-semibold bg-stone-50" />
         </div>
+
         <div>
           <label class="block font-bold text-stone-700 mb-1">Password</label>
           <div class="relative">
             <input id="login-pass" type="password" placeholder="••••••••" class="w-full border border-stone-300 rounded-xl p-3 pr-10 outline-none focus:border-red-700 text-xs bg-stone-50 font-mono" />
-            <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-3 text-stone-400 hover:text-stone-700 text-sm">👁️</button>
+            <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-3 text-stone-400 hover:text-stone-700 text-sm">
+              👁️
+            </button>
           </div>
         </div>
+
         <div id="login-status-box" class="hidden p-2.5 rounded-xl text-[11px] font-bold"></div>
+
         <button type="button" onclick="performLogin()" id="login-submit-btn" class="w-full bg-red-700 hover:bg-red-800 text-amber-300 font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-md border border-amber-400 active:scale-95 transition">
           Sign In to Admin
         </button>
@@ -63,6 +71,7 @@
             <p class="text-[9px] text-stone-400 tracking-wider">ADMIN CONTROL HUB</p>
           </div>
         </div>
+
         <nav class="space-y-1.5 text-xs font-semibold">
           <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl bg-red-700 text-amber-300 shadow-sm">
             <span>📊</span><span>Analytics & Dashboard</span>
@@ -87,6 +96,7 @@
           </button>
         </nav>
       </div>
+
       <div class="pt-4 border-t border-neutral-800 text-xs">
         <div class="flex items-center justify-between">
           <div>
@@ -102,6 +112,17 @@
     <main class="flex-1 p-4 md:p-8 h-full overflow-y-auto">
       <div class="max-w-6xl mx-auto space-y-6">
 
+        <!-- LIVE DATABASE CONNECTION STATUS BAR -->
+        <div class="bg-white border border-stone-200 px-4 py-2 rounded-2xl flex items-center justify-between text-xs shadow-xs">
+          <div class="flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="live-db-status" class="font-bold text-stone-700">Connecting to Supabase...</span>
+          </div>
+          <button onclick="loadAllCoreData(true)" class="text-[11px] bg-stone-100 hover:bg-stone-200 font-bold px-3 py-1 rounded-xl transition">
+            🔄 Force Sync Database
+          </button>
+        </div>
+
         <!-- ================= 1. ANALYTICS & DASHBOARD TAB ================= -->
         <section id="view-dashboard" class="tab-view space-y-6">
           <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
@@ -109,7 +130,7 @@
               <h1 class="text-2xl font-black text-stone-950">Dashboard & Sales Analytics</h1>
               <p class="text-xs text-stone-500">Live sales, festival cycles, and order pipeline statistics.</p>
             </div>
-            <button onclick="loadAllCoreData()" class="bg-stone-200 hover:bg-stone-300 text-stone-800 px-3 py-1.5 rounded-xl text-xs font-bold active:scale-95 transition">
+            <button onclick="loadAllCoreData(true)" class="bg-stone-200 hover:bg-stone-300 text-stone-800 px-3 py-1.5 rounded-xl text-xs font-bold active:scale-95 transition">
               🔄 Refresh Live Stats
             </button>
           </div>
@@ -711,24 +732,6 @@
     let monthChartInstance = null;
     let festivalChartInstance = null;
 
-    // Self-healing fallback data sets
-    const FALLBACK_PRODUCTS = [
-      { id: 1, name: "10cm Electric Sparklers", category: "Sparklers", mrp: 60, offer_price: 45, stock_qty: 100, sold_qty: 15, image_url: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300" },
-      { id: 2, name: "10cm Crackling Sparklers", category: "Sparklers", mrp: 70, offer_price: 50, stock_qty: 100, sold_qty: 8, image_url: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300" },
-      { id: 3, name: "15cm Electric Sparklers", category: "Sparklers", mrp: 90, offer_price: 68, stock_qty: 100, sold_qty: 20, image_url: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300" },
-      { id: 4, name: "12 Shots Multi-Colour Rider", category: "Night Aerial Fancy", mrp: 450, offer_price: 340, stock_qty: 100, sold_qty: 12, image_url: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300" },
-      { id: 5, name: "28 Chorsa Garland", category: "Garlands & Chorsa", mrp: 120, offer_price: 85, stock_qty: 100, sold_qty: 25, image_url: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300" },
-      { id: 6, name: "Standard Flower Pots", category: "Flower Pots", mrp: 180, offer_price: 130, stock_qty: 100, sold_qty: 18, image_url: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300" },
-      { id: 7, name: "Special Ground Chakkars", category: "Chakkars & Spinners", mrp: 150, offer_price: 110, stock_qty: 100, sold_qty: 14, image_url: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300" },
-      { id: 8, name: "Hydro Bomb", category: "Bombs", mrp: 160, offer_price: 120, stock_qty: 100, sold_qty: 30, image_url: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300" }
-    ];
-
-    const FALLBACK_ORDERS = [
-      { id: "BK9821", customer_name: "Ramesh Varma", customer_phone: "9848104866", delivery_address: "Trunk Road, Kavali", delivery_location: "Kavali Town", total_amount: 1850, status: "Delivered", created_at: new Date(Date.now() - 172800000).toISOString(), items: [{ name: "10cm Electric Sparklers", qty: 10, offer_price: 45 }] },
-      { id: "BK9822", customer_name: "Suresh Reddy", customer_phone: "7993659115", delivery_address: "Vengal Rao Nagar, Kavali", delivery_location: "Kavali Town", total_amount: 2400, status: "Confirmed", created_at: new Date(Date.now() - 86400000).toISOString(), items: [{ name: "Standard Flower Pots", qty: 6, offer_price: 130 }] },
-      { id: "BK9823", customer_name: "Kalyan Kumar", customer_phone: "7661869408", delivery_address: "Musunuru, Kavali", delivery_location: "Kavali Town", total_amount: 950, status: "New Order", created_at: new Date().toISOString(), items: [{ name: "Hydro Bomb", qty: 5, offer_price: 120 }] }
-    ];
-
     function togglePassVisibility() {
       const pField = document.getElementById('login-pass');
       pField.type = pField.type === 'password' ? 'text' : 'password';
@@ -784,7 +787,6 @@
 
         showStatus('Invalid username/email or password.', true);
       } catch (err) {
-        console.warn('Login check:', err);
         showStatus('Invalid credentials. Please verify your login details.', true);
       } finally {
         submitBtn.innerText = 'Sign In to Admin';
@@ -806,7 +808,7 @@
       document.getElementById('current-user-name').innerText = (user.first_name || 'Bittu') + ' ' + (user.last_name || '');
       document.getElementById('current-user-role').innerText = user.role || 'Super Admin';
 
-      loadAllCoreData();
+      loadAllCoreData(true);
     }
 
     function checkSession() {
@@ -835,43 +837,68 @@
       const activeBtn = document.getElementById('nav-' + tabName);
       if (activeBtn) activeBtn.className = 'nav-item w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl bg-red-700 text-amber-300 shadow-sm';
 
-      if (tabName === 'dashboard') loadDashboardMetrics();
-      if (tabName === 'orders') renderOrdersTable();
-      if (tabName === 'inventory') {
-        if (productsList.length === 0) await loadProducts();
-        renderInventorySection();
+      if (tabName === 'dashboard') {
+        await Promise.all([loadOrders(), loadProducts()]);
+        loadDashboardMetrics();
       }
-      if (tabName === 'products') loadProducts();
-      if (tabName === 'delivery') loadDeliveryZones();
-      if (tabName === 'price-sheet') loadPriceSheet();
-      if (tabName === 'store-settings') { loadStoreSettings(); loadAdminUsersList(); }
+      if (tabName === 'orders') {
+        await loadOrders();
+      }
+      if (tabName === 'inventory') {
+        await loadProducts();
+      }
+      if (tabName === 'products') {
+        await loadProducts();
+      }
+      if (tabName === 'delivery') {
+        await loadDeliveryZones();
+      }
+      if (tabName === 'price-sheet') {
+        await loadProducts();
+        renderPriceSheetTable();
+      }
+      if (tabName === 'store-settings') {
+        loadStoreSettings();
+        loadAdminUsersList();
+      }
     }
 
-    async function loadAllCoreData() {
+    async function loadAllCoreData(isManualSync = false) {
+      const statusEl = document.getElementById('live-db-status');
+      if (statusEl) statusEl.innerText = 'Connecting to Supabase...';
+
       await Promise.all([loadOrders(), loadProducts(), loadDeliveryZones()]);
       loadDashboardMetrics();
+
+      if (statusEl) {
+        statusEl.innerText = `● Supabase Live: ${productsList.length} Products, ${ordersList.length} Orders Loaded`;
+      }
+      if (isManualSync) {
+        alert(`Synced Live from Supabase!\n\nProducts: ${productsList.length}\nOrders: ${ordersList.length}\nDelivery Zones: ${deliveryZonesList.length}`);
+      }
     }
 
     async function loadOrders() {
       try {
         const { data, error } = await window.db.from('orders').select('*').order('created_at', { ascending: false });
-        if (error || !data || data.length === 0) {
-          ordersList = FALLBACK_ORDERS;
+        if (error) {
+          console.warn('Orders query failed:', error);
         } else {
-          ordersList = data;
+          ordersList = data || [];
         }
       } catch(e) {
-        ordersList = FALLBACK_ORDERS;
+        console.warn('Orders error:', e);
       }
       renderOrdersTable();
+      loadDashboardMetrics();
     }
 
     async function loadProducts() {
       try {
         const { data, error } = await window.db.from('products').select('*').order('name');
-        if (error || !data || data.length === 0) {
-          productsList = FALLBACK_PRODUCTS;
-        } else {
+        if (error) {
+          console.warn('Products query failed:', error);
+        } else if (data) {
           productsList = data.map(p => ({
             ...p,
             stock_qty: p.stock_qty !== undefined && p.stock_qty !== null ? Number(p.stock_qty) : 100,
@@ -879,7 +906,7 @@
           }));
         }
       } catch(e) {
-        productsList = FALLBACK_PRODUCTS;
+        console.warn('Products error:', e);
       }
       renderProductsTable();
       renderInventorySection();
@@ -889,10 +916,10 @@
     async function loadDeliveryZones() {
       try {
         const { data, error } = await window.db.from('delivery_zones').select('*').order('delivery_charge');
-        if (error || !data) {
-          deliveryZonesList = [];
+        if (error) {
+          console.warn('Delivery zones query failed:', error);
         } else {
-          deliveryZonesList = data;
+          deliveryZonesList = data || [];
         }
       } catch(e) {
         deliveryZonesList = [];
@@ -1195,7 +1222,7 @@
               <div class="flex items-center space-x-1.5">
                 <span class="text-stone-400 font-bold">₹</span>
                 <input type="number" id="inline-rate-${z.id}" value="${z.delivery_charge || 0}" class="w-20 border border-stone-300 rounded-lg p-1.5 text-xs font-black text-red-700 bg-white outline-none focus:border-red-700" />
-                <button onclick="saveInlineDeliveryRate('${z.id}',${isStaged})" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-2 py-1 rounded-lg text-[11px] shadow-xs active:scale-95 transition">
+                <button onclick="saveInlineDeliveryRate('${z.id}', ${isStaged})" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-2 py-1 rounded-lg text-[11px] shadow-xs active:scale-95 transition">
                   Save
                 </button>
               </div>
@@ -1628,7 +1655,7 @@
             <button onclick="deleteProduct('${p.id}')" class="text-red-700 hover:text-red-900 font-bold hover:underline">Delete</button>
           </td>
         </tr>
-      }).join('');
+      `).join('');
     }
 
     function openProductModal(editId = null) {
@@ -1742,10 +1769,6 @@
     }
 
     // LIVE PRICE SHEET
-    function loadPriceSheet() {
-      renderPriceSheetTable();
-    }
-
     function renderPriceSheetTable() {
       const q = (document.getElementById('price-search') ? document.getElementById('price-search').value.toLowerCase().trim() : '');
       const selectedCat = (document.getElementById('price-category-filter') ? document.getElementById('price-category-filter').value : 'All');
@@ -1760,6 +1783,11 @@
 
       const tbody = document.getElementById('price-sheet-table');
       if (!tbody) return;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone-400">No matching products found.</td></tr>';
+        return;
+      }
 
       tbody.innerHTML = filtered.map(p => {
         const disc = p.mrp > 0 ? Math.round(((p.mrp - p.offer_price) / p.mrp) * 100) : 0;
