@@ -240,11 +240,11 @@
         </div>
       </section>
 
-      <!-- ================= 3. INVENTORY & STOCK MANAGEMENT TAB ================= -->
+      <!-- ================= 3. INVENTORY & STOCK MANAGEMENT TAB (ADJUSTED SPACING & MANUAL STOCK ENTRY) ================= -->
       <section id="view-inventory" class="tab-view space-y-6 hidden">
         <div>
           <h1 class="text-2xl font-black text-stone-950">Inventory & Stock Tracking</h1>
-          <p class="text-xs text-stone-500">Monitor current stock, units sold, out-of-stock alerts, and non-moving items.</p>
+          <p class="text-xs text-stone-500">Monitor current stock, units sold, out-of-stock alerts, and adjust stock directly.</p>
         </div>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -274,11 +274,11 @@
           <table class="w-full text-left text-xs whitespace-nowrap">
             <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
               <tr>
-                <th class="p-3">Cracker Item</th>
-                <th class="p-3">Category</th>
-                <th class="p-3">In-Stock Qty</th>
-                <th class="p-3">Sold Qty</th>
-                <th class="p-3">Status</th>
+                <th class="p-3 w-72">Cracker Item</th>
+                <th class="p-3 w-32">Category</th>
+                <th class="p-3 w-28 text-center">In-Stock Qty</th>
+                <th class="p-3 w-24 text-center">Sold Qty</th>
+                <th class="p-3 w-28 text-center">Status</th>
                 <th class="p-3 text-right">Quick Stock Adjustment</th>
               </tr>
             </thead>
@@ -329,12 +329,12 @@
           </div>
         </div>
 
-        <!-- SECTION B: PRODUCT CATALOG MANAGEMENT WITH IMPORT (IMAGE 2) -->
+        <!-- SECTION B: PRODUCT CATALOG MANAGEMENT (IMAGE 1: NO SAVE BUTTON, CLEAN ACTIONS) -->
         <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b pb-3">
             <div>
               <h2 class="text-lg font-black text-stone-950">Product Catalog Management</h2>
-              <p class="text-xs text-stone-500">Import catalog files (Excel/PDF), edit titles directly, or attach photos & videos.</p>
+              <p class="text-xs text-stone-500">Import catalog files (Excel/PDF), edit items directly, or attach photos & videos.</p>
             </div>
 
             <div class="flex items-center space-x-2">
@@ -353,7 +353,7 @@
             <table class="w-full text-left text-xs whitespace-nowrap">
               <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
                 <tr>
-                  <th class="p-3 w-96">Product Name (Editable)</th>
+                  <th class="p-3 w-96">Product Name</th>
                   <th class="p-3">Category</th>
                   <th class="p-3">MRP (₹)</th>
                   <th class="p-3">Offer Price (₹)</th>
@@ -921,6 +921,7 @@
       loadDashboardMetrics();
     }
 
+    // 3. INVENTORY & STOCK TRACKING (MANUAL NUMBER INPUT & TIGHT SPACING)
     function renderInventorySection() {
       const totalStock = productsList.reduce((sum, p) => sum + (Number(p.stock_qty) || 0), 0);
       const totalSold = productsList.reduce((sum, p) => sum + (Number(p.sold_qty) || 0), 0);
@@ -944,28 +945,41 @@
 
         return `
           <tr class="hover:bg-stone-50">
-            <td class="p-3 font-bold text-stone-900">${p.name}</td>
-            <td class="p-3 text-stone-500">${p.category}</td>
-            <td class="p-3 font-black text-stone-900 text-sm">${stock}</td>
-            <td class="p-3 font-bold text-red-700">${sold}</td>
-            <td class="p-3">${statusBadge}</td>
-            <td class="p-3 text-right space-x-1">
-              <button onclick="adjustProductStock('${p.id}', 10)" class="bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold px-2 py-1 rounded text-xs">+10</button>
-              <button onclick="adjustProductStock('${p.id}', 50)" class="bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold px-2 py-1 rounded text-xs">+50</button>
-              <button onclick="adjustProductStock('${p.id}', 100)" class="bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold px-2 py-1 rounded text-xs">+100</button>
+            <td class="p-3 font-bold text-stone-900 w-72 truncate" title="${p.name}">${p.name}</td>
+            <td class="p-3 text-stone-500 font-medium w-32">${p.category}</td>
+            <td class="p-3 font-black text-stone-900 text-sm text-center w-28">${stock}</td>
+            <td class="p-3 font-bold text-red-700 text-center w-24">${sold}</td>
+            <td class="p-3 text-center w-28">${statusBadge}</td>
+            <td class="p-3 text-right">
+              <div class="inline-flex items-center space-x-1.5">
+                <input type="number" id="manual-stock-${p.id}" value="${stock}" min="0" class="w-20 border border-stone-300 rounded-lg p-1.5 text-xs text-center font-bold text-stone-900 bg-white outline-none focus:border-red-700" />
+                <button onclick="setManualProductStock('${p.id}')" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-2.5 py-1.5 rounded-lg text-xs shadow-xs active:scale-95 transition">
+                  Update
+                </button>
+              </div>
             </td>
           </tr>
         `;
       }).join('');
     }
 
-    async function adjustProductStock(id, addUnits) {
-      const item = productsList.find(p => p.id === id);
-      if (!item) return;
-      const newStock = (Number(item.stock_qty) || 0) + addUnits;
-      await window.db.from('products').update({ stock_qty: newStock }).eq('id', id);
-      item.stock_qty = newStock;
-      renderInventorySection();
+    async function setManualProductStock(id) {
+      const input = document.getElementById(`manual-stock-${id}`);
+      const newStockVal = Number(input.value);
+
+      if (isNaN(newStockVal) || newStockVal < 0) {
+        return alert('Please enter a valid stock quantity (0 or higher).');
+      }
+
+      const { error } = await window.db.from('products').update({ stock_qty: newStockVal }).eq('id', id);
+      if (error) {
+        alert('Failed to update stock: ' + error.message);
+      } else {
+        const item = productsList.find(p => p.id === id);
+        if (item) item.stock_qty = newStockVal;
+        renderInventorySection();
+        alert('Stock updated successfully!');
+      }
     }
 
     // 7. AREA & PINCODE DELIVERY RATE FIXER + BULK EXCEL/PDF/CSV IMPORT (IMAGE 1)
@@ -1108,7 +1122,6 @@
       }
     }
 
-    // BULK IMPORT FOR DELIVERY RATES (IMAGE 1: PARSES VILLAGE, MANDAL, TOWN & PINCODE)
     async function handleDeliveryRateImport(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1221,7 +1234,7 @@
       }
     }
 
-    // 8. PRODUCTS CATALOG (IMAGE 2: SAVE BUTTON IN ACTIONS COLUMN, 'Edit' INSTEAD OF 'Edit Full')
+    // 8. PRODUCTS CATALOG (IMAGE 1: NO SAVE BUTTON IN ROW, CLEAN EDIT & DELETE)
     function openProductModal(editId = null) {
       const modal = document.getElementById('product-modal');
       const title = document.getElementById('product-modal-title');
@@ -1333,26 +1346,7 @@
       }
     }
 
-    // Inline Save for Product Name (Triggered from last Actions column)
-    async function saveInlineProductName(id) {
-      const nameInput = document.getElementById(`prod-name-${id}`);
-      const newName = nameInput.value.trim();
-
-      if (!newName) {
-        return alert('Product name cannot be empty.');
-      }
-
-      const { error } = await window.db.from('products').update({ name: newName }).eq('id', id);
-      if (error) {
-        alert('Failed to update name: ' + error.message);
-      } else {
-        const item = productsList.find(p => p.id.toString() === id.toString());
-        if (item) item.name = newName;
-        alert('Product name saved live!');
-      }
-    }
-
-    // RENDER PRODUCTS TABLE (IMAGE 2: SAVE BUTTON IN ACTIONS COLUMN, 'Edit' INSTEAD OF 'Edit Full')
+    // RENDER PRODUCTS TABLE (IMAGE 1: NO SAVE BUTTON, CLEAN ACTIONS)
     function renderProductsTable() {
       const tbody = document.getElementById('products-table');
       if (!tbody) return;
@@ -1362,7 +1356,7 @@
           <td class="p-3">
             <div class="flex items-center space-x-2.5">
               <img src="${p.image_url || 'https://placehold.co/40x40?text=Cracker'}" class="w-10 h-10 rounded-lg object-cover border shrink-0" />
-              <input type="text" id="prod-name-${p.id}" value="${p.name.replace(/"/g, '&quot;')}" class="w-full border border-stone-300 rounded-lg p-1.5 text-xs font-bold text-stone-900 bg-white outline-none focus:border-red-700" />
+              <span class="font-bold text-stone-900 text-xs truncate max-w-sm" title="${p.name}">${p.name}</span>
             </div>
             ${p.video_url ? '<span class="text-[9px] bg-red-100 text-red-800 font-bold px-1.5 py-0.2 rounded-full inline-block mt-1">🎬 Video Demo Attached</span>' : ''}
           </td>
@@ -1370,11 +1364,7 @@
           <td class="p-3 text-stone-400 font-bold">₹${p.mrp}</td>
           <td class="p-3 text-red-700 font-black">₹${p.offer_price}</td>
           <td class="p-3 font-bold">${p.stock_qty || 0}</td>
-          <!-- ACTIONS COLUMN WITH SAVE MOVED TO LAST COLUMN & 'Edit' RENAMED -->
           <td class="p-3 text-right space-x-2">
-            <button onclick="saveInlineProductName('${p.id}')" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3 py-1 rounded-lg text-xs shadow-xs active:scale-95 transition">
-              Save
-            </button>
             <button onclick="openProductModal('${p.id}')" class="text-blue-600 hover:text-blue-800 font-bold hover:underline">
               Edit
             </button>
@@ -1386,7 +1376,6 @@
       `).join('') || '<tr><td colspan="6" class="p-4 text-center text-stone-400">No products found.</td></tr>';
     }
 
-    // BULK IMPORT FOR PRODUCTS CATALOG (EXCEL / CSV / PDF)
     async function handleCatalogImport(event) {
       const file = event.target.files[0];
       if (!file) return;
