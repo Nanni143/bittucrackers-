@@ -296,7 +296,7 @@
       <!-- ================= 4. PRODUCTS & DELIVERY RATE FIXER TAB ================= -->
       <section id="view-products" class="tab-view space-y-6 hidden">
         
-        <!-- SECTION A: AREA & PINCODE DELIVERY RATE FIXER -->
+        <!-- SECTION A: AREA & PINCODE DELIVERY RATE FIXER WITH EDIT BUTTON & INLINE EDITING -->
         <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b pb-3">
             <div>
@@ -440,9 +440,10 @@
   <div id="rate-modal" style="display: none;" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl border border-stone-200">
       <div class="flex justify-between items-center mb-3 pb-2 border-b">
-        <h3 class="text-sm font-extrabold text-stone-900">Add / Edit Delivery Rate</h3>
+        <h3 id="rate-modal-title" class="text-sm font-extrabold text-stone-900">Add Delivery Rate</h3>
         <button type="button" onclick="closeDeliveryRateModal()" class="text-stone-400 hover:text-black text-2xl font-black">&times;</button>
       </div>
+      <input type="hidden" id="editing-rate-id" value="" />
       <div class="space-y-3 text-xs">
         <div>
           <label class="font-bold block mb-1">Zone or Area Name *</label>
@@ -460,7 +461,7 @@
           <label class="font-bold block mb-1">Delivery Charge (₹) *</label>
           <input id="rate-charge" type="number" placeholder="0 for Free, or 99, 150" class="w-full border rounded-xl p-2.5 outline-none font-bold text-red-700" />
         </div>
-        <button type="button" onclick="handleSaveDeliveryRate()" class="w-full bg-red-700 hover:bg-red-800 text-amber-300 font-black py-2.5 rounded-xl text-xs uppercase border border-amber-400 active:scale-95 transition">
+        <button type="button" onclick="handleSaveDeliveryRate()" id="btn-save-delivery-rate" class="w-full bg-red-700 hover:bg-red-800 text-amber-300 font-black py-2.5 rounded-xl text-xs uppercase border border-amber-400 active:scale-95 transition">
           Save Delivery Rate
         </button>
       </div>
@@ -603,7 +604,6 @@
         }
       } catch (err) {
         console.warn('RPC check failed:', err);
-        // Fallback for primary admin username match
         if (validUsers.includes(user.toLowerCase())) {
           revealDashboard({
             username: 'bittu_admin',
@@ -945,11 +945,44 @@
       renderInventorySection();
     }
 
-    // DELIVERY RATE FIXER
-    function openDeliveryRateModal() { document.getElementById('rate-modal').style.display = 'flex'; }
-    function closeDeliveryRateModal() { document.getElementById('rate-modal').style.display = 'none'; }
+    // 7. AREA & PINCODE DELIVERY RATE FIXER (WITH INLINE & MODAL EDIT)
+    function openDeliveryRateModal(editId = null) {
+      const modal = document.getElementById('rate-modal');
+      const title = document.getElementById('rate-modal-title');
+      const btn = document.getElementById('btn-save-delivery-rate');
+      const editInput = document.getElementById('editing-rate-id');
+
+      if (editId) {
+        const item = deliveryZonesList.find(z => z.id.toString() === editId.toString());
+        if (item) {
+          title.innerText = 'Edit Delivery Rate';
+          btn.innerText = 'Update Delivery Rate';
+          editInput.value = item.id;
+          document.getElementById('rate-zone-name').value = item.zone_name || '';
+          document.getElementById('rate-pincode').value = item.pincode || '';
+          document.getElementById('rate-keywords').value = item.area_keywords || '';
+          document.getElementById('rate-charge').value = item.delivery_charge !== undefined ? item.delivery_charge : 0;
+        }
+      } else {
+        title.innerText = 'Add Delivery Rate';
+        btn.innerText = 'Save Delivery Rate';
+        editInput.value = '';
+        document.getElementById('rate-zone-name').value = '';
+        document.getElementById('rate-pincode').value = '';
+        document.getElementById('rate-keywords').value = '';
+        document.getElementById('rate-charge').value = '';
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeDeliveryRateModal() {
+      document.getElementById('rate-modal').style.display = 'none';
+      document.getElementById('editing-rate-id').value = '';
+    }
 
     async function handleSaveDeliveryRate() {
+      const editId = document.getElementById('editing-rate-id').value;
       const zone_name = document.getElementById('rate-zone-name').value.trim();
       const pincode = document.getElementById('rate-pincode').value.trim();
       const area_keywords = document.getElementById('rate-keywords').value.trim();
@@ -959,22 +992,60 @@
         return alert('Please fill in Zone Name, Keywords, and Delivery Charge.');
       }
 
-      const { error } = await window.db.from('delivery_zones').insert([{
-        zone_name, pincode, area_keywords, delivery_charge
-      }]);
+      const payload = {
+        zone_name,
+        pincode: pincode || 'Any',
+        area_keywords,
+        delivery_charge
+      };
 
-      if (error) alert('Error saving rate: ' + error.message);
-      else {
+      let error = null;
+      if (editId) {
+        const res = await window.db.from('delivery_zones').update(payload).eq('id', editId);
+        error = res.error;
+      } else {
+        const res = await window.db.from('delivery_zones').insert([payload]);
+        error = res.error;
+      }
+
+      if (error) {
+        alert('Error saving rate: ' + error.message);
+      } else {
         closeDeliveryRateModal();
-        loadDeliveryZones();
-        alert('Delivery rate added live!');
+        await loadDeliveryZones();
+        alert(editId ? 'Delivery rate updated successfully!' : 'New delivery rate added live!');
+      }
+    }
+
+    // Quick inline price save directly from the table input
+    async function saveInlineDeliveryRate(id) {
+      const input = document.getElementById(`inline-rate-${id}`);
+      const newCharge = Number(input.value);
+
+      if (isNaN(newCharge) || newCharge < 0) {
+        return alert('Please enter a valid rate (0 or higher).');
+      }
+
+      const { error } = await window.db.from('delivery_zones').update({
+        delivery_charge: newCharge
+      }).eq('id', id);
+
+      if (error) {
+        alert('Failed to update rate: ' + error.message);
+      } else {
+        const item = deliveryZonesList.find(z => z.id.toString() === id.toString());
+        if (item) item.delivery_charge = newCharge;
+        renderDeliveryZonesTable();
+        alert('Delivery rate updated to ₹' + newCharge + '!');
       }
     }
 
     function renderDeliveryZonesTable() {
       const tbody = document.getElementById('delivery-rates-table');
+      if (!tbody) return;
+
       if (deliveryZonesList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-stone-400">No custom delivery rates added yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-stone-400">No custom delivery rates added yet.</td></tr>';
         return;
       }
 
@@ -982,19 +1053,37 @@
         <tr class="hover:bg-stone-50">
           <td class="p-3 font-bold text-stone-900">${z.zone_name}</td>
           <td class="p-3 font-mono font-bold text-amber-700">${z.pincode || 'Any'}</td>
-          <td class="p-3 text-stone-500 max-w-xs truncate">${z.area_keywords}</td>
-          <td class="p-3 font-black text-stone-900">${Number(z.delivery_charge) === 0 ? '<span class="text-emerald-700">FREE</span>' : '₹' + z.delivery_charge}</td>
-          <td class="p-3 text-right">
-            <button onclick="deleteDeliveryZone('${z.id}')" class="text-red-700 hover:underline font-bold">Delete</button>
+          <td class="p-3 text-stone-500 max-w-xs truncate" title="${z.area_keywords}">${z.area_keywords}</td>
+          <td class="p-3">
+            <div class="flex items-center space-x-1.5">
+              <span class="text-stone-400 font-bold">₹</span>
+              <input type="number" id="inline-rate-${z.id}" value="${z.delivery_charge || 0}" class="w-20 border border-stone-300 rounded-lg p-1.5 text-xs font-black text-red-700 bg-white outline-none focus:border-red-700" />
+              <button onclick="saveInlineDeliveryRate('${z.id}')" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-2 py-1 rounded-lg text-[11px] shadow-xs active:scale-95 transition">
+                Save
+              </button>
+            </div>
+          </td>
+          <td class="p-3 text-right space-x-2">
+            <button onclick="openDeliveryRateModal('${z.id}')" class="text-blue-600 hover:text-blue-800 font-bold hover:underline">
+              Edit
+            </button>
+            <button onclick="deleteDeliveryZone('${z.id}')" class="text-red-700 hover:text-red-900 font-bold hover:underline">
+              Delete
+            </button>
           </td>
         </tr>
       `).join('');
     }
 
     async function deleteDeliveryZone(id) {
-      if (!confirm('Delete this delivery rate?')) return;
-      await window.db.from('delivery_zones').delete().eq('id', id);
-      loadDeliveryZones();
+      if (!confirm('Are you sure you want to delete this delivery rate rule?')) return;
+      const { error } = await window.db.from('delivery_zones').delete().eq('id', id);
+      if (error) {
+        alert('Could not delete: ' + error.message);
+      } else {
+        deliveryZonesList = deliveryZonesList.filter(z => z.id.toString() !== id.toString());
+        renderDeliveryZonesTable();
+      }
     }
 
     // PRODUCTS CATALOG
