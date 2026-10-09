@@ -133,15 +133,28 @@
   <!-- ================= CATALOG STOREFRONT VIEW ================= -->
   <div id="catalog-page-view">
 
-    <!-- Categories Horizontal Filter Bar -->
-    <div class="px-3 pt-3 pb-1 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs bg-white border-b border-stone-200">
-      <button onclick="filterCategory('All')" class="cat-btn bg-red-700 text-amber-300 border border-amber-400 px-3.5 py-1.5 rounded-full font-bold shadow-xs">All</button>
-      <button onclick="filterCategory('Sparklers')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium">Sparklers</button>
-      <button onclick="filterCategory('Sound Crackers')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium">Sound Crackers</button>
-      <button onclick="filterCategory('Ground Chakkars')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium">Ground Chakkars</button>
-      <button onclick="filterCategory('Flower Pots')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium">Flower Pots</button>
-      <button onclick="filterCategory('Sky Shots')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium">Sky Shots</button>
-      <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium">Gift Boxes</button>
+    <!-- ALL 18 CATEGORIES HORIZONTAL FILTER BAR (IMAGES 2 & 3) -->
+    <div class="px-3 pt-3 pb-2 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs bg-white border-b border-stone-200 no-scrollbar">
+      <button onclick="filterCategory('All')" class="cat-btn bg-red-700 text-amber-300 border border-amber-400 px-3.5 py-1.5 rounded-full font-bold shadow-xs shrink-0">All</button>
+      <button onclick="filterCategory('One Sound Crackers')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">One Sound Crackers</button>
+      <button onclick="filterCategory('Chakkars & Spinners')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Chakkars & Spinners</button>
+      <button onclick="filterCategory('Flower Pots')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Flower Pots</button>
+      <button onclick="filterCategory('Bombs')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Bombs</button>
+      <button onclick="filterCategory('Rockets')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Rockets</button>
+      <button onclick="filterCategory('Garlands & Chorsa')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Garlands & Chorsa</button>
+      <button onclick="filterCategory('Night Aerial Fancy')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Night Aerial Fancy</button>
+      <button onclick="filterCategory('Festival Repeaters')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Festival Repeaters</button>
+      <button onclick="filterCategory('Bijili & Paper Bombs')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Bijili & Paper Bombs</button>
+      <button onclick="filterCategory('Twinkling Stars')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Twinkling Stars</button>
+      <button onclick="filterCategory('Colour Fountains')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Colour Fountains</button>
+      <button onclick="filterCategory('Kids Zone Novelties')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Kids Zone Novelties</button>
+      <button onclick="filterCategory('Sparklers')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Sparklers</button>
+      <button onclick="filterCategory('New Arrivals')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">New Arrivals</button>
+      <button onclick="filterCategory('Colourful Matches')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Colourful Matches</button>
+      <button onclick="filterCategory('Serpent & Caps')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Serpent & Caps</button>
+      <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Gift Boxes</button>
+      <button onclick="filterCategory('Ropes & Chains')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Ropes & Chains</button>
+      <button onclick="filterCategory('Special Items')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Special Items</button>
     </div>
 
     <!-- ================= FLOATING / STICKY STATS PILL ================= -->
@@ -156,7 +169,7 @@
           </button>
           
           <div class="relative">
-            <input type="text" id="live-search" placeholder="Search..." oninput="renderProducts()" class="border border-stone-200 rounded-full pl-7 pr-2.5 py-1.5 text-[11px] w-24 sm:w-32 outline-none focus:border-red-600 bg-stone-50" />
+            <input type="text" id="live-search" placeholder="Search..." oninput="renderProducts()" class="border border-stone-200 rounded-full pl-7 pr-2.5 py-1.5 text-[11px] w-24 sm:w-32 outline-none focus:border-red-700 bg-stone-50" />
             <span class="absolute left-2.5 top-2 text-[10px] text-stone-400">🔍</span>
           </div>
           <span class="text-stone-300 hidden sm:inline">|</span>
@@ -215,10 +228,10 @@
     </main>
   </div>
 
-  <!-- ================= CATEGORY SELECTION MODAL ================= -->
+  <!-- ================= CATEGORY SELECTION MODAL (IMAGE 1: FULL 18 CATEGORIES INCLUDED) ================= -->
   <div id="category-drawer-modal" class="fixed inset-0 bg-neutral-950/75 backdrop-blur-2xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4">
-      <div class="flex justify-between items-center border-b pb-2.5">
+    <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-3.5 max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-center border-b pb-2.5 shrink-0">
         <div class="flex items-center space-x-2">
           <span class="text-base text-red-700">⚙</span>
           <h3 class="font-extrabold text-sm text-stone-900">Select Cracker Category</h3>
@@ -226,34 +239,86 @@
         <button onclick="closeCategoryModal()" class="text-stone-400 hover:text-black text-2xl font-black">&times;</button>
       </div>
 
-      <div class="grid grid-cols-1 gap-2 text-xs font-bold">
-        <button onclick="selectCategoryFromModal('All')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+      <div class="grid grid-cols-1 gap-1.5 text-xs font-bold overflow-y-auto pr-1">
+        <button onclick="selectCategoryFromModal('All')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
           <span>🎆 All Crackers</span>
           <span id="cat-check-All">✓</span>
         </button>
-        <button onclick="selectCategoryFromModal('Sparklers')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>✨ Sparklers</span>
+        <button onclick="selectCategoryFromModal('One Sound Crackers')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🔊 One Sound Crackers</span>
+          <span id="cat-check-One-Sound-Crackers" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Chakkars & Spinners')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🌀 Chakkars & Spinners</span>
+          <span id="cat-check-Chakkars--Spinners" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Flower Pots')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🏺 Flower Pots</span>
+          <span id="cat-check-Flower-Pots" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Bombs')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>💣 Bombs</span>
+          <span id="cat-check-Bombs" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Rockets')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🚀 Rockets</span>
+          <span id="cat-check-Rockets" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Garlands & Chorsa')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🎇 Garlands & Chorsa</span>
+          <span id="cat-check-Garlands--Chorsa" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Night Aerial Fancy')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🌌 Night Aerial Fancy</span>
+          <span id="cat-check-Night-Aerial-Fancy" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Festival Repeaters')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>✨ Festival Repeaters</span>
+          <span id="cat-check-Festival-Repeaters" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Bijili & Paper Bombs')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>💥 Bijili & Paper Bombs</span>
+          <span id="cat-check-Bijili--Paper-Bombs" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Twinkling Stars')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>⭐ Twinkling Stars</span>
+          <span id="cat-check-Twinkling-Stars" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Colour Fountains')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>⛲ Colour Fountains</span>
+          <span id="cat-check-Colour-Fountains" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Kids Zone Novelties')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🧸 Kids Zone Novelties</span>
+          <span id="cat-check-Kids-Zone-Novelties" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Sparklers')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🪄 Sparklers</span>
           <span id="cat-check-Sparklers" class="hidden">✓</span>
         </button>
-        <button onclick="selectCategoryFromModal('Sound Crackers')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>💥 Sound Crackers</span>
-          <span id="cat-check-Sound Crackers" class="hidden">✓</span>
+        <button onclick="selectCategoryFromModal('New Arrivals')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🆕 New Arrivals</span>
+          <span id="cat-check-New-Arrivals" class="hidden">✓</span>
         </button>
-        <button onclick="selectCategoryFromModal('Ground Chakkars')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🌀 Ground Chakkars</span>
-          <span id="cat-check-Ground Chakkars" class="hidden">✓</span>
+        <button onclick="selectCategoryFromModal('Colourful Matches')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🔥 Colourful Matches</span>
+          <span id="cat-check-Colourful-Matches" class="hidden">✓</span>
         </button>
-        <button onclick="selectCategoryFromModal('Flower Pots')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🏺 Flower Pots</span>
-          <span id="cat-check-Flower Pots" class="hidden">✓</span>
+        <button onclick="selectCategoryFromModal('Serpent & Caps')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🐍 Serpent & Caps</span>
+          <span id="cat-check-Serpent--Caps" class="hidden">✓</span>
         </button>
-        <button onclick="selectCategoryFromModal('Sky Shots')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🚀 Sky Shots</span>
-          <span id="cat-check-Sky Shots" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Gift Boxes')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+        <button onclick="selectCategoryFromModal('Gift Boxes')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
           <span>🎁 Gift Boxes</span>
-          <span id="cat-check-Gift Boxes" class="hidden">✓</span>
+          <span id="cat-check-Gift-Boxes" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Ropes & Chains')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>⛓️ Ropes & Chains</span>
+          <span id="cat-check-Ropes--Chains" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Special Items')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🎉 Special Items</span>
+          <span id="cat-check-Special-Items" class="hidden">✓</span>
         </button>
       </div>
     </div>
@@ -424,7 +489,7 @@
 
   <!-- ================= SUCCESS CONFIRMATION MODAL ================= -->
   <div id="order-success-modal" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center space-y-4 border border-stone-200">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-stone-200">
       <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl font-black">
         ✓
       </div>
@@ -605,7 +670,6 @@
         } catch(e) {}
       }
 
-      // Fetch dynamic delivery rules from Supabase (including imported pincodes and areas)
       const { data: zData } = await db.from('delivery_zones').select('*');
       deliveryZones = zData && zData.length > 0 ? zData : [
         { zone_name: 'Kavali City & Town (Local)', pincode: '524201', area_keywords: 'kavali, vengal, musunuru, maddurupadu, rudrakota', delivery_charge: 0 },
@@ -667,10 +731,6 @@
 
     function selectCategoryFromModal(cat) {
       filterCategory(cat);
-      ['All', 'Sparklers', 'Sound Crackers', 'Ground Chakkars', 'Flower Pots', 'Sky Shots', 'Gift Boxes'].forEach(c => {
-        const chk = document.getElementById('cat-check-' + c);
-        if (chk) chk.className = (c === cat ? 'text-red-700 font-black' : 'hidden');
-      });
       closeCategoryModal();
     }
 
@@ -835,12 +895,10 @@
       }
     }
 
-    // ACCURATE PINCODE & KEYWORD DELIVERY MATCHING (SYNCED WITH ADMIN)
     function evaluateDeliveryCharge(addressString, detectedPincode) {
       const lowerAddr = (addressString || '').toLowerCase();
       const pinToMatch = (detectedPincode || '').toString().trim();
 
-      // 1. Check exact 6-digit Pincode match first
       if (pinToMatch && pinToMatch.length === 6) {
         for (const z of deliveryZones) {
           if (z.pincode && z.pincode.toString().trim() === pinToMatch) {
@@ -849,7 +907,6 @@
         }
       }
 
-      // 2. Check Area / Town / Mandal keywords match
       for (const z of deliveryZones) {
         const keys = (z.area_keywords || '').split(',').map(k => k.trim().toLowerCase());
         if (keys.some(k => k && lowerAddr.includes(k))) {
@@ -857,7 +914,6 @@
         }
       }
 
-      // 3. Fallback default
       return { zoneName: "Regional Delivery", charge: 99 };
     }
 
@@ -1098,7 +1154,6 @@
         const savings = (p.mrp > p.offer_price) ? (p.mrp - p.offer_price) : 0;
         const hasVideo = Boolean(p.video_url);
 
-        // Slideable Media Carousel: Image first, swipe for video demo
         const mediaGalleryHtml = hasVideo ? `
           <div class="relative w-full overflow-hidden rounded-xl bg-stone-100">
             <div id="media-carousel-${p.id}" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar w-full h-40 sm:h-44">
@@ -1206,8 +1261,8 @@
       activeCategory = cat;
       document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.className = btn.innerText === cat 
-          ? "cat-btn bg-red-700 text-amber-300 border border-amber-400 px-3.5 py-1.5 rounded-full font-bold shadow-xs" 
-          : "cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium";
+          ? "cat-btn bg-red-700 text-amber-300 border border-amber-400 px-3.5 py-1.5 rounded-full font-bold shadow-xs shrink-0" 
+          : "cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0";
       });
       renderProducts();
     }
