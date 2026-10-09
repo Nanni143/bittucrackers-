@@ -527,20 +527,56 @@
     let festivalChartInstance = null;
 
     // 1. LOGIN WITH FALLBACK RECOVERY
-    async function performLogin() {
+   async function performLogin() {
       const user = document.getElementById('login-id').value.trim();
       const pass = document.getElementById('login-pass').value.trim();
       const errBox = document.getElementById('login-error');
       const submitBtn = document.getElementById('login-submit-btn');
 
       if (!user || !pass) {
-        errBox.innerText = 'Please enter your username and password.';
+        errBox.innerText = 'Please enter username and password.';
         errBox.classList.remove('hidden');
         return;
       }
 
-      submitBtn.innerText = 'Verifying...';
+      submitBtn.innerText = 'Signing in...';
 
+      // 1. Direct Master Login (Works instantly, never gets locked out)
+      if (
+        (user.toLowerCase() === 'bittu_admin' || user.toLowerCase() === 'admin@bittucrackers.in') &&
+        pass === 'admin@bittu123'
+      ) {
+        revealDashboard({
+          username: 'bittu_admin',
+          first_name: 'Bittu',
+          last_name: 'Kumar',
+          email: 'admin@bittucrackers.in',
+          role: 'Super Admin'
+        });
+        return;
+      }
+
+      // 2. Database verification via RPC
+      try {
+        const { data, error } = await window.db.rpc('verify_admin_login', {
+          p_user: user,
+          p_pass: pass
+        });
+
+        if (data && data.length > 0) {
+          revealDashboard(data[0]);
+        } else {
+          errBox.innerText = 'Invalid username/email or password.';
+          errBox.classList.remove('hidden');
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        errBox.innerText = 'Server error. Please try again.';
+        errBox.classList.remove('hidden');
+      } finally {
+        submitBtn.innerText = 'Sign In to Admin';
+      }
+    }
       // Immediate Master Key Override: Never locks you out
       if ((user.toLowerCase() === 'bittu_admin' || user.toLowerCase() === 'admin@bittucrackers.in') && pass === 'admin@bittu123') {
         revealDashboard({ username: 'bittu_admin', first_name: 'Bittu', last_name: 'Kumar', role: 'Super Admin' });
