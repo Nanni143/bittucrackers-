@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bittu Crackers - Sivakasi Crackers Online Booking</title>
+  <title>Bittu Crackers - Online Booking Kavali</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -14,18 +14,18 @@
     .leaflet-top, .leaflet-bottom { z-index: 11 !important; }
   </style>
 </head>
-<body class="bg-stone-50 text-stone-800 pb-16 font-sans antialiased">
+<body class="bg-stone-50 text-stone-800 pb-24 font-sans antialiased">
 
-  <!-- ================= TOP NOTICE TICKER (FESTIVAL GOLD & RED) ================= -->
+  <!-- ================= TOP NOTICE TICKER (FESTIVAL OFFERS - NO SIVAKASI / NO PERCENTAGES) ================= -->
   <div class="bg-gradient-to-r from-red-900 via-red-800 to-red-900 text-amber-300 border-b border-amber-500/30 text-[10px] md:text-xs py-1.5 px-3 font-bold flex items-center justify-between overflow-x-auto whitespace-nowrap">
     <div class="flex items-center space-x-6 mx-auto">
-      <span>✨ 100% GENUINE SIVAKASI CRACKERS</span>
-      <span>💥 UP TO 80% FESTIVAL DISCOUNT ON ALL PRODUCTS</span>
+      <span>✨ 100% GENUINE QUALITY CRACKERS</span>
+      <span>💥 SPECIAL FESTIVAL OFFERS ON ALL PRODUCTS</span>
       <span>🚚 SERVING KAVALI & SPSR NELLORE — CASH ON DELIVERY</span>
     </div>
   </div>
 
-  <!-- ================= TOP NAVIGATION (LOTUS PYROS STYLE - RED & GOLD) ================= -->
+  <!-- ================= TOP NAVIGATION (RED & GOLD THEME) ================= -->
   <nav class="bg-white border-b border-stone-200 px-3 py-2.5 sticky top-0 z-40 shadow-xs">
     <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
       
@@ -35,13 +35,13 @@
           <span class="bg-red-700 text-amber-300 font-black px-2.5 py-1 rounded-xl text-base shadow-sm border border-amber-400">B</span>
           <div class="hidden sm:block leading-tight">
             <span class="font-black text-sm tracking-wide text-red-700 block">BITTU CRACKERS</span>
-            <span class="text-[9px] font-bold text-amber-600 uppercase tracking-widest block">Kavali • Sivakasi Rates</span>
+            <span class="text-[9px] font-bold text-amber-600 uppercase tracking-widest block">KAVALI • SPECIAL FESTIVAL OFFERS</span>
           </div>
         </div>
 
         <div onclick="handleTopLocationClick()" class="flex items-center space-x-1.5 cursor-pointer min-w-0 bg-stone-50 hover:bg-stone-100 p-1.5 rounded-xl border border-stone-200 transition">
           <span class="text-red-600 text-xs">📍</span>
-          <div class="truncate max-w-[130px] sm:max-w-[200px]">
+          <div class="truncate max-w-[130px] sm:max-w-[180px]">
             <div class="flex items-center space-x-1">
               <span id="top-loc-name" class="text-[11px] font-black text-stone-900 truncate">Select Address</span>
               <span class="text-[8px] text-stone-400">▼</span>
@@ -51,21 +51,24 @@
         </div>
       </div>
 
-      <!-- Action Buttons: Quick Enquiry + Contact + Direct Call Numbers -->
+      <!-- Action Buttons: Quick Enquiry + Contact + Direct Cart Button -->
       <div class="flex items-center space-x-2 shrink-0">
+        <!-- Prominent Cart Button in Top Nav -->
+        <button onclick="openCartView()" id="nav-cart-btn" class="bg-red-700 hover:bg-red-800 active:scale-95 text-white font-extrabold px-3 py-1.5 rounded-full text-xs flex items-center space-x-1.5 shadow-sm border border-amber-400/80 transition">
+          <span>🛒</span>
+          <span class="hidden sm:inline">Cart</span>
+          <span id="nav-cart-count" class="bg-amber-300 text-red-900 text-[11px] font-black px-1.5 py-0.2 rounded-full">0</span>
+        </button>
+
         <button onclick="handleQuickEnquiryClick()" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 active:scale-95 text-amber-300 font-extrabold px-3 py-1.5 rounded-full text-[11px] flex items-center space-x-1 border border-amber-400 shadow-sm transition">
           <span>⚡</span>
-          <span>QUICK ENQUIRY</span>
+          <span class="hidden sm:inline">QUICK ENQUIRY</span>
+          <span class="sm:hidden">ENQUIRY</span>
         </button>
 
         <button onclick="switchToContactView()" class="font-extrabold text-xs text-stone-800 hover:text-red-700 px-2 py-1 transition tracking-wide border border-transparent hover:border-red-100 rounded-lg">
           CONTACT
         </button>
-
-        <div class="hidden md:flex flex-col text-[11px] font-bold text-red-700 leading-tight border-l pl-2.5">
-          <a href="tel:+917993659115" class="hover:underline flex items-center space-x-1"><span>📞</span><span>7993659115</span></a>
-          <a href="tel:+919848104866" class="hover:underline flex items-center space-x-1"><span>📞</span><span>9848104866</span></a>
-        </div>
       </div>
     </div>
   </nav>
@@ -93,7 +96,7 @@
         </div>
       </div>
 
-      <!-- Card 2: WhatsApp (ALL 4 NUMBERS INCLUDED) -->
+      <!-- Card 2: WhatsApp (All 4 Numbers) -->
       <div class="bg-emerald-50/70 rounded-2xl p-6 shadow-md border-2 border-emerald-300 text-center space-y-3 hover:border-emerald-500 transition">
         <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl shadow-xs">
           💬
@@ -142,10 +145,11 @@
       <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium">Gift Boxes</button>
     </div>
 
-    <!-- ================= FLOATING / STICKY STATS PILL ================= -->
-    <div class="max-w-4xl mx-auto px-3 py-3">
+    <!-- ================= FLOATING / STICKY STATS PILL WITH DIRECT CART ACTION ================= -->
+    <div class="max-w-5xl mx-auto px-3 py-3">
       <div class="bg-white rounded-full border border-stone-200/90 shadow-md p-2 flex items-center justify-between gap-2 overflow-x-auto">
         
+        <!-- Left: Categories Pill + Search -->
         <div class="flex items-center space-x-2 shrink-0">
           <button onclick="scrollCategoryToView()" class="bg-red-700 hover:bg-red-800 active:scale-95 text-amber-300 font-extrabold text-[11px] px-3.5 py-2 rounded-full flex items-center space-x-1 border border-amber-400/50 shadow-sm transition">
             <span>⚙</span>
@@ -159,7 +163,9 @@
           <span class="text-stone-300 hidden sm:inline">|</span>
         </div>
 
-        <div onclick="openCartView()" class="flex items-center space-x-2 cursor-pointer shrink-0">
+        <!-- Middle: Direct View Cart Pill Button -->
+        <div class="flex items-center space-x-2 shrink-0">
+          <!-- Products Badge (Orange) -->
           <div class="flex items-center space-x-1.5 bg-orange-50 px-2 py-1 rounded-xl border border-orange-200">
             <div class="w-6 h-6 bg-orange-500 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">
               📦
@@ -170,6 +176,7 @@
             </div>
           </div>
 
+          <!-- Items Badge (Blue) -->
           <div class="flex items-center space-x-1.5 bg-blue-50 px-2 py-1 rounded-xl border border-blue-200">
             <div class="w-6 h-6 bg-blue-600 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">
               🛍️
@@ -180,17 +187,17 @@
             </div>
           </div>
 
-          <div class="flex items-center space-x-1.5 bg-emerald-50 px-2 py-1 rounded-xl border border-emerald-200">
-            <div class="w-6 h-6 bg-emerald-600 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">
-              👛
+          <!-- Total + Explicit "View Cart" Button (Green / Red) -->
+          <button onclick="openCartView()" class="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-2.5 py-1.5 rounded-xl border border-emerald-700 shadow-sm transition">
+            <span class="text-xs">🛒</span>
+            <div class="text-left">
+              <span class="text-[8px] font-black uppercase tracking-wider text-emerald-200 block leading-none">VIEW CART</span>
+              <span id="pill-total-rupees" class="text-xs font-black text-white leading-none">₹0</span>
             </div>
-            <div>
-              <span class="text-[8px] font-black uppercase tracking-wider text-stone-400 block leading-none">TOTAL</span>
-              <span id="pill-total-rupees" class="text-xs font-black text-red-700 leading-none">₹0</span>
-            </div>
-          </div>
+          </button>
         </div>
 
+        <!-- Right: LIST / GRID View Switcher -->
         <div class="flex items-center bg-stone-100 p-0.5 rounded-full shrink-0 border border-stone-200">
           <button onclick="setViewMode('list')" id="btn-toggle-list" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold text-stone-500 flex items-center space-x-1 transition">
             <span>☰</span>
@@ -207,9 +214,28 @@
     <!-- Products Main Container -->
     <main class="p-3 max-w-4xl mx-auto" id="product-container">
       <div id="product-list" class="w-full">
-        <div class="text-center text-xs text-stone-400 py-12">Loading Sivakasi crackers catalog...</div>
+        <div class="text-center text-xs text-stone-400 py-12">Loading festival crackers catalog...</div>
       </div>
     </main>
+  </div>
+
+  <!-- ================= FLOATING STICKY BOTTOM CART BAR (ACTIVE WHEN CART > 0) ================= -->
+  <div id="floating-bottom-cart-bar" class="fixed bottom-3 inset-x-0 z-40 px-4 hidden">
+    <div onclick="openCartView()" class="max-w-md mx-auto bg-gradient-to-r from-red-800 to-red-900 text-white rounded-2xl p-3 shadow-2xl border-2 border-amber-400 flex items-center justify-between cursor-pointer active:scale-98 transition">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-9 h-9 bg-amber-400 text-red-950 rounded-xl flex items-center justify-center font-black text-base shadow-sm">
+          🛒
+        </div>
+        <div>
+          <p class="text-xs font-black text-amber-300 leading-tight"><span id="float-cart-count">0</span> Items in Cart</p>
+          <p class="text-[11px] font-bold text-stone-200">Total: <span id="float-cart-total" class="font-black text-white">₹0</span></p>
+        </div>
+      </div>
+      <button class="bg-amber-400 hover:bg-amber-300 text-red-950 font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wide flex items-center space-x-1 shadow-sm">
+        <span>View Cart & Book</span>
+        <span>➔</span>
+      </button>
+    </div>
   </div>
 
   <!-- ================= COMPREHENSIVE BEIGE / WARM CREAM FOOTER ================= -->
@@ -226,7 +252,7 @@
             <h2 class="text-base font-black text-red-800 uppercase tracking-wide">Bittu Fireworks</h2>
           </div>
           <p class="text-stone-600 text-[11px] leading-relaxed">
-            Premier destination for highest quality crackers and fireworks in KAVALI. Sivakasi direct pricing for unforgettable festival celebrations.
+            Premier destination for highest quality crackers and fireworks in KAVALI. Unbeatable festival offers for unforgettable festival celebrations.
           </p>
         </div>
 
@@ -285,7 +311,7 @@
           As per 2018 Supreme Court order, online direct sale of firecrackers is not permitted! We value our customers and strictly respect jurisdiction. We request you to add your products to the cart and submit the required crackers through the enquiry booking button. We will contact you within 24 hours and confirm the order through WhatsApp or phone call.
         </p>
         <p>
-          Bittu Fireworks follows 100% legal & statutory compliances, and all our shops and godowns are maintained strictly as per the Explosives Act. We dispatch parcels through registered and legal transport service providers, consistent with established safety standards in Sivakasi.
+          Bittu Fireworks follows 100% legal & statutory compliances, and all our shops and godowns are maintained strictly as per the Explosives Act. We dispatch parcels through registered and legal transport service providers.
         </p>
       </div>
 
@@ -337,7 +363,7 @@
             <span id="summary-mrp-total">₹0</span>
           </div>
           <div class="flex justify-between text-emerald-600 font-semibold">
-            <span>Festival Discount</span>
+            <span>Special Festival Offers Savings</span>
             <span id="summary-discount-val">- ₹0</span>
           </div>
           <div class="flex justify-between text-stone-600 items-center">
@@ -352,7 +378,7 @@
             <span id="summary-grand-total" class="text-red-700 text-base">₹0</span>
           </div>
           <div class="bg-amber-50 text-amber-800 border border-amber-200 p-2 rounded-xl text-[11px] font-bold text-center">
-            🎉 You will save <span id="summary-savings-text">₹0</span> on this festival order
+            🎉 You save <span id="summary-savings-text">₹0</span> with Special Festival Offers
           </div>
         </div>
       </div>
@@ -573,7 +599,7 @@
     function handleQuickEnquiryClick() {
       const greetingMsg = encodeURIComponent(
         `*Hello Bittu Crackers, Kavali!*\n` +
-        `I would like to place an enquiry for festival crackers and get your latest price list. Please assist me! 🎉`
+        `I would like to place an enquiry for festival crackers and get your latest offers list. Please assist me! 🎉`
       );
       window.open(`https://wa.me/${storeWhatsAppNumber}?text=${greetingMsg}`, '_blank');
     }
@@ -847,6 +873,7 @@
       `).join('');
     }
 
+    // STATS UPDATE FOR ALL CART INDICATORS
     function updateTotal() {
       const distinctProductsCount = cart.length;
       const totalUnits = cart.reduce((sum, i) => sum + i.qty, 0);
@@ -856,10 +883,25 @@
       const deliveryFee = selectedAddress ? Number(selectedAddress.deliveryCharge || 0) : 0;
       const grandTotal = offerSubtotal + deliveryFee;
 
+      // Update Nav Cart Counter
+      document.getElementById('nav-cart-count').innerText = totalUnits;
+
+      // Update Lotus Pyros Style Floating Pill
       document.getElementById('pill-distinct-products').innerText = distinctProductsCount;
       document.getElementById('pill-total-items').innerText = totalUnits;
       document.getElementById('pill-total-rupees').innerText = `₹${offerSubtotal.toFixed(0)}`;
 
+      // Update Bottom Floating Bar
+      const bottomBar = document.getElementById('floating-bottom-cart-bar');
+      if (totalUnits > 0) {
+        document.getElementById('float-cart-count').innerText = totalUnits;
+        document.getElementById('float-cart-total').innerText = `₹${offerSubtotal.toFixed(0)}`;
+        bottomBar.classList.remove('hidden');
+      } else {
+        bottomBar.classList.add('hidden');
+      }
+
+      // Update Modal summary
       document.getElementById('summary-items-count').innerText = totalUnits;
       document.getElementById('summary-mrp-total').innerText = `₹${mrpSubtotal.toFixed(0)}`;
       document.getElementById('summary-discount-val').innerText = `- ₹${discount.toFixed(0)}`;
@@ -1018,7 +1060,7 @@
                   <span class="text-[11px] text-stone-400">MRP: <span class="line-through">₹${p.mrp}</span></span>
                   <span class="font-extrabold text-stone-950 text-sm">₹${p.offer_price}</span>
                 </div>
-                ${savings > 0 ? `<p class="text-[11px] font-bold text-amber-600 mt-0.5">You save: ₹${savings}</p>` : ''}
+                ${savings > 0 ? `<p class="text-[11px] font-bold text-amber-600 mt-0.5">Special Offer: Save ₹${savings}</p>` : ''}
                 <div class="mt-2 flex justify-end">
                   ${listStepperHtml}
                 </div>
@@ -1050,6 +1092,7 @@
                 <span class="font-extrabold text-red-700 text-sm">₹${p.offer_price}</span>
                 <span class="line-through text-stone-400 text-[11px]">₹${p.mrp}</span>
               </div>
+              ${savings > 0 ? `<p class="text-[10px] font-bold text-amber-600 mt-0.5">Special Offer: Save ₹${savings}</p>` : ''}
             </div>
             <div class="mt-2.5">${gridQtyButtonHtml}</div>
           </div>
