@@ -14,13 +14,13 @@
 <body class="bg-gray-100 text-gray-800 font-sans antialiased min-h-screen">
 
   <!-- ================= AUTHENTICATION MODAL ================= -->
-  <div id="auth-modal" style="display: none;" class="fixed inset-0 bg-neutral-950/90 backdrop-blur-sm z-50 items-center justify-center p-4">
+  <div id="auth-modal" style="display: flex;" class="fixed inset-0 bg-neutral-950/90 backdrop-blur-sm z-50 items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-gray-100">
       <div class="flex items-center space-x-2.5 mb-5">
         <span class="bg-red-600 text-white font-black px-2.5 py-1 rounded-lg text-sm">B</span>
         <div>
           <h2 class="text-base font-extrabold text-gray-950">BITTU CRACKERS</h2>
-          <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Admin Portal</p>
+          <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Admin Login</p>
         </div>
       </div>
 
@@ -34,7 +34,8 @@
           <input id="login-pass" type="password" placeholder="••••••••" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 text-xs" />
         </div>
         <p id="login-error" class="text-red-600 text-[11px] hidden font-semibold"></p>
-        <button type="button" onclick="performLogin()" id="login-submit-btn" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-lg text-sm hover:bg-red-700 active:scale-95 transition">
+        
+        <button type="button" onclick="performLogin()" id="login-submit-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs shadow-sm transition active:scale-95">
           Sign In to Admin
         </button>
       </div>
@@ -42,7 +43,7 @@
   </div>
 
   <!-- ================= MAIN ADMIN DASHBOARD ================= -->
-  <div id="admin-layout" style="display: flex;" class="min-h-screen flex flex-col md:flex-row">
+  <div id="admin-layout" style="display: none;" class="min-h-screen flex flex-col md:flex-row">
     
     <!-- LEFT SIDEBAR -->
     <aside class="w-full md:w-60 bg-neutral-900 text-white flex flex-col justify-between shrink-0 p-4 border-r border-neutral-800">
@@ -56,10 +57,10 @@
         </div>
 
         <nav class="space-y-1 text-xs font-medium">
-          <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
+          <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-600 text-white">
             <span>⊞</span><span>Dashboard</span>
           </button>
-          <button onclick="navigate('orders')" id="nav-orders" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-600 text-white">
+          <button onclick="navigate('orders')" id="nav-orders" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
             <span>☰</span><span>Orders</span>
           </button>
           <button onclick="navigate('products')" id="nav-products" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
@@ -92,7 +93,7 @@
     <main class="flex-1 p-4 md:p-8 max-w-6xl mx-auto overflow-y-auto">
 
       <!-- 1. DASHBOARD TAB -->
-      <section id="view-dashboard" class="tab-view space-y-6 hidden">
+      <section id="view-dashboard" class="tab-view space-y-6">
         <div>
           <h1 class="text-2xl font-black text-gray-950">Dashboard</h1>
           <p class="text-xs text-gray-500">Live snapshot of bookings, revenue and stock.</p>
@@ -121,7 +122,7 @@
           <div class="flex justify-between items-center border-b pb-2">
             <div>
               <h2 class="text-sm font-bold text-gray-900">Latest Orders</h2>
-              <p class="text-[11px] text-gray-400">Recent bookings display directly here</p>
+              <p class="text-[11px] text-gray-400">Live order snapshot</p>
             </div>
             <button onclick="loadDashboardMetrics()" class="text-xs bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded font-semibold text-gray-700">Refresh</button>
           </div>
@@ -129,8 +130,8 @@
         </div>
       </section>
 
-      <!-- 2. ORDERS TAB (WITH DIRECT CUSTOMER WHATSAPP + DELETE ORDER BUTTON) -->
-      <section id="view-orders" class="tab-view space-y-4">
+      <!-- 2. ORDERS TAB -->
+      <section id="view-orders" class="tab-view space-y-4 hidden">
         <div class="flex justify-between items-center">
           <div>
             <h1 class="text-2xl font-black text-gray-950">Orders</h1>
@@ -277,7 +278,7 @@
       <section id="view-store-settings" class="tab-view space-y-4 hidden">
         <div>
           <h1 class="text-2xl font-black text-gray-950">Store Settings</h1>
-          <p class="text-xs text-gray-500">Configure store addresses, delivery zones, and contact numbers.</p>
+          <p class="text-xs text-gray-500">Configure store addresses, delivery zones, and 3 display phone numbers.</p>
         </div>
 
         <div class="bg-white rounded-2xl border p-5 max-w-xl space-y-4 text-xs shadow-sm">
@@ -321,7 +322,7 @@
     </main>
   </div>
 
-   <!-- ================= ADD ADMIN MODAL ================= -->
+  <!-- ================= ADD ADMIN MODAL ================= -->
   <div id="add-admin-modal" style="display: none;" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border">
       <div class="flex justify-between items-center mb-3 pb-2 border-b">
@@ -421,7 +422,7 @@
     </div>
   </div>
 
-  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <!-- ================= JAVASCRIPT ENGINE ================= -->
   <script>
     const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
     const SUPABASE_KEY = "sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
@@ -432,46 +433,52 @@
     let ordersList = [];
     let teamList = [];
 
-    // Format phone to guarantee valid direct WhatsApp URL (Strips leading zeros and non-digits)
     function sanitizeCustomerWhatsAppNumber(rawPhone) {
       if (!rawPhone) return "";
-      let cleaned = rawPhone.toString().replace(/\D/g, ''); // Keep only digits
-      if (cleaned.startsWith('0')) cleaned = cleaned.replace(/^0+/, ''); // Remove leading 0 (e.g. 07993659115 -> 7993659115)
-      if (cleaned.length === 10) cleaned = '91' + cleaned; // Prepend country code
+      let cleaned = rawPhone.toString().replace(/\D/g, '');
+      if (cleaned.startsWith('0')) cleaned = cleaned.replace(/^0+/, '');
+      if (cleaned.length === 10) cleaned = '91' + cleaned;
       return cleaned;
     }
 
-    // AUTHENTICATION
-    function performLogin() {
+    // 1. AUTHENTICATION & LOGIN FLOW
+    async function performLogin() {
       const user = document.getElementById('login-id').value.trim();
       const pass = document.getElementById('login-pass').value.trim();
       const errBox = document.getElementById('login-error');
 
-      if ((user === 'bittu_admin' || user === 'admin@bittucrackers.in') && pass === 'admin@bittu123') {
-        const adminData = { username: 'bittu_admin', first_name: 'Bittu', last_name: 'Kumar', email: 'admin@bittucrackers.in', role: 'Super Admin' };
-        localStorage.setItem('admin_session', JSON.stringify(adminData));
-        revealDashboard(adminData);
+      if (!user || !pass) {
+        errBox.innerText = 'Please enter your username and password.';
+        errBox.classList.remove('hidden');
         return;
       }
 
-      window.db.from('admin_users').select('*').eq('password_hash', pass).then(({ data, error }) => {
-        const matched = data ? data.find(u => u.username === user || u.email === user) : null;
-        if (matched) {
-          localStorage.setItem('admin_session', JSON.stringify(matched));
-          revealDashboard(matched);
-        } else {
-          errBox.innerText = 'Invalid username/email or password.';
-          errBox.classList.remove('hidden');
-        }
+      // Hardcoded fallback for primary super admin
+      if ((user === 'bittu_admin' || user === 'admin@bittucrackers.in') && pass === 'admin@bittu123') {
+        revealDashboard({ username: 'bittu_admin', first_name: 'Bittu', last_name: 'Kumar', email: 'admin@bittucrackers.in', role: 'Super Admin' });
+        return;
+      }
+
+      // Secure RPC verification
+      const { data, error } = await window.db.rpc('verify_admin_login', {
+        p_user: user,
+        p_pass: pass
       });
+
+      if (data && data.length > 0) {
+        revealDashboard(data[0]);
+      } else {
+        errBox.innerText = 'Invalid username/email or password.';
+        errBox.classList.remove('hidden');
+      }
     }
 
     function revealDashboard(user) {
+      localStorage.setItem('admin_session', JSON.stringify(user));
       document.getElementById('auth-modal').style.display = 'none';
       document.getElementById('admin-layout').style.display = 'flex';
       document.getElementById('current-user-name').innerText = user.first_name + ' ' + (user.last_name || '');
-      document.getElementById('current-user-role').innerText = user.role;
-      loadOrders();
+      document.getElementById('current-user-role').innerText = user.role || 'Admin';
       loadDashboardMetrics();
     }
 
@@ -487,7 +494,7 @@
       window.location.reload();
     }
 
-    // NAVIGATION
+    // 2. NAVIGATION
     function navigate(tabName) {
       document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
       document.querySelectorAll('.nav-item').forEach(b => {
@@ -506,7 +513,7 @@
       if (tabName === 'store-settings') loadStoreSettings();
     }
 
-    // DASHBOARD METRICS
+    // 3. DASHBOARD METRICS
     async function loadDashboardMetrics() {
       try {
         const { data: oData } = await window.db.from('orders').select('*').order('created_at', { ascending: false });
@@ -529,8 +536,8 @@
         recDiv.innerHTML = ordersList.slice(0, 5).map(o => `
           <div class="py-3 flex justify-between items-center">
             <div>
-              <p class="font-bold text-gray-900">#${o.id.toString().slice(0, 8)} • ${o.customer_name}</p>
-              <p class="text-[11px] text-gray-500">${o.customer_phone || ''} • ${o.delivery_location || 'Standard Delivery'}</p>
+              <p class="font-bold text-gray-900">#${o.id.toString().slice(0, 8)} •${o.customer_name}</p>
+              <p class="text-[11px] text-gray-500">${o.customer_phone \vert{}\vert{} ''} •${o.delivery_location || 'Standard Delivery'}</p>
             </div>
             <div class="text-right">
               <span class="font-bold text-gray-900">₹${o.total_amount}</span>
@@ -543,7 +550,7 @@
       }
     }
 
-    // ================= ORDERS TAB: DIRECT CUSTOMER WHATSAPP + DELETE ORDER =================
+    // 4. ORDERS TAB (DIRECT WHATSAPP + DELETE ACTION)
     async function loadOrders() {
       const { data } = await window.db.from('orders').select('*').order('created_at', { ascending: false });
       ordersList = data || [];
@@ -555,7 +562,6 @@
       }
 
       tbody.innerHTML = ordersList.map(o => {
-        // Sanitize phone to direct message customer
         const customerWaPhone = sanitizeCustomerWhatsAppNumber(o.customer_phone);
         const waMessage = encodeURIComponent(`Hello ${o.customer_name}, regarding your Bittu Crackers booking #${o.id.toString().slice(0, 8)} of ₹${o.total_amount}.`);
         const waLink = customerWaPhone ? `https://wa.me/${customerWaPhone}?text=${waMessage}` : '#';
@@ -580,11 +586,9 @@
               </select>
             </td>
             <td class="p-3 text-right space-x-2">
-              <!-- Direct WhatsApp to Customer -->
               <a href="${waLink}" target="_blank" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg text-xs font-bold inline-block active:scale-95 transition">
                 WhatsApp
               </a>
-              <!-- Delete Order Action -->
               <button onclick="deleteOrder('${o.id}', '${o.customer_name}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-2.5 py-1 rounded-lg text-xs font-bold active:scale-95 transition">
                 Delete
               </button>
@@ -598,21 +602,17 @@
       await window.db.from('orders').update({ status }).eq('id', id);
     }
 
-    // Direct Order Deletion from Database
     async function deleteOrder(id, customerName) {
-      const confirmDelete = confirm(`Are you sure you want to delete order #${id.slice(0, 8)} for ${customerName}? This cannot be undone.`);
-      if (!confirmDelete) return;
-
+      if (!confirm(`Are you sure you want to delete order #${id.slice(0, 8)} for${customerName}?`)) return;
       const { error } = await window.db.from('orders').delete().eq('id', id);
-      if (error) {
-        alert("Failed to delete order: " + error.message);
-      } else {
+      if (error) alert("Failed to delete order: " + error.message);
+      else {
         loadOrders();
         loadDashboardMetrics();
       }
     }
 
-    // PRODUCTS
+    // 5. PRODUCTS & GALLERY PICKER
     function openProductModal() {
       document.getElementById('product-modal').style.display = 'flex';
       document.getElementById('prod-name').focus();
@@ -663,9 +663,8 @@
         name, category, mrp, offer_price, image_url: currentImageData
       }]);
 
-      if (error) {
-        alert('Error: ' + error.message);
-      } else {
+      if (error) alert('Error: ' + error.message);
+      else {
         closeProductModal();
         alert('"' + name + '" saved to store!');
         loadProducts();
@@ -697,7 +696,7 @@
       loadProducts();
     }
 
-    // PRICE SHEET
+    // 6. PRICE SHEET & PDF / CSV IMPORT
     async function loadPriceSheet() {
       const { data } = await window.db.from('products').select('*').order('name');
       productsList = data || [];
@@ -721,7 +720,7 @@
             <td class="p-3 text-right"><button onclick="saveRowPrice('${p.id}')" class="bg-red-600 text-white text-xs px-2.5 py-1 rounded font-bold">Save</button></td>
           </tr>
         `;
-      }).join('') || '<tr><td colspan="6" class="p-4 text-center text-gray-400">No items available.</td></tr>';
+      }).join('') || '<tr><td colspan="6" class="p-4 text-center text-gray-400">No items available. Upload a price sheet or add crackers.</td></tr>';
     }
 
     function recalcDisc(id) {
@@ -792,7 +791,7 @@
       }
     }
 
-    // TEAM & PROFILE
+    // 7. TEAM & PROFILE
     function openAddAdminModal() { document.getElementById('add-admin-modal').style.display = 'flex'; }
     function closeAddAdminModal() { document.getElementById('add-admin-modal').style.display = 'none'; }
 
@@ -809,106 +808,5 @@
 
       document.getElementById('team-table').innerHTML = teamList.map(u => `
         <tr>
-          <td class="p-3 font-bold text-gray-900">${u.first_name} ${u.last_name || ''}<br><span class="text-gray-400 font-normal text-[10px]">@${u.username}</span></td>
-          <td class="p-3 text-gray-500">${u.email}<br><span class="text-[10px]">${u.phone || ''}</span></td>
-          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.role === 'Super Admin' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}">${u.role || 'Admin'}</span></td>
-          <td class="p-3 text-right">
-            <button onclick="sendPasswordReset('${u.email}', '${u.username}')" class="text-blue-600 font-semibold hover:underline">Reset password</button>
-          </td>
-        </tr>
-      `).join('') || '<tr><td colspan="4" class="p-3 text-center text-gray-400">No extra admins found.</td></tr>';
-    }
-
-    async function saveMyProfile() {
-      const updated = {
-        first_name: document.getElementById('my-first-name').value.trim(),
-        last_name: document.getElementById('my-last-name').value.trim(),
-        phone: document.getElementById('my-phone').value.trim(),
-        email: document.getElementById('my-email').value.trim()
-      };
-      const session = localStorage.getItem('admin_session');
-      const cur = session ? JSON.parse(session) : {};
-      Object.assign(cur, updated);
-      localStorage.setItem('admin_session', JSON.stringify(cur));
-      document.getElementById('current-user-name').innerText = cur.first_name + ' ' + (cur.last_name || '');
-      alert('Profile saved successfully!');
-    }
-
-    async function handleCreateAdmin() {
-      const newAdmin = {
-        username: document.getElementById('new-admin-user').value.trim(),
-        role: document.getElementById('new-admin-role').value,
-        first_name: document.getElementById('new-admin-fname').value.trim(),
-        last_name: document.getElementById('new-admin-lname').value.trim(),
-        email: document.getElementById('new-admin-email').value.trim(),
-        phone: document.getElementById('new-admin-phone').value.trim(),
-        password_hash: document.getElementById('new-admin-pass').value.trim()
-      };
-
-      if (!newAdmin.username || !newAdmin.first_name || !newAdmin.email || !newAdmin.password_hash) {
-        return alert('Please fill in username, first name, email and password.');
-      }
-
-      const { error } = await window.db.from('admin_users').insert([newAdmin]);
-      if (error) alert('Could not create admin: ' + error.message);
-      else {
-        alert(`Admin @${newAdmin.username} added successfully!`);
-        closeAddAdminModal();
-        loadTeamAndProfile();
-      }
-    }
-
-    function sendPasswordReset(email, username) {
-      const newPass = prompt('Set a new password for ' + username + ':');
-      if (newPass) {
-        window.db.from('admin_users').update({ password_hash: newPass }).eq('email', email).then(() => {
-          alert('Password updated for ' + username + '!');
-        });
-      }
-    }
-
-    // STORE SETTINGS
-    async function loadStoreSettings() {
-      const { data } = await window.db.from('store_settings').select('*').eq('id', 1).single();
-      if (data) {
-        document.getElementById('cfg-name').value = data.store_name || 'BITTU CRACKERS';
-        document.getElementById('cfg-wa').value = data.whatsapp_number || '+917829978883';
-        document.getElementById('cfg-phone-1').value = data.phone_1 || '7829978883';
-        document.getElementById('cfg-phone-2').value = data.phone_2 || '';
-        document.getElementById('cfg-phone-3').value = data.phone_3 || '';
-        document.getElementById('cfg-address').value = data.shop_address || 'Vengal Rao Nagar, Kavali, SPSR Nellore District, Andhra Pradesh - 524201';
-      }
-    }
-
-    async function saveStoreSettings() {
-      const btn = document.getElementById('btn-save-settings');
-      btn.innerText = 'Saving...';
-      btn.disabled = true;
-
-      const store_name = document.getElementById('cfg-name').value.trim();
-      const whatsapp_number = document.getElementById('cfg-wa').value.trim();
-      const phone_1 = document.getElementById('cfg-phone-1').value.trim();
-      const phone_2 = document.getElementById('cfg-phone-2').value.trim();
-      const phone_3 = document.getElementById('cfg-phone-3').value.trim();
-      const shop_address = document.getElementById('cfg-address').value.trim();
-
-      const { error } = await window.db.from('store_settings').upsert({
-        id: 1,
-        store_name,
-        whatsapp_number,
-        display_phone: phone_1,
-        phone_1, phone_2, phone_3,
-        shop_address
-      });
-
-      if (error) alert('Error saving settings: ' + error.message);
-      else alert('Store settings saved successfully!');
-
-      btn.innerText = 'Save Store Settings';
-      btn.disabled = false;
-    }
-
-    checkSession();
-  </script>
-</body>
-</html>
+          <td class="p-3 font-bold text-gray-900">${u.first_name}${u.last_name || ''}<br><span class="text-gray-400 font-normal text-[10px]">@${u.username}</span></td>
+          <td class="p-3 text-gray-500">${u.email}<br><span class
