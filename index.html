@@ -55,7 +55,7 @@
     <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Gift Boxes</button>
   </div>
 
-  <!-- View Switcher (Big, Medium, Small) & Sort Toolbar -->
+  <!-- View Switcher (Only Big, Medium, Small) & Sort Toolbar -->
   <div class="px-3.5 py-2 flex items-center justify-between bg-white border-b text-xs">
     <div class="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg">
       <button onclick="setViewMode('big')" id="btn-view-big" title="Big (1 by 1)" class="view-btn px-2 py-1 rounded text-gray-600">
@@ -159,7 +159,7 @@
     </div>
   </div>
 
- <!-- ================= SUCCESS CONFIRMATION MODAL ================= -->
+  <!-- ================= SUCCESS CONFIRMATION MODAL ================= -->
   <div id="order-success-modal" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center space-y-4">
       <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl font-black">
@@ -314,22 +314,7 @@
     </div>
   </div>
 
-            <div class="flex items-start space-x-2.5">
-            <span class="text-base text-gray-700 mt-0.5">📍</span>
-            <div class="text-xs">
-              <div class="flex items-center space-x-2">
-                <span class="font-bold text-gray-900">${a.name}</span>
-                ${selectedAddress && selectedAddress.id === a.id ? '<span class="bg-blue-100 text-blue-700 font-bold text-[9px] px-1.5 py-0.2 rounded">Selected</span>' : ''}
-              </div>
-              <p class="text-gray-600 mt-0.5 text-[11px]">${a.house ? a.house + ', ' : ''}${a.area}</p>
-              <p class="text-gray-500 font-semibold mt-0.5 text-[11px]">📞 ${a.phone}</p>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-      <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
     const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
     const SUPABASE_KEY = "sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
@@ -732,7 +717,7 @@
       }
     }
 
-     // ================= VIEW SWITCHER (BIG, MEDIUM, SMALL) =================
+    // ================= VIEW SWITCHER (BIG, MEDIUM, SMALL) =================
     function setViewMode(mode) {
       currentViewMode = mode;
       document.querySelectorAll('.view-btn').forEach(b => b.className = "view-btn px-2 py-1 rounded text-gray-600");
@@ -756,13 +741,11 @@
         return;
       }
 
-      // Container layouts for Big, Medium, and Small
       if (currentViewMode === 'big') {
         container.className = "w-full flex flex-col space-y-3.5";
       } else if (currentViewMode === 'small') {
         container.className = "w-full grid grid-cols-3 gap-2";
       } else {
-        // Default medium (2 columns)
         container.className = "w-full grid grid-cols-2 gap-2.5";
       }
 
@@ -771,7 +754,7 @@
         const qty = inCartItem ? inCartItem.qty : 0;
         const savings = (p.mrp > p.offer_price) ? (p.mrp - p.offer_price) : 0;
 
-        // ================= BIG VIEW (Single Column) =================
+        // BIG VIEW
         if (currentViewMode === 'big') {
           const bigStepperHtml = qty > 0 ? `
             <div class="flex items-center border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-8 w-28">
@@ -808,7 +791,7 @@
           `;
         }
 
-        // ================= SMALL VIEW (3 Columns) =================
+        // SMALL VIEW
         if (currentViewMode === 'small') {
           const smallStepperHtml = qty > 0 ? `
             <div class="flex items-center justify-between border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-7 w-full">
@@ -840,7 +823,7 @@
           `;
         }
 
-        // ================= MEDIUM VIEW (2 Columns Default) =================
+        // MEDIUM VIEW
         const gridQtyButtonHtml = qty > 0 ? `
           <div class="flex items-center justify-between border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-8 w-full">
             <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
@@ -854,7 +837,7 @@
         `;
 
         return `
-          <div class="bg-white border rounded-xl p-3 flex flex-col justify-between shadow-2xs">
+          <div class="bg-white border border-gray-200 rounded-xl p-3 flex flex-col justify-between shadow-2xs">
             <div>
               <img src="${p.image_url || 'https://placehold.co/200x150?text=Cracker'}" class="w-full h-24 object-cover rounded-lg mb-2" />
               <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${p.category}</div>
