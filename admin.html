@@ -319,12 +319,12 @@
           </div>
         </div>
 
-        <!-- SECTION B: PRODUCT CATALOG MANAGEMENT -->
+        <!-- SECTION B: PRODUCT CATALOG MANAGEMENT (NAME EDITABLE HERE AS REQUESTED) -->
         <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs space-y-4">
-          <div class="flex justify-between items-center border-b pb-3">
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b pb-3">
             <div>
               <h2 class="text-lg font-black text-stone-950">Product Catalog Management</h2>
-              <p class="text-xs text-stone-500">Add, edit pricing, photos, video links, or remove crackers.</p>
+              <p class="text-xs text-stone-500">Directly modify cracker titles below, upload manual photos, or manage details.</p>
             </div>
             <button onclick="openProductModal()" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs border border-amber-400 active:scale-95 transition">
               + Add New Cracker
@@ -335,12 +335,12 @@
             <table class="w-full text-left text-xs whitespace-nowrap">
               <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
                 <tr>
-                  <th class="p-3">Product Name</th>
+                  <th class="p-3 w-96">Product Name (Editable)</th>
                   <th class="p-3">Category</th>
                   <th class="p-3">MRP (₹)</th>
                   <th class="p-3">Offer Price (₹)</th>
                   <th class="p-3">Stock Units</th>
-                  <th class="p-3 text-right">Action</th>
+                  <th class="p-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody id="products-table" class="divide-y divide-stone-100"></tbody>
@@ -349,19 +349,24 @@
         </div>
       </section>
 
-      <!-- ================= 5. LIVE PRICE SHEET & NAME EDITOR (WITH CATEGORY FILTER) ================= -->
+      <!-- ================= 5. LIVE PRICE SHEET (PRICES EDITABLE HERE, NAMES READ-ONLY) ================= -->
       <section id="view-price-sheet" class="tab-view space-y-4 hidden">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
           <div>
-            <h1 class="text-2xl font-black text-stone-950">Live Price Sheet & Name Editor</h1>
-            <p class="text-xs text-stone-500">Directly modify Item Name, MRP, and Offer Price; syncs to the storefront instantly.</p>
+            <h1 class="text-2xl font-black text-stone-950">Live Price Sheet & Rate Editor</h1>
+            <p class="text-xs text-stone-500">Directly modify MRP and Offer Price; edit single rows or use "Save All Prices".</p>
           </div>
-          <button onclick="loadPriceSheet()" class="bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs px-3.5 py-2 rounded-xl font-bold active:scale-95 transition">
-            🔄 Refresh Items
-          </button>
+          <div class="flex items-center space-x-2">
+            <button onclick="saveAllChangedPrices()" id="btn-save-all-prices" class="bg-red-700 hover:bg-red-800 text-amber-300 font-black text-xs px-4 py-2 rounded-xl border border-amber-400 active:scale-95 transition shadow-sm">
+              💾 Save All Prices
+            </button>
+            <button onclick="loadPriceSheet()" class="bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs px-3 py-2 rounded-xl font-bold active:scale-95 transition">
+              🔄 Refresh
+            </button>
+          </div>
         </div>
 
-        <!-- Filter Bar: Search + Category Dropdown (Image 2) -->
+        <!-- Filter Bar: Search + Category Filter Dropdown -->
         <div class="flex flex-col sm:flex-row gap-2.5">
           <input type="text" id="price-search" placeholder="Search cracker name..." oninput="renderPriceSheetTable()" class="flex-1 text-xs border border-stone-300 rounded-xl p-3 bg-white outline-none focus:border-red-700" />
           <select id="price-category-filter" onchange="renderPriceSheetTable()" class="text-xs border border-stone-300 rounded-xl p-3 bg-white font-bold text-stone-700 outline-none focus:border-red-700">
@@ -379,7 +384,7 @@
           <table class="w-full text-left text-xs whitespace-nowrap">
             <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
               <tr>
-                <th class="p-3 w-80">Item Name (Editable)</th>
+                <th class="p-3 w-96">Item Name</th>
                 <th class="p-3">Category</th>
                 <th class="p-3 w-28">MRP (₹)</th>
                 <th class="p-3 w-28">Offer Price (₹)</th>
@@ -1086,7 +1091,7 @@
       }
     }
 
-    // 8. PRODUCTS CATALOG (IMAGE UPLOAD & VIDEO DEMO SUPPORT)
+    // 8. PRODUCTS CATALOG (IMAGE 2: PRODUCT NAMES EDITABLE DIRECTLY HERE)
     function openProductModal(editId = null) {
       const modal = document.getElementById('product-modal');
       const title = document.getElementById('product-modal-title');
@@ -1198,25 +1203,49 @@
       }
     }
 
+    // Inline Save for Product Name in Product Catalog Tab (Fig 2)
+    async function saveInlineProductName(id) {
+      const nameInput = document.getElementById(`prod-name-${id}`);
+      const newName = nameInput.value.trim();
+
+      if (!newName) {
+        return alert('Product name cannot be empty.');
+      }
+
+      const { error } = await window.db.from('products').update({ name: newName }).eq('id', id);
+      if (error) {
+        alert('Failed to update name: ' + error.message);
+      } else {
+        const item = productsList.find(p => p.id.toString() === id.toString());
+        if (item) item.name = newName;
+        alert('Product name updated live!');
+      }
+    }
+
     function renderProductsTable() {
       const tbody = document.getElementById('products-table');
       if (!tbody) return;
 
       tbody.innerHTML = productsList.map(p => `
         <tr class="hover:bg-stone-50">
-          <td class="p-3 flex items-center space-x-2.5">
-            <img src="${p.image_url || 'https://placehold.co/40x40?text=Cracker'}" class="w-9 h-9 rounded-lg object-cover border" />
-            <div>
-              <span class="font-bold text-stone-900 block">${p.name}</span>
-              ${p.video_url ? '<span class="text-[9px] bg-red-100 text-red-800 font-bold px-1.5 py-0.2 rounded-full">🎬 Video included</span>' : ''}
+          <td class="p-3">
+            <div class="flex items-center space-x-2.5">
+              <img src="${p.image_url || 'https://placehold.co/40x40?text=Cracker'}" class="w-10 h-10 rounded-lg object-cover border shrink-0" />
+              <div class="flex items-center space-x-1.5 flex-1 min-w-0">
+                <input type="text" id="prod-name-${p.id}" value="${p.name.replace(/"/g, '&quot;')}" class="w-full border border-stone-300 rounded-lg p-1.5 text-xs font-bold text-stone-900 bg-white outline-none focus:border-red-700" />
+                <button onclick="saveInlineProductName('${p.id}')" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-2.5 py-1.5 rounded-lg text-[11px] shadow-xs active:scale-95 transition shrink-0" title="Save Title">
+                  Save
+                </button>
+              </div>
             </div>
+            ${p.video_url ? '<span class="text-[9px] bg-red-100 text-red-800 font-bold px-1.5 py-0.2 rounded-full inline-block mt-1">🎬 Video Demo Attached</span>' : ''}
           </td>
-          <td class="p-3 text-stone-500">${p.category}</td>
+          <td class="p-3 text-stone-500 font-medium">${p.category}</td>
           <td class="p-3 text-stone-400 font-bold">₹${p.mrp}</td>
           <td class="p-3 text-red-700 font-black">₹${p.offer_price}</td>
           <td class="p-3 font-bold">${p.stock_qty || 0}</td>
           <td class="p-3 text-right space-x-2">
-            <button onclick="openProductModal('${p.id}')" class="text-blue-600 hover:text-blue-800 font-bold hover:underline">Edit</button>
+            <button onclick="openProductModal('${p.id}')" class="text-blue-600 hover:text-blue-800 font-bold hover:underline">Edit Full</button>
             <button onclick="deleteProduct('${p.id}')" class="text-red-700 hover:text-red-900 font-bold hover:underline">Delete</button>
           </td>
         </tr>
@@ -1229,7 +1258,7 @@
       loadProducts();
     }
 
-    // 9. LIVE PRICE SHEET & NAME EDITOR (WITH CATEGORY FILTER)
+    // 9. LIVE PRICE SHEET (IMAGE 1: ITEM NAMES ARE READ-ONLY TEXT, PRICES EDITABLE)
     function loadPriceSheet() {
       renderPriceSheetTable();
     }
@@ -1258,13 +1287,16 @@
         const disc = p.mrp > 0 ? Math.round(((p.mrp - p.offer_price) / p.mrp) * 100) : 0;
         return `
           <tr class="hover:bg-stone-50">
-            <td class="p-3">
-              <input type="text" id="ps-name-${p.id}" value="${p.name.replace(/"/g, '&quot;')}" class="w-full border border-stone-300 rounded-lg p-1.5 text-xs font-bold text-stone-900 bg-white outline-none focus:border-red-700" placeholder="Product name" />
+            <!-- Plain Text Item Name (Not editable here as requested) -->
+            <td class="p-3 font-bold text-stone-900 max-w-sm truncate" title="${p.name}">
+              ${p.name}
             </td>
             <td class="p-3 text-stone-500 font-medium">${p.category}</td>
+            <!-- Editable MRP -->
             <td class="p-3">
-              <input type="number" id="ps-mrp-${p.id}" value="${p.mrp}" oninput="recalcRowDisc('${p.id}')" class="w-20 border border-stone-300 rounded-lg p-1.5 text-xs text-stone-600 bg-white outline-none focus:border-red-700" />
+              <input type="number" id="ps-mrp-${p.id}" value="${p.mrp}" oninput="recalcRowDisc('${p.id}')" class="w-20 border border-stone-300 rounded-lg p-1.5 text-xs text-stone-700 bg-white outline-none focus:border-red-700" />
             </td>
+            <!-- Editable Offer Price -->
             <td class="p-3">
               <input type="number" id="ps-offer-${p.id}" value="${p.offer_price}" oninput="recalcRowDisc('${p.id}')" class="w-20 border border-red-300 rounded-lg p-1.5 text-xs font-black text-red-700 bg-white outline-none focus:border-red-700" />
             </td>
@@ -1272,7 +1304,7 @@
               <span id="ps-disc-${p.id}" class="bg-amber-100 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded-full">${disc}% OFF</span>
             </td>
             <td class="p-3 text-right">
-              <button onclick="saveRowAllDetails('${p.id}')" id="ps-btn-${p.id}" class="bg-red-700 hover:bg-red-800 text-amber-300 font-black text-xs px-3.5 py-1.5 rounded-lg border border-amber-400 active:scale-95 transition shadow-xs">
+              <button onclick="saveRowPriceOnly('${p.id}')" id="ps-btn-${p.id}" class="bg-red-700 hover:bg-red-800 text-amber-300 font-black text-xs px-3.5 py-1.5 rounded-lg border border-amber-400 active:scale-95 transition shadow-xs">
                 Save
               </button>
             </td>
@@ -1290,20 +1322,18 @@
       }
     }
 
-    async function saveRowAllDetails(id) {
+    // Save individual row prices (MRP & Offer Price only)
+    async function saveRowPriceOnly(id) {
       const btn = document.getElementById('ps-btn-' + id);
-      const newName = document.getElementById('ps-name-' + id).value.trim();
       const newMrp = Number(document.getElementById('ps-mrp-' + id).value);
       const newOffer = Number(document.getElementById('ps-offer-' + id).value);
 
-      if (!newName) return alert('Product name cannot be empty.');
       if (isNaN(newMrp) || isNaN(newOffer)) return alert('Please enter valid numerical prices.');
 
       btn.innerText = 'Saving...';
       btn.disabled = true;
 
       const { error } = await window.db.from('products').update({
-        name: newName,
         mrp: newMrp,
         offer_price: newOffer
       }).eq('id', id);
@@ -1312,16 +1342,42 @@
       btn.innerText = 'Save';
 
       if (error) {
-        alert('Failed to save: ' + error.message);
+        alert('Failed to save price: ' + error.message);
       } else {
         const item = productsList.find(x => x.id.toString() === id.toString());
         if (item) {
-          item.name = newName;
           item.mrp = newMrp;
           item.offer_price = newOffer;
         }
-        alert('Product details & price saved live!');
+        alert('Price updated live!');
       }
+    }
+
+    // Master Save: Saves all modified prices on current view in one go
+    async function saveAllChangedPrices() {
+      const btn = document.getElementById('btn-save-all-prices');
+      btn.innerText = 'Saving all...';
+      btn.disabled = true;
+
+      let updateCount = 0;
+      for (const p of productsList) {
+        const mrpEl = document.getElementById(`ps-mrp-${p.id}`);
+        const offerEl = document.getElementById(`ps-offer-${p.id}`);
+        if (mrpEl && offerEl) {
+          const newMrp = Number(mrpEl.value);
+          const newOffer = Number(offerEl.value);
+          if (newMrp !== p.mrp || newOffer !== p.offer_price) {
+            await window.db.from('products').update({ mrp: newMrp, offer_price: newOffer }).eq('id', p.id);
+            p.mrp = newMrp;
+            p.offer_price = newOffer;
+            updateCount++;
+          }
+        }
+      }
+
+      btn.innerText = '💾 Save All Prices';
+      btn.disabled = false;
+      alert(updateCount > 0 ? `Successfully updated prices for ${updateCount} items!` : 'No price changes detected.');
     }
 
     // 10. STORE SETTINGS
