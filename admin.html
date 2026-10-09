@@ -7,7 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- PDF & Excel Parsing Engines -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
@@ -288,7 +290,7 @@
       <!-- ================= 4. PRODUCTS & DELIVERY RATE FIXER TAB ================= -->
       <section id="view-products" class="tab-view space-y-6 hidden">
         
-        <!-- SECTION A: AREA & PINCODE DELIVERY RATE FIXER -->
+        <!-- SECTION A: AREA & PINCODE DELIVERY RATE FIXER (IMAGE 1 WITH IMPORT BUTTON) -->
         <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b pb-3">
             <div>
@@ -296,11 +298,20 @@
                 <span>📍</span>
                 <span>Delivery Rate Fixer (By Area & Pincode)</span>
               </h2>
-              <p class="text-xs text-stone-500">Configure exact delivery charges based on customer address keywords or pincodes.</p>
+              <p class="text-xs text-stone-500">Configure delivery charges or import bulk areas/villages/pincodes from Excel or PDF.</p>
             </div>
-            <button onclick="openDeliveryRateModal()" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs border border-amber-400 active:scale-95 transition">
-              + Add Area / Pincode Rate
-            </button>
+            
+            <div class="flex items-center space-x-2">
+              <!-- Hidden File Input for Delivery Rates -->
+              <input type="file" id="delivery-file-input" accept=".xlsx,.xls,.csv,.pdf" class="hidden" onchange="handleDeliveryRateImport(event)" />
+              <button onclick="document.getElementById('delivery-file-input').click()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 shadow-xs active:scale-95 transition">
+                <span>📄</span>
+                <span>Import (Excel / PDF / CSV)</span>
+              </button>
+              <button onclick="openDeliveryRateModal()" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs border border-amber-400 active:scale-95 transition">
+                + Add Area / Pincode Rate
+              </button>
+            </div>
           </div>
 
           <div class="overflow-x-auto">
@@ -319,16 +330,19 @@
           </div>
         </div>
 
-        <!-- SECTION B: PRODUCT CATALOG MANAGEMENT (NAME EDITABLE HERE AS REQUESTED) -->
+        <!-- SECTION B: PRODUCT CATALOG MANAGEMENT (IMAGE 2: SAVE MOVED TO LAST, EDIT RENAMED) -->
         <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b pb-3">
             <div>
               <h2 class="text-lg font-black text-stone-950">Product Catalog Management</h2>
               <p class="text-xs text-stone-500">Directly modify cracker titles below, upload manual photos, or manage details.</p>
             </div>
-            <button onclick="openProductModal()" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs border border-amber-400 active:scale-95 transition">
-              + Add New Cracker
-            </button>
+
+            <div class="flex items-center space-x-2">
+              <button onclick="openProductModal()" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs border border-amber-400 active:scale-95 transition">
+                + Add New Cracker
+              </button>
+            </div>
           </div>
 
           <div class="overflow-x-auto">
@@ -349,7 +363,7 @@
         </div>
       </section>
 
-      <!-- ================= 5. LIVE PRICE SHEET (PRICES EDITABLE HERE, NAMES READ-ONLY) ================= -->
+      <!-- ================= 5. LIVE PRICE SHEET ================= -->
       <section id="view-price-sheet" class="tab-view space-y-4 hidden">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
           <div>
@@ -366,7 +380,6 @@
           </div>
         </div>
 
-        <!-- Filter Bar: Search + Category Filter Dropdown -->
         <div class="flex flex-col sm:flex-row gap-2.5">
           <input type="text" id="price-search" placeholder="Search cracker name..." oninput="renderPriceSheetTable()" class="flex-1 text-xs border border-stone-300 rounded-xl p-3 bg-white outline-none focus:border-red-700" />
           <select id="price-category-filter" onchange="renderPriceSheetTable()" class="text-xs border border-stone-300 rounded-xl p-3 bg-white font-bold text-stone-700 outline-none focus:border-red-700">
@@ -951,7 +964,7 @@
       renderInventorySection();
     }
 
-    // 7. AREA & PINCODE DELIVERY RATE FIXER (INLINE + MODAL EDIT)
+    // 7. AREA & PINCODE DELIVERY RATE FIXER + BULK EXCEL/PDF IMPORT
     function openDeliveryRateModal(editId = null) {
       const modal = document.getElementById('rate-modal');
       const title = document.getElementById('rate-modal-title');
@@ -1091,7 +1104,120 @@
       }
     }
 
-    // 8. PRODUCTS CATALOG (IMAGE 2: PRODUCT NAMES EDITABLE DIRECTLY HERE)
+    // BULK IMPORT FOR DELIVERY RATES (EXTRACTS VILLAGE/MANDAL/DISTRICT & PINCODE FROM EXCEL / CSV / PDF)
+    async function handleDeliveryRateImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      alert(`Reading delivery rates file: ${file.name}...`);
+      const extractedZones = [];
+
+      try {
+        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv')) {
+          const buffer = await file.arrayBuffer();
+          const workbook = XLSX.read(buffer, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
+
+          for (let i = 1; i < rows.length; i++) {
+            const r = rows[i];
+            if (!r || r.length === 0) continue;
+
+            let rowText = r.map(cell => cell.toString().trim()).join(' ');
+            let pinMatch = rowText.match(/\b\d{6}\b/);
+            let pincode = pinMatch ? pinMatch[0] : '';
+
+            let area = (r[0] || '').toString().trim();
+            let place = (r[1] || '').toString().trim();
+            let mandal = (r[2] || '').toString().trim();
+            let district = (r[3] || '').toString().trim();
+
+            let charge = 0;
+            for (let c = r.length - 1; c >= 0; c--) {
+              let val = Number(r[c]);
+              if (!isNaN(val) && val > 0 && r[c].toString().length < 6) {
+                charge = val;
+                break;
+              }
+            }
+
+            let nameParts = [area, place, mandal, district].filter(p => p && !p.match(/\b\d{6}\b/));
+            let zoneTitle = nameParts[0] || 'Delivery Area';
+            if (nameParts[1]) zoneTitle += ` (${nameParts[1]})`;
+
+            let keywords = nameParts.join(', ').toLowerCase();
+            if (pincode) keywords += `, ${pincode}`;
+
+            if (zoneTitle && zoneTitle !== 'Delivery Area') {
+              extractedZones.push({
+                zone_name: zoneTitle,
+                pincode: pincode || 'Any',
+                area_keywords: keywords,
+                delivery_charge: charge
+              });
+            }
+          }
+        } else if (file.name.endsWith('.pdf')) {
+          const typedarray = new Uint8Array(await file.arrayBuffer());
+          const pdf = await pdfjsLib.getDocument(typedarray).promise;
+          let fullLines = [];
+          for (let p = 1; p <= pdf.numPages; p++) {
+            const page = await pdf.getPage(p);
+            const content = await page.getTextContent();
+            let lineMap = {};
+            content.items.forEach(it => {
+              const y = Math.round(it.transform[5]);
+              if (!lineMap[y]) lineMap[y] = [];
+              lineMap[y].push(it.str.trim());
+            });
+            Object.keys(lineMap).sort((a,b) => b - a).forEach(y => {
+              const line = lineMap[y].join(' ').trim();
+              if (line) fullLines.push(line);
+            });
+          }
+
+          for (const line of fullLines) {
+            const pinMatch = line.match(/\b\d{6}\b/);
+            const pincode = pinMatch ? pinMatch[0] : 'Any';
+            
+            const numMatches = line.match(/\b\d+(\.\d+)?\b/g);
+            let charge = 0;
+            if (numMatches) {
+              const possibleCharges = numMatches.filter(n => n.length < 6);
+              if (possibleCharges.length > 0) charge = Number(possibleCharges[possibleCharges.length - 1]);
+            }
+
+            let areaName = line.replace(/\b\d{6}\b/, '').replace(/\b\d+(\.\d+)?\b/g, '').replace(/[,-]/g, ' ').trim();
+            if (areaName.length > 2) {
+              extractedZones.push({
+                zone_name: areaName,
+                pincode: pincode,
+                area_keywords: `${areaName.toLowerCase()}, ${pincode}`,
+                delivery_charge: isNaN(charge) ? 0 : charge
+              });
+            }
+          }
+        }
+
+        if (extractedZones.length > 0) {
+          const { error } = await window.db.from('delivery_zones').insert(extractedZones);
+          if (error) {
+            alert('Failed to insert imported rates: ' + error.message);
+          } else {
+            alert(`Successfully imported ${extractedZones.length} area & pincode delivery rates! You can now edit their charges in the table.`);
+            await loadDeliveryZones();
+          }
+        } else {
+          alert('Could not find recognizable area or pincode entries in this file.');
+        }
+      } catch (err) {
+        alert('File import error: ' + err.message);
+      } finally {
+        event.target.value = '';
+      }
+    }
+
+    // 8. PRODUCTS CATALOG (IMAGE 2: SAVE BUTTON MOVED TO LAST ACTIONS COLUMN & EDIT RENAMED)
     function openProductModal(editId = null) {
       const modal = document.getElementById('product-modal');
       const title = document.getElementById('product-modal-title');
@@ -1203,7 +1329,7 @@
       }
     }
 
-    // Inline Save for Product Name in Product Catalog Tab (Fig 2)
+    // Inline Save for Product Name (Triggered from last Actions column)
     async function saveInlineProductName(id) {
       const nameInput = document.getElementById(`prod-name-${id}`);
       const newName = nameInput.value.trim();
@@ -1218,10 +1344,11 @@
       } else {
         const item = productsList.find(p => p.id.toString() === id.toString());
         if (item) item.name = newName;
-        alert('Product name updated live!');
+        alert('Product name saved live!');
       }
     }
 
+    // RENDER PRODUCTS TABLE (SAVE BUTTON IN LAST COLUMN & 'Edit' INSTEAD OF 'Edit Full')
     function renderProductsTable() {
       const tbody = document.getElementById('products-table');
       if (!tbody) return;
@@ -1231,12 +1358,7 @@
           <td class="p-3">
             <div class="flex items-center space-x-2.5">
               <img src="${p.image_url || 'https://placehold.co/40x40?text=Cracker'}" class="w-10 h-10 rounded-lg object-cover border shrink-0" />
-              <div class="flex items-center space-x-1.5 flex-1 min-w-0">
-                <input type="text" id="prod-name-${p.id}" value="${p.name.replace(/"/g, '&quot;')}" class="w-full border border-stone-300 rounded-lg p-1.5 text-xs font-bold text-stone-900 bg-white outline-none focus:border-red-700" />
-                <button onclick="saveInlineProductName('${p.id}')" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-2.5 py-1.5 rounded-lg text-[11px] shadow-xs active:scale-95 transition shrink-0" title="Save Title">
-                  Save
-                </button>
-              </div>
+              <input type="text" id="prod-name-${p.id}" value="${p.name.replace(/"/g, '&quot;')}" class="w-full border border-stone-300 rounded-lg p-1.5 text-xs font-bold text-stone-900 bg-white outline-none focus:border-red-700" />
             </div>
             ${p.video_url ? '<span class="text-[9px] bg-red-100 text-red-800 font-bold px-1.5 py-0.2 rounded-full inline-block mt-1">🎬 Video Demo Attached</span>' : ''}
           </td>
@@ -1244,9 +1366,17 @@
           <td class="p-3 text-stone-400 font-bold">₹${p.mrp}</td>
           <td class="p-3 text-red-700 font-black">₹${p.offer_price}</td>
           <td class="p-3 font-bold">${p.stock_qty || 0}</td>
+          <!-- ACTIONS COLUMN WITH SAVE MOVED HERE & 'Edit' RENAMED -->
           <td class="p-3 text-right space-x-2">
-            <button onclick="openProductModal('${p.id}')" class="text-blue-600 hover:text-blue-800 font-bold hover:underline">Edit Full</button>
-            <button onclick="deleteProduct('${p.id}')" class="text-red-700 hover:text-red-900 font-bold hover:underline">Delete</button>
+            <button onclick="saveInlineProductName('${p.id}')" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3 py-1 rounded-lg text-xs shadow-xs active:scale-95 transition">
+              Save
+            </button>
+            <button onclick="openProductModal('${p.id}')" class="text-blue-600 hover:text-blue-800 font-bold hover:underline">
+              Edit
+            </button>
+            <button onclick="deleteProduct('${p.id}')" class="text-red-700 hover:text-red-900 font-bold hover:underline">
+              Delete
+            </button>
           </td>
         </tr>
       `).join('') || '<tr><td colspan="6" class="p-4 text-center text-stone-400">No products found.</td></tr>';
@@ -1258,7 +1388,7 @@
       loadProducts();
     }
 
-    // 9. LIVE PRICE SHEET (IMAGE 1: ITEM NAMES ARE READ-ONLY TEXT, PRICES EDITABLE)
+    // 9. LIVE PRICE SHEET
     function loadPriceSheet() {
       renderPriceSheetTable();
     }
@@ -1287,16 +1417,13 @@
         const disc = p.mrp > 0 ? Math.round(((p.mrp - p.offer_price) / p.mrp) * 100) : 0;
         return `
           <tr class="hover:bg-stone-50">
-            <!-- Plain Text Item Name (Not editable here as requested) -->
             <td class="p-3 font-bold text-stone-900 max-w-sm truncate" title="${p.name}">
               ${p.name}
             </td>
             <td class="p-3 text-stone-500 font-medium">${p.category}</td>
-            <!-- Editable MRP -->
             <td class="p-3">
               <input type="number" id="ps-mrp-${p.id}" value="${p.mrp}" oninput="recalcRowDisc('${p.id}')" class="w-20 border border-stone-300 rounded-lg p-1.5 text-xs text-stone-700 bg-white outline-none focus:border-red-700" />
             </td>
-            <!-- Editable Offer Price -->
             <td class="p-3">
               <input type="number" id="ps-offer-${p.id}" value="${p.offer_price}" oninput="recalcRowDisc('${p.id}')" class="w-20 border border-red-300 rounded-lg p-1.5 text-xs font-black text-red-700 bg-white outline-none focus:border-red-700" />
             </td>
@@ -1322,7 +1449,6 @@
       }
     }
 
-    // Save individual row prices (MRP & Offer Price only)
     async function saveRowPriceOnly(id) {
       const btn = document.getElementById('ps-btn-' + id);
       const newMrp = Number(document.getElementById('ps-mrp-' + id).value);
@@ -1353,7 +1479,6 @@
       }
     }
 
-    // Master Save: Saves all modified prices on current view in one go
     async function saveAllChangedPrices() {
       const btn = document.getElementById('btn-save-all-prices');
       btn.innerText = 'Saving all...';
