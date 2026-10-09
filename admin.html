@@ -290,7 +290,7 @@
       <!-- ================= 4. PRODUCTS & DELIVERY RATE FIXER TAB ================= -->
       <section id="view-products" class="tab-view space-y-6 hidden">
         
-        <!-- SECTION A: AREA & PINCODE DELIVERY RATE FIXER (IMAGE 1 WITH IMPORT BUTTON) -->
+        <!-- SECTION A: AREA & PINCODE DELIVERY RATE FIXER WITH IMPORT (IMAGE 1) -->
         <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b pb-3">
             <div>
@@ -302,7 +302,6 @@
             </div>
             
             <div class="flex items-center space-x-2">
-              <!-- Hidden File Input for Delivery Rates -->
               <input type="file" id="delivery-file-input" accept=".xlsx,.xls,.csv,.pdf" class="hidden" onchange="handleDeliveryRateImport(event)" />
               <button onclick="document.getElementById('delivery-file-input').click()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 shadow-xs active:scale-95 transition">
                 <span>📄</span>
@@ -330,15 +329,21 @@
           </div>
         </div>
 
-        <!-- SECTION B: PRODUCT CATALOG MANAGEMENT (IMAGE 2: SAVE MOVED TO LAST, EDIT RENAMED) -->
+        <!-- SECTION B: PRODUCT CATALOG MANAGEMENT WITH IMPORT (IMAGE 2) -->
         <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b pb-3">
             <div>
               <h2 class="text-lg font-black text-stone-950">Product Catalog Management</h2>
-              <p class="text-xs text-stone-500">Directly modify cracker titles below, upload manual photos, or manage details.</p>
+              <p class="text-xs text-stone-500">Import catalog files (Excel/PDF), edit titles directly, or attach photos & videos.</p>
             </div>
 
             <div class="flex items-center space-x-2">
+              <!-- Catalog File Import Input & Button -->
+              <input type="file" id="catalog-file-input" accept=".xlsx,.xls,.csv,.pdf" class="hidden" onchange="handleCatalogImport(event)" />
+              <button onclick="document.getElementById('catalog-file-input').click()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 shadow-xs active:scale-95 transition">
+                <span>📄</span>
+                <span>Import Products (Excel / PDF / CSV)</span>
+              </button>
               <button onclick="openProductModal()" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs border border-amber-400 active:scale-95 transition">
                 + Add New Cracker
               </button>
@@ -964,7 +969,7 @@
       renderInventorySection();
     }
 
-    // 7. AREA & PINCODE DELIVERY RATE FIXER + BULK EXCEL/PDF IMPORT
+    // 7. AREA & PINCODE DELIVERY RATE FIXER + BULK EXCEL/PDF/CSV IMPORT (IMAGE 1)
     function openDeliveryRateModal(editId = null) {
       const modal = document.getElementById('rate-modal');
       const title = document.getElementById('rate-modal-title');
@@ -1104,7 +1109,7 @@
       }
     }
 
-    // BULK IMPORT FOR DELIVERY RATES (EXTRACTS VILLAGE/MANDAL/DISTRICT & PINCODE FROM EXCEL / CSV / PDF)
+    // BULK IMPORT FOR DELIVERY RATES (IMAGE 1: PARSES VILLAGE, MANDAL, TOWN & PINCODE)
     async function handleDeliveryRateImport(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1348,7 +1353,7 @@
       }
     }
 
-    // RENDER PRODUCTS TABLE (SAVE BUTTON IN LAST COLUMN & 'Edit' INSTEAD OF 'Edit Full')
+    // RENDER PRODUCTS TABLE (IMAGE 2: SAVE BUTTON IN ACTIONS COLUMN, 'Edit' INSTEAD OF 'Edit Full')
     function renderProductsTable() {
       const tbody = document.getElementById('products-table');
       if (!tbody) return;
@@ -1366,7 +1371,7 @@
           <td class="p-3 text-stone-400 font-bold">₹${p.mrp}</td>
           <td class="p-3 text-red-700 font-black">₹${p.offer_price}</td>
           <td class="p-3 font-bold">${p.stock_qty || 0}</td>
-          <!-- ACTIONS COLUMN WITH SAVE MOVED HERE & 'Edit' RENAMED -->
+          <!-- ACTIONS COLUMN WITH SAVE MOVED TO LAST COLUMN & 'Edit' RENAMED -->
           <td class="p-3 text-right space-x-2">
             <button onclick="saveInlineProductName('${p.id}')" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3 py-1 rounded-lg text-xs shadow-xs active:scale-95 transition">
               Save
@@ -1380,6 +1385,106 @@
           </td>
         </tr>
       `).join('') || '<tr><td colspan="6" class="p-4 text-center text-stone-400">No products found.</td></tr>';
+    }
+
+    // BULK IMPORT FOR PRODUCTS CATALOG (EXCEL / CSV / PDF)
+    async function handleCatalogImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      alert(`Parsing product catalog file: ${file.name}...`);
+      const extractedProducts = [];
+
+      try {
+        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv')) {
+          const buffer = await file.arrayBuffer();
+          const workbook = XLSX.read(buffer, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
+
+          for (let i = 1; i < rows.length; i++) {
+            const r = rows[i];
+            if (!r || r.length === 0) continue;
+
+            const name = (r[0] || '').toString().trim();
+            const category = (r[1] || 'Sparklers').toString().trim();
+            const mrp = Number(r[2] || 0);
+            const offer = Number(r[3] || mrp);
+            const stock = Number(r[4] || 100);
+
+            if (name && mrp > 0) {
+              extractedProducts.push({
+                name,
+                category: category || 'Sparklers',
+                mrp,
+                offer_price: offer,
+                stock_qty: isNaN(stock) ? 100 : stock,
+                sold_qty: 0,
+                image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300'
+              });
+            }
+          }
+        } else if (file.name.endsWith('.pdf')) {
+          const typedarray = new Uint8Array(await file.arrayBuffer());
+          const pdf = await pdfjsLib.getDocument(typedarray).promise;
+          let fullLines = [];
+          for (let p = 1; p <= pdf.numPages; p++) {
+            const page = await pdf.getPage(p);
+            const content = await page.getTextContent();
+            let lineMap = {};
+            content.items.forEach(it => {
+              const y = Math.round(it.transform[5]);
+              if (!lineMap[y]) lineMap[y] = [];
+              lineMap[y].push(it.str.trim());
+            });
+            Object.keys(lineMap).sort((a,b) => b - a).forEach(y => {
+              const line = lineMap[y].join(' ').trim();
+              if (line) fullLines.push(line);
+            });
+          }
+
+          let currentCategory = 'Sparklers';
+          for (const line of fullLines) {
+            if (/sparkler|pot|chakkar|sound|bomb|shot|gift box/i.test(line) && !/\d/.test(line)) {
+              currentCategory = line.trim();
+              continue;
+            }
+            const numbers = line.match(/\b\d+(\.\d+)?\b/g);
+            if (numbers && numbers.length >= 2) {
+              const offer = Number(numbers[numbers.length - 1]);
+              const mrp = Number(numbers[numbers.length - 2]);
+              let name = line.replace(/\b\d+(\.\d+)?\b/g, '').replace(/^[0-9\.\-\)\*\/]+/, '').replace(/[₹\$,]/g, '').trim();
+              if (name.length > 2 && mrp > 0) {
+                extractedProducts.push({
+                  name,
+                  category: currentCategory,
+                  mrp,
+                  offer_price: offer,
+                  stock_qty: 100,
+                  sold_qty: 0,
+                  image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300'
+                });
+              }
+            }
+          }
+        }
+
+        if (extractedProducts.length > 0) {
+          const { error } = await window.db.from('products').insert(extractedProducts);
+          if (error) {
+            alert('Failed to insert imported products: ' + error.message);
+          } else {
+            alert(`Successfully imported ${extractedProducts.length} cracker items to catalog! You can now click Edit on each item to attach its photos.`);
+            await loadProducts();
+          }
+        } else {
+          alert('No recognizable product name and price combinations found in this file.');
+        }
+      } catch (err) {
+        alert('Catalog import error: ' + err.message);
+      } finally {
+        event.target.value = '';
+      }
     }
 
     async function deleteProduct(id) {
