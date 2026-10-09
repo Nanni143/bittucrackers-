@@ -12,11 +12,13 @@
     .leaflet-control-attribution { display: none !important; }
     .leaflet-pane { z-index: 10 !important; }
     .leaflet-top, .leaflet-bottom { z-index: 11 !important; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="bg-stone-50 text-stone-800 pb-24 font-sans antialiased">
 
-  <!-- ================= TOP NOTICE TICKER (FESTIVAL OFFERS - NO SIVAKASI / NO PERCENTAGES) ================= -->
+  <!-- ================= TOP NOTICE TICKER ================= -->
   <div class="bg-gradient-to-r from-red-900 via-red-800 to-red-900 text-amber-300 border-b border-amber-500/30 text-[10px] md:text-xs py-1.5 px-3 font-bold flex items-center justify-between overflow-x-auto whitespace-nowrap">
     <div class="flex items-center space-x-6 mx-auto">
       <span>✨ 100% GENUINE QUALITY CRACKERS</span>
@@ -25,7 +27,7 @@
     </div>
   </div>
 
-  <!-- ================= TOP NAVIGATION (RED & GOLD THEME) ================= -->
+  <!-- ================= TOP NAVIGATION ================= -->
   <nav class="bg-white border-b border-stone-200 px-3 py-2.5 sticky top-0 z-40 shadow-xs">
     <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
       
@@ -51,9 +53,8 @@
         </div>
       </div>
 
-      <!-- Action Buttons: Quick Enquiry + Contact + Direct Cart Button -->
+      <!-- Action Buttons -->
       <div class="flex items-center space-x-2 shrink-0">
-        <!-- Prominent Cart Button in Top Nav -->
         <button onclick="openCartView()" id="nav-cart-btn" class="bg-red-700 hover:bg-red-800 active:scale-95 text-white font-extrabold px-3 py-1.5 rounded-full text-xs flex items-center space-x-1.5 shadow-sm border border-amber-400/80 transition">
           <span>🛒</span>
           <span class="hidden sm:inline">Cart</span>
@@ -80,9 +81,8 @@
       <p class="text-xs sm:text-sm text-stone-200 font-semibold tracking-widest mt-1 uppercase">REACH OUT TO KAVALI'S FINEST BITTU CRACKERS</p>
     </div>
 
-    <!-- 3 High-Engagement Contact Cards -->
     <div class="max-w-4xl mx-auto px-4 -mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-      <!-- Card 1: Call Us -->
+      <!-- Call Us -->
       <div class="bg-white rounded-2xl p-6 shadow-md border-2 border-stone-100 text-center space-y-3 hover:border-amber-400 transition">
         <div class="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl shadow-xs border border-red-100">
           📞
@@ -96,7 +96,7 @@
         </div>
       </div>
 
-      <!-- Card 2: WhatsApp (All 4 Numbers) -->
+      <!-- WhatsApp -->
       <div class="bg-emerald-50/70 rounded-2xl p-6 shadow-md border-2 border-emerald-300 text-center space-y-3 hover:border-emerald-500 transition">
         <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl shadow-xs">
           💬
@@ -111,7 +111,7 @@
         </div>
       </div>
 
-      <!-- Card 3: Our Store -->
+      <!-- Store Location -->
       <div class="bg-white rounded-2xl p-6 shadow-md border-2 border-stone-100 text-center space-y-3 hover:border-amber-400 transition">
         <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto text-xl shadow-xs border border-amber-200">
           📍
@@ -123,7 +123,6 @@
       </div>
     </div>
 
-    <!-- Back to Store Action -->
     <div class="text-center pb-8">
       <button onclick="switchToCatalogView()" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-6 py-2.5 rounded-full text-xs shadow-md border border-amber-400 transition active:scale-95">
         ← Back to Cracker Catalog
@@ -134,7 +133,7 @@
   <!-- ================= CATALOG STOREFRONT VIEW ================= -->
   <div id="catalog-page-view">
 
-    <!-- Categories Filter Bar -->
+    <!-- Categories Horizontal Filter Bar -->
     <div class="px-3 pt-3 pb-1 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs bg-white border-b border-stone-200">
       <button onclick="filterCategory('All')" class="cat-btn bg-red-700 text-amber-300 border border-amber-400 px-3.5 py-1.5 rounded-full font-bold shadow-xs">All</button>
       <button onclick="filterCategory('Sparklers')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium">Sparklers</button>
@@ -145,13 +144,13 @@
       <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium">Gift Boxes</button>
     </div>
 
-    <!-- ================= FLOATING / STICKY STATS PILL WITH DIRECT CART ACTION ================= -->
+    <!-- ================= FLOATING / STICKY STATS PILL ================= -->
     <div class="max-w-5xl mx-auto px-3 py-3">
       <div class="bg-white rounded-full border border-stone-200/90 shadow-md p-2 flex items-center justify-between gap-2 overflow-x-auto">
         
-        <!-- Left: Categories Pill + Search -->
+        <!-- Left: Categories Modal Trigger + Live Search -->
         <div class="flex items-center space-x-2 shrink-0">
-          <button onclick="scrollCategoryToView()" class="bg-red-700 hover:bg-red-800 active:scale-95 text-amber-300 font-extrabold text-[11px] px-3.5 py-2 rounded-full flex items-center space-x-1 border border-amber-400/50 shadow-sm transition">
+          <button onclick="openCategoryModal()" class="bg-red-700 hover:bg-red-800 active:scale-95 text-amber-300 font-extrabold text-[11px] px-3.5 py-2 rounded-full flex items-center space-x-1 border border-amber-400/50 shadow-sm transition">
             <span>⚙</span>
             <span>CATEGORIES</span>
           </button>
@@ -163,9 +162,8 @@
           <span class="text-stone-300 hidden sm:inline">|</span>
         </div>
 
-        <!-- Middle: Direct View Cart Pill Button -->
+        <!-- Middle: Stats & Direct Cart Pill Button -->
         <div class="flex items-center space-x-2 shrink-0">
-          <!-- Products Badge (Orange) -->
           <div class="flex items-center space-x-1.5 bg-orange-50 px-2 py-1 rounded-xl border border-orange-200">
             <div class="w-6 h-6 bg-orange-500 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">
               📦
@@ -176,7 +174,6 @@
             </div>
           </div>
 
-          <!-- Items Badge (Blue) -->
           <div class="flex items-center space-x-1.5 bg-blue-50 px-2 py-1 rounded-xl border border-blue-200">
             <div class="w-6 h-6 bg-blue-600 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">
               🛍️
@@ -187,7 +184,6 @@
             </div>
           </div>
 
-          <!-- Total + Explicit "View Cart" Button (Green / Red) -->
           <button onclick="openCartView()" class="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-2.5 py-1.5 rounded-xl border border-emerald-700 shadow-sm transition">
             <span class="text-xs">🛒</span>
             <div class="text-left">
@@ -197,7 +193,7 @@
           </button>
         </div>
 
-        <!-- Right: LIST / GRID View Switcher -->
+        <!-- Right: LIST / GRID Toggle -->
         <div class="flex items-center bg-stone-100 p-0.5 rounded-full shrink-0 border border-stone-200">
           <button onclick="setViewMode('list')" id="btn-toggle-list" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold text-stone-500 flex items-center space-x-1 transition">
             <span>☰</span>
@@ -219,7 +215,51 @@
     </main>
   </div>
 
-  <!-- ================= FLOATING STICKY BOTTOM CART BAR (ACTIVE WHEN CART > 0) ================= -->
+  <!-- ================= CATEGORY SELECTION MODAL ================= -->
+  <div id="category-drawer-modal" class="fixed inset-0 bg-neutral-950/75 backdrop-blur-2xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b pb-2.5">
+        <div class="flex items-center space-x-2">
+          <span class="text-base text-red-700">⚙</span>
+          <h3 class="font-extrabold text-sm text-stone-900">Select Cracker Category</h3>
+        </div>
+        <button onclick="closeCategoryModal()" class="text-stone-400 hover:text-black text-2xl font-black">&times;</button>
+      </div>
+
+      <div class="grid grid-cols-1 gap-2 text-xs font-bold">
+        <button onclick="selectCategoryFromModal('All')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🎆 All Crackers</span>
+          <span id="cat-check-All">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Sparklers')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>✨ Sparklers</span>
+          <span id="cat-check-Sparklers" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Sound Crackers')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>💥 Sound Crackers</span>
+          <span id="cat-check-Sound Crackers" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Ground Chakkars')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🌀 Ground Chakkars</span>
+          <span id="cat-check-Ground Chakkars" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Flower Pots')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🏺 Flower Pots</span>
+          <span id="cat-check-Flower Pots" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Sky Shots')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🚀 Sky Shots</span>
+          <span id="cat-check-Sky Shots" class="hidden">✓</span>
+        </button>
+        <button onclick="selectCategoryFromModal('Gift Boxes')" class="cat-drawer-item w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
+          <span>🎁 Gift Boxes</span>
+          <span id="cat-check-Gift Boxes" class="hidden">✓</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FLOATING STICKY BOTTOM CART BAR ================= -->
   <div id="floating-bottom-cart-bar" class="fixed bottom-3 inset-x-0 z-40 px-4 hidden">
     <div onclick="openCartView()" class="max-w-md mx-auto bg-gradient-to-r from-red-800 to-red-900 text-white rounded-2xl p-3 shadow-2xl border-2 border-amber-400 flex items-center justify-between cursor-pointer active:scale-98 transition">
       <div class="flex items-center space-x-2.5">
@@ -238,14 +278,11 @@
     </div>
   </div>
 
-  <!-- ================= COMPREHENSIVE BEIGE / WARM CREAM FOOTER ================= -->
+  <!-- ================= WARM BEIGE FOOTER ================= -->
   <footer class="bg-[#F8F4EA] text-stone-800 mt-16 border-t-4 border-amber-500 shadow-inner">
     <div class="max-w-5xl mx-auto px-4 py-12 space-y-8 text-xs">
       
-      <!-- Top Row: 4 Columns (Brand, Quick Links, Contacts, WhatsApp) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        
-        <!-- Col 1: Brand -->
         <div class="space-y-2">
           <div class="flex items-center space-x-2">
             <span class="bg-red-700 text-amber-300 font-black px-2 py-0.5 rounded border border-amber-400 text-sm">B</span>
@@ -256,7 +293,6 @@
           </p>
         </div>
 
-        <!-- Col 2: Quick Links -->
         <div class="space-y-2.5">
           <h3 class="font-black text-red-800 uppercase tracking-wider text-[11px] border-b border-amber-300 pb-1">Quick Links</h3>
           <ul class="space-y-1.5 text-stone-700 text-[11px] font-medium">
@@ -267,7 +303,6 @@
           </ul>
         </div>
 
-        <!-- Col 3: Contact Info -->
         <div class="space-y-2.5">
           <h3 class="font-black text-red-800 uppercase tracking-wider text-[11px] border-b border-amber-300 pb-1">Contact Us</h3>
           <p class="text-stone-700 text-[11px]">
@@ -280,7 +315,6 @@
           </div>
         </div>
 
-        <!-- Col 4: WhatsApp Direct Us -->
         <div class="space-y-2.5">
           <h3 class="font-black text-emerald-800 uppercase tracking-wider text-[11px] border-b border-amber-300 pb-1">WhatsApp Us</h3>
           <p class="text-stone-500 text-[10px]">Tap any number to open instant chat:</p>
@@ -293,7 +327,6 @@
         </div>
       </div>
 
-      <!-- Payment / Banking Details Box -->
       <div class="bg-white p-4 rounded-2xl border-2 border-amber-400/60 shadow-xs space-y-1.5">
         <div class="flex items-center space-x-2">
           <span class="text-base">💳</span>
@@ -304,7 +337,6 @@
         </p>
       </div>
 
-      <!-- Legal Compliance Notice -->
       <div class="border-t border-stone-300 pt-5 space-y-2 text-stone-600 text-[10px] leading-relaxed">
         <h4 class="font-bold text-red-800 uppercase tracking-wider">Legal Compliance Notice</h4>
         <p>
@@ -315,7 +347,6 @@
         </p>
       </div>
 
-      <!-- Bottom Copyright -->
       <div class="border-t border-stone-300 pt-4 text-center text-stone-500 text-[10px] font-medium">
         © 2026 Bittu Fireworks, Kavali. All rights reserved.
       </div>
@@ -326,7 +357,6 @@
   <div id="cart-modal" class="fixed inset-0 bg-neutral-950/75 backdrop-blur-xs z-50 hidden flex justify-end">
     <div class="bg-stone-50 w-full max-w-md h-full flex flex-col overflow-y-auto">
       
-      <!-- Top Step Header -->
       <div class="bg-white px-4 py-3 border-b flex items-center justify-between sticky top-0 z-10 shadow-2xs">
         <div class="flex items-center space-x-3">
           <button onclick="closeCartView()" class="text-stone-600 hover:text-black font-bold text-lg">←</button>
@@ -340,7 +370,6 @@
       </div>
 
       <div class="flex-1 p-3.5 space-y-3 overflow-y-auto">
-        <!-- Delivering To Card -->
         <div class="bg-white rounded-2xl p-4 border border-stone-200 shadow-2xs space-y-2">
           <div class="flex justify-between items-center">
             <span class="text-xs font-black text-stone-900 uppercase tracking-wide">Delivering to</span>
@@ -349,13 +378,11 @@
           <div id="address-card-content" class="pt-1"></div>
         </div>
 
-        <!-- Ordered Items List -->
         <div class="bg-white rounded-2xl p-3 border border-stone-200 shadow-2xs space-y-2.5">
           <h3 class="text-xs font-black text-stone-900 uppercase tracking-wide border-b pb-2">Order Items</h3>
           <div id="cart-items-list" class="divide-y space-y-2"></div>
         </div>
 
-        <!-- Price Details Card -->
         <div class="bg-white rounded-2xl p-4 border border-stone-200 shadow-2xs space-y-2 text-xs">
           <h3 class="font-black text-stone-900 uppercase tracking-wide border-b pb-2">Price Details</h3>
           <div class="flex justify-between text-stone-600">
@@ -383,7 +410,6 @@
         </div>
       </div>
 
-      <!-- Bottom Booking Bar -->
       <div class="bg-white border-t p-3 sticky bottom-0 shadow-lg flex items-center justify-between">
         <div>
           <span class="text-[10px] text-stone-400 font-bold uppercase block">Pay on Delivery</span>
@@ -447,7 +473,7 @@
     </div>
   </div>
 
-  <!-- ================= FULLSCREEN INTERACTIVE MAP PIN PICKER ================= -->
+  <!-- ================= FULLSCREEN MAP PIN PICKER ================= -->
   <div id="map-pin-modal" class="fixed inset-0 bg-white z-50 hidden flex flex-col h-screen w-screen">
     <div class="px-4 py-3 border-b flex items-center justify-between bg-white z-30 shadow-xs shrink-0">
       <div class="flex items-center space-x-3">
@@ -561,7 +587,7 @@
     let deliveryZones = [];
     let cart = [];
     let activeCategory = 'All';
-    let currentViewMode = 'grid'; // 'grid' | 'list'
+    let currentViewMode = 'grid';
     let currentSort = 'popular';
 
     let savedAddresses = [];
@@ -595,7 +621,22 @@
       loadLiveProducts();
     }
 
-    // QUICK ENQUIRY BUTTON -> WHATSAPP REDIRECT
+    function formatMediaVideoEmbed(videoUrl) {
+      if (!videoUrl) return '';
+      if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+        let vidId = '';
+        if (videoUrl.includes('shorts/')) {
+          vidId = videoUrl.split('shorts/')[1].split('?')[0];
+        } else if (videoUrl.includes('v=')) {
+          vidId = videoUrl.split('v=')[1].split('&')[0];
+        } else if (videoUrl.includes('youtu.be/')) {
+          vidId = videoUrl.split('youtu.be/')[1].split('?')[0];
+        }
+        return `<iframe class="w-full h-full rounded-xl object-cover" src="https://www.youtube.com/embed/${vidId}?rel=0" frameborder="0" allowfullscreen></iframe>`;
+      }
+      return `<video src="${videoUrl}" controls class="w-full h-full rounded-xl object-cover bg-black" playsinline></video>`;
+    }
+
     function handleQuickEnquiryClick() {
       const greetingMsg = encodeURIComponent(
         `*Hello Bittu Crackers, Kavali!*\n` +
@@ -604,7 +645,6 @@
       window.open(`https://wa.me/${storeWhatsAppNumber}?text=${greetingMsg}`, '_blank');
     }
 
-    // VIEW ROUTING
     function switchToContactView() {
       document.getElementById('catalog-page-view').classList.add('hidden');
       document.getElementById('contact-page-view').classList.remove('hidden');
@@ -617,8 +657,21 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function scrollCategoryToView() {
-      window.scrollTo({ top: 40, behavior: 'smooth' });
+    function openCategoryModal() {
+      document.getElementById('category-drawer-modal').classList.remove('hidden');
+    }
+
+    function closeCategoryModal() {
+      document.getElementById('category-drawer-modal').classList.add('hidden');
+    }
+
+    function selectCategoryFromModal(cat) {
+      filterCategory(cat);
+      ['All', 'Sparklers', 'Sound Crackers', 'Ground Chakkars', 'Flower Pots', 'Sky Shots', 'Gift Boxes'].forEach(c => {
+        const chk = document.getElementById('cat-check-' + c);
+        if (chk) chk.className = (c === cat ? 'text-red-700 font-black' : 'hidden');
+      });
+      closeCategoryModal();
     }
 
     function handleTopLocationClick() {
@@ -873,7 +926,6 @@
       `).join('');
     }
 
-    // STATS UPDATE FOR ALL CART INDICATORS
     function updateTotal() {
       const distinctProductsCount = cart.length;
       const totalUnits = cart.reduce((sum, i) => sum + i.qty, 0);
@@ -883,15 +935,11 @@
       const deliveryFee = selectedAddress ? Number(selectedAddress.deliveryCharge || 0) : 0;
       const grandTotal = offerSubtotal + deliveryFee;
 
-      // Update Nav Cart Counter
       document.getElementById('nav-cart-count').innerText = totalUnits;
-
-      // Update Lotus Pyros Style Floating Pill
       document.getElementById('pill-distinct-products').innerText = distinctProductsCount;
       document.getElementById('pill-total-items').innerText = totalUnits;
       document.getElementById('pill-total-rupees').innerText = `₹${offerSubtotal.toFixed(0)}`;
 
-      // Update Bottom Floating Bar
       const bottomBar = document.getElementById('floating-bottom-cart-bar');
       if (totalUnits > 0) {
         document.getElementById('float-cart-count').innerText = totalUnits;
@@ -901,7 +949,6 @@
         bottomBar.classList.add('hidden');
       }
 
-      // Update Modal summary
       document.getElementById('summary-items-count').innerText = totalUnits;
       document.getElementById('summary-mrp-total').innerText = `₹${mrpSubtotal.toFixed(0)}`;
       document.getElementById('summary-discount-val').innerText = `- ₹${discount.toFixed(0)}`;
@@ -1033,8 +1080,31 @@
         const inCartItem = cart.find(c => c.id === p.id);
         const qty = inCartItem ? inCartItem.qty : 0;
         const savings = (p.mrp > p.offer_price) ? (p.mrp - p.offer_price) : 0;
+        const hasVideo = Boolean(p.video_url);
 
-        // ================= 1. LIST VIEW =================
+        const mediaGalleryHtml = hasVideo ? `
+          <div class="relative w-full overflow-hidden rounded-xl bg-stone-100">
+            <div id="media-carousel-${p.id}" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar w-full h-40 sm:h-44">
+              <div class="w-full h-full shrink-0 snap-center relative">
+                <img src="${p.image_url || 'https://placehold.co/400x200?text=Cracker'}" class="w-full h-full object-cover rounded-xl" />
+                <span class="absolute bottom-1.5 right-1.5 bg-black/60 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full backdrop-blur-xs">
+                  Swipe for Video ➔
+                </span>
+              </div>
+              <div class="w-full h-full shrink-0 snap-center relative bg-black flex items-center justify-center">
+                ${formatMediaVideoEmbed(p.video_url)}
+              </div>
+            </div>
+            <div class="absolute top-1.5 right-1.5 bg-amber-400 text-red-950 font-black text-[8px] px-1.5 py-0.2 rounded-full shadow-xs">
+              📷 1/2 • 🎬 Video
+            </div>
+          </div>
+        ` : `
+          <div class="relative w-full h-40 sm:h-44 overflow-hidden rounded-xl bg-stone-100">
+            <img src="${p.image_url || 'https://placehold.co/400x200?text=Cracker'}" class="w-full h-full object-cover rounded-xl" />
+          </div>
+        `;
+
         if (currentViewMode === 'list') {
           const listStepperHtml = qty > 0 ? `
             <div class="flex items-center border border-stone-200 bg-stone-50 rounded-lg overflow-hidden h-7">
@@ -1050,8 +1120,8 @@
 
           return `
             <div class="bg-white border border-stone-200 rounded-2xl p-3.5 shadow-xs flex items-start space-x-3.5 w-full hover:border-amber-400/60 transition">
-              <div class="w-16 h-16 shrink-0 bg-stone-50 rounded-xl overflow-hidden border border-stone-100 flex items-center justify-center">
-                <img src="${p.image_url || 'https://placehold.co/120x120?text=Cracker'}" class="w-full h-full object-cover" />
+              <div class="w-24 h-24 shrink-0 overflow-hidden rounded-xl">
+                ${mediaGalleryHtml}
               </div>
               <div class="flex-1 min-w-0">
                 <h3 class="font-bold text-xs text-stone-900 leading-snug line-clamp-2">${p.name}</h3>
@@ -1069,7 +1139,6 @@
           `;
         }
 
-        // ================= 2. GRID VIEW =================
         const gridQtyButtonHtml = qty > 0 ? `
           <div class="flex items-center justify-between border-2 border-red-700 bg-red-50 rounded-lg overflow-hidden h-8 w-full">
             <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-700 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
@@ -1085,7 +1154,9 @@
         return `
           <div class="bg-white border border-stone-200 rounded-2xl p-3 flex flex-col justify-between shadow-xs hover:border-amber-400/60 transition">
             <div>
-              <img src="${p.image_url || 'https://placehold.co/200x150?text=Cracker'}" class="w-full h-24 object-cover rounded-xl mb-2" />
+              <div class="mb-2">
+                ${mediaGalleryHtml}
+              </div>
               <div class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">${p.category}</div>
               <h3 class="font-bold text-xs mt-0.5 leading-snug line-clamp-2 h-8 text-stone-900">${p.name}</h3>
               <div class="flex items-center space-x-1.5 mt-1.5">
