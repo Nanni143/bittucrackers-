@@ -15,8 +15,12 @@
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
     }
   </script>
+  <style>
+    /* Independent scrolling setup */
+    html, body { height: 100%; overflow: hidden; }
+  </style>
 </head>
-<body class="bg-stone-100 text-stone-800 font-sans antialiased min-h-screen">
+<body class="bg-stone-100 text-stone-800 font-sans antialiased h-screen overflow-hidden">
 
   <!-- ================= AUTHENTICATION MODAL ================= -->
   <div id="auth-modal" style="display: flex;" class="fixed inset-0 bg-neutral-950/90 backdrop-blur-sm z-50 items-center justify-center p-4">
@@ -61,10 +65,10 @@
   </div>
 
   <!-- ================= MAIN ADMIN DASHBOARD ================= -->
-  <div id="admin-layout" style="display: none;" class="min-h-screen flex flex-col md:flex-row">
+  <div id="admin-layout" style="display: none;" class="h-screen w-screen flex flex-col md:flex-row overflow-hidden">
     
-    <!-- LEFT SIDEBAR -->
-    <aside class="w-full md:w-64 bg-neutral-900 text-white flex flex-col justify-between shrink-0 p-4 border-r border-neutral-800">
+    <!-- LEFT SIDEBAR: FIXED, INDEPENDENT SCROLL (IMAGE 3) -->
+    <aside class="w-full md:w-64 bg-neutral-900 text-white flex flex-col justify-between shrink-0 p-4 border-r border-neutral-800 h-full overflow-y-auto">
       <div>
         <div class="flex items-center space-x-2.5 pb-5 border-b border-neutral-800 mb-5">
           <span class="bg-red-700 text-amber-300 font-black px-2 py-0.5 rounded text-xs border border-amber-400">B</span>
@@ -74,6 +78,7 @@
           </div>
         </div>
 
+        <!-- NAVIGATION: SEPARATE TABS -->
         <nav class="space-y-1.5 text-xs font-semibold">
           <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl bg-red-700 text-amber-300 shadow-sm">
             <span>📊</span><span>Analytics & Dashboard</span>
@@ -84,8 +89,13 @@
           <button onclick="navigate('inventory')" id="nav-inventory" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl text-stone-400 hover:text-white">
             <span>📋</span><span>Inventory & Stock</span>
           </button>
+          <!-- TAB 1: PRODUCT CATALOG MANAGEMENT -->
           <button onclick="navigate('products')" id="nav-products" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl text-stone-400 hover:text-white">
-            <span>🎇</span><span>Products & Delivery Rates</span>
+            <span>🎇</span><span>Products Catalog</span>
+          </button>
+          <!-- TAB 2: DELIVERY RATE FIXER (SEPARATE SECTION) -->
+          <button onclick="navigate('delivery')" id="nav-delivery" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl text-stone-400 hover:text-white">
+            <span>📍</span><span>Delivery Rates</span>
           </button>
           <button onclick="navigate('price-sheet')" id="nav-price-sheet" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl text-stone-400 hover:text-white">
             <span>₹</span><span>Price Sheet & Rates</span>
@@ -107,358 +117,384 @@
       </div>
     </aside>
 
-    <!-- MAIN RIGHT VIEWPORT -->
-    <main class="flex-1 p-4 md:p-8 max-w-6xl mx-auto overflow-y-auto">
+    <!-- RIGHT VIEWPORT: INDEPENDENT SCROLL -->
+    <main class="flex-1 p-4 md:p-8 h-full overflow-y-auto">
+      <div class="max-w-6xl mx-auto space-y-6">
 
-      <!-- ================= 1. ANALYTICS & DASHBOARD TAB ================= -->
-      <section id="view-dashboard" class="tab-view space-y-6">
-        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-          <div>
-            <h1 class="text-2xl font-black text-stone-950">Dashboard & Sales Analytics</h1>
-            <p class="text-xs text-stone-500">Live sales, festival cycles, and order pipeline statistics.</p>
-          </div>
-          <button onclick="loadDashboardMetrics()" class="bg-stone-200 hover:bg-stone-300 text-stone-800 px-3 py-1.5 rounded-xl text-xs font-bold active:scale-95 transition">
-            🔄 Refresh Live Stats
-          </button>
-        </div>
-
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
-            <span class="text-xs font-bold text-stone-500">Total Booked Value</span>
-            <div id="stat-revenue" class="text-2xl font-black text-red-700 mt-1">₹0</div>
-            <span class="text-[10px] text-emerald-600 font-bold">● Live from orders</span>
-          </div>
-          <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
-            <span class="text-xs font-bold text-stone-500">Total Orders Placed</span>
-            <div id="stat-total-orders" class="text-2xl font-black text-stone-900 mt-1">0</div>
-            <span class="text-[10px] text-stone-400 font-medium">All historical bookings</span>
-          </div>
-          <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
-            <span class="text-xs font-bold text-amber-600">Pending & New Orders</span>
-            <div id="stat-pending" class="text-2xl font-black text-amber-600 mt-1">0</div>
-            <span class="text-[10px] text-amber-700 font-bold">Needs dispatch action</span>
-          </div>
-          <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
-            <span class="text-xs font-bold text-emerald-600">Completed Deliveries</span>
-            <div id="stat-delivered" class="text-2xl font-black text-emerald-600 mt-1">0</div>
-            <span class="text-[10px] text-emerald-700 font-bold">Delivered to customer</span>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs space-y-3">
-            <div class="flex justify-between items-center border-b pb-2">
-              <div>
-                <h3 class="font-black text-sm text-stone-900">Month-Wise Sales & Marketing Revenue</h3>
-                <p class="text-[11px] text-stone-400">Monthly booking totals across 2026</p>
-              </div>
-              <span class="text-xs bg-red-50 text-red-700 font-bold px-2 py-0.5 rounded-full">Monthly</span>
-            </div>
-            <div class="h-60 relative">
-              <canvas id="monthSalesChart"></canvas>
-            </div>
-          </div>
-
-          <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs space-y-3">
-            <div class="flex justify-between items-center border-b pb-2">
-              <div>
-                <h3 class="font-black text-sm text-stone-900">Festival-Wise Sales Distribution</h3>
-                <p class="text-[11px] text-stone-400">Diwali, Dussehra, New Year & Celebrations</p>
-              </div>
-              <span class="text-xs bg-amber-50 text-amber-700 font-bold px-2 py-0.5 rounded-full">Festival Cycle</span>
-            </div>
-            <div class="h-60 relative">
-              <canvas id="festivalSalesChart"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="bg-white p-5 rounded-2xl border border-emerald-200 shadow-xs space-y-3">
-            <div class="flex items-center space-x-2 border-b pb-2">
-              <span class="text-xl">🔥</span>
-              <div>
-                <h3 class="font-black text-sm text-stone-900">Highest Selling Items (Top Movers)</h3>
-                <p class="text-[11px] text-emerald-700 font-semibold">Most demanded crackers by customers</p>
-              </div>
-            </div>
-            <div id="highest-selling-list" class="divide-y space-y-2 text-xs">
-              <p class="text-stone-400 py-3 text-center">Loading sellers...</p>
-            </div>
-          </div>
-
-          <div class="bg-white p-5 rounded-2xl border border-amber-200 shadow-xs space-y-3">
-            <div class="flex items-center space-x-2 border-b pb-2">
-              <span class="text-xl">⚠️</span>
-              <div>
-                <h3 class="font-black text-sm text-stone-900">Lowest Selling & Non-Moved Items</h3>
-                <p class="text-[11px] text-amber-700 font-semibold">Items with zero or slow customer movement</p>
-              </div>
-            </div>
-            <div id="lowest-selling-list" class="divide-y space-y-2 text-xs">
-              <p class="text-stone-400 py-3 text-center">Loading inventory status...</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ================= 2. ORDERS PIPELINE TAB ================= -->
-      <section id="view-orders" class="tab-view space-y-4 hidden">
-        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-          <div>
-            <h1 class="text-2xl font-black text-stone-950">Orders Pipeline</h1>
-            <p class="text-xs text-stone-500">Track and advance orders across each progressive delivery stage.</p>
-          </div>
-          <button onclick="loadOrders()" class="bg-stone-200 text-stone-800 px-3 py-1.5 rounded-xl text-xs font-bold active:scale-95 transition">
-            🔄 Refresh Orders
-          </button>
-        </div>
-
-        <div class="flex flex-wrap gap-2 text-xs font-bold bg-white p-2.5 rounded-2xl border border-stone-200">
-          <button onclick="filterOrdersByStage('All')" class="stage-filter-btn bg-stone-900 text-white px-3 py-1.5 rounded-xl">All Orders</button>
-          <button onclick="filterOrdersByStage('New Order')" class="stage-filter-btn bg-stone-100 text-stone-600 px-3 py-1.5 rounded-xl">🆕 New Order</button>
-          <button onclick="filterOrdersByStage('Pending')" class="stage-filter-btn bg-stone-100 text-stone-600 px-3 py-1.5 rounded-xl">⏳ Pending</button>
-          <button onclick="filterOrdersByStage('Confirmed')" class="stage-filter-btn bg-stone-100 text-stone-600 px-3 py-1.5 rounded-xl">✓ Confirmed</button>
-          <button onclick="filterOrdersByStage('Out for Delivery')" class="stage-filter-btn bg-stone-100 text-stone-600 px-3 py-1.5 rounded-xl">🚚 Out for Delivery</button>
-          <button onclick="filterOrdersByStage('Delivered')" class="stage-filter-btn bg-stone-100 text-stone-600 px-3 py-1.5 rounded-xl">🎉 Delivered / Completed</button>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-stone-200 overflow-x-auto shadow-xs">
-          <table class="w-full text-left text-xs whitespace-nowrap">
-            <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
-              <tr>
-                <th class="p-3">Order ID</th>
-                <th class="p-3">Customer & Phone</th>
-                <th class="p-3">Delivery Area</th>
-                <th class="p-3">Amount</th>
-                <th class="p-3">Delivery Stage</th>
-                <th class="p-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="orders-table" class="divide-y divide-stone-100"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- ================= 3. INVENTORY & STOCK MANAGEMENT TAB (ADJUSTED SPACING & MANUAL STOCK ENTRY) ================= -->
-      <section id="view-inventory" class="tab-view space-y-6 hidden">
-        <div>
-          <h1 class="text-2xl font-black text-stone-950">Inventory & Stock Tracking</h1>
-          <p class="text-xs text-stone-500">Monitor current stock, units sold, out-of-stock alerts, and adjust stock directly.</p>
-        </div>
-
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
-            <span class="text-xs font-bold text-stone-500">Total Stock in Hand</span>
-            <div id="inv-current-stock" class="text-2xl font-black text-stone-900 mt-1">0 units</div>
-            <span class="text-[10px] text-emerald-600 font-bold">Active inventory</span>
-          </div>
-          <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
-            <span class="text-xs font-bold text-stone-500">Total Items Sold</span>
-            <div id="inv-total-sold" class="text-2xl font-black text-red-700 mt-1">0 units</div>
-            <span class="text-[10px] text-stone-400 font-medium">Dispatched to customers</span>
-          </div>
-          <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
-            <span class="text-xs font-bold text-amber-600">Low & Out of Stock</span>
-            <div id="inv-out-stock" class="text-2xl font-black text-amber-600 mt-1">0 items</div>
-            <span class="text-[10px] text-amber-700 font-bold">Stock &lt;= 5 units</span>
-          </div>
-          <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
-            <span class="text-xs font-bold text-stone-500">Non-Moved Crackers</span>
-            <div id="inv-not-moved" class="text-2xl font-black text-stone-900 mt-1">0 items</div>
-            <span class="text-[10px] text-stone-400 font-medium">0 units sold</span>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-stone-200 overflow-x-auto shadow-xs">
-          <table class="w-full text-left text-xs whitespace-nowrap">
-            <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
-              <tr>
-                <th class="p-3 w-72">Cracker Item</th>
-                <th class="p-3 w-32">Category</th>
-                <th class="p-3 w-28 text-center">In-Stock Qty</th>
-                <th class="p-3 w-24 text-center">Sold Qty</th>
-                <th class="p-3 w-28 text-center">Status</th>
-                <th class="p-3 text-right">Quick Stock Adjustment</th>
-              </tr>
-            </thead>
-            <tbody id="inventory-table" class="divide-y divide-stone-100"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- ================= 4. PRODUCTS & DELIVERY RATE FIXER TAB ================= -->
-      <section id="view-products" class="tab-view space-y-6 hidden">
-        
-        <!-- SECTION A: AREA & PINCODE DELIVERY RATE FIXER WITH IMPORT (IMAGE 1) -->
-        <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs space-y-4">
-          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b pb-3">
+        <!-- ================= 1. ANALYTICS & DASHBOARD TAB ================= -->
+        <section id="view-dashboard" class="tab-view space-y-6">
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
             <div>
-              <h2 class="text-lg font-black text-stone-950 flex items-center space-x-2">
-                <span>📍</span>
-                <span>Delivery Rate Fixer (By Area & Pincode)</span>
-              </h2>
-              <p class="text-xs text-stone-500">Configure delivery charges or import bulk areas/villages/pincodes from Excel or PDF.</p>
+              <h1 class="text-2xl font-black text-stone-950">Dashboard & Sales Analytics</h1>
+              <p class="text-xs text-stone-500">Live sales, festival cycles, and order pipeline statistics.</p>
             </div>
-            
-            <div class="flex items-center space-x-2">
-              <input type="file" id="delivery-file-input" accept=".xlsx,.xls,.csv,.pdf" class="hidden" onchange="handleDeliveryRateImport(event)" />
-              <button onclick="document.getElementById('delivery-file-input').click()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 shadow-xs active:scale-95 transition">
-                <span>📄</span>
-                <span>Import (Excel / PDF / CSV)</span>
-              </button>
-              <button onclick="openDeliveryRateModal()" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs border border-amber-400 active:scale-95 transition">
-                + Add Area / Pincode Rate
-              </button>
+            <button onclick="loadDashboardMetrics()" class="bg-stone-200 hover:bg-stone-300 text-stone-800 px-3 py-1.5 rounded-xl text-xs font-bold active:scale-95 transition">
+              🔄 Refresh Live Stats
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+              <span class="text-xs font-bold text-stone-500">Total Booked Value</span>
+              <div id="stat-revenue" class="text-2xl font-black text-red-700 mt-1">₹0</div>
+              <span class="text-[10px] text-emerald-600 font-bold">● Live from orders</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+              <span class="text-xs font-bold text-stone-500">Total Orders Placed</span>
+              <div id="stat-total-orders" class="text-2xl font-black text-stone-900 mt-1">0</div>
+              <span class="text-[10px] text-stone-400 font-medium">All historical bookings</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+              <span class="text-xs font-bold text-amber-600">Pending & New Orders</span>
+              <div id="stat-pending" class="text-2xl font-black text-amber-600 mt-1">0</div>
+              <span class="text-[10px] text-amber-700 font-bold">Needs dispatch action</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+              <span class="text-xs font-bold text-emerald-600">Completed Deliveries</span>
+              <div id="stat-delivered" class="text-2xl font-black text-emerald-600 mt-1">0</div>
+              <span class="text-[10px] text-emerald-700 font-bold">Delivered to customer</span>
             </div>
           </div>
 
-          <div class="overflow-x-auto">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs space-y-3">
+              <div class="flex justify-between items-center border-b pb-2">
+                <div>
+                  <h3 class="font-black text-sm text-stone-900">Month-Wise Sales & Marketing Revenue</h3>
+                  <p class="text-[11px] text-stone-400">Monthly booking totals across 2026</p>
+                </div>
+                <span class="text-xs bg-red-50 text-red-700 font-bold px-2 py-0.5 rounded-full">Monthly</span>
+              </div>
+              <div class="h-60 relative">
+                <canvas id="monthSalesChart"></canvas>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs space-y-3">
+              <div class="flex justify-between items-center border-b pb-2">
+                <div>
+                  <h3 class="font-black text-sm text-stone-900">Festival-Wise Sales Distribution</h3>
+                  <p class="text-[11px] text-stone-400">Diwali, Dussehra, New Year & Celebrations</p>
+                </div>
+                <span class="text-xs bg-amber-50 text-amber-700 font-bold px-2 py-0.5 rounded-full">Festival Cycle</span>
+              </div>
+              <div class="h-60 relative">
+                <canvas id="festivalSalesChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-emerald-200 shadow-xs space-y-3">
+              <div class="flex items-center space-x-2 border-b pb-2">
+                <span class="text-xl">🔥</span>
+                <div>
+                  <h3 class="font-black text-sm text-stone-900">Highest Selling Items (Top Movers)</h3>
+                  <p class="text-[11px] text-emerald-700 font-semibold">Most demanded crackers by customers</p>
+                </div>
+              </div>
+              <div id="highest-selling-list" class="divide-y space-y-2 text-xs">
+                <p class="text-stone-400 py-3 text-center">Loading sellers...</p>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-amber-200 shadow-xs space-y-3">
+              <div class="flex items-center space-x-2 border-b pb-2">
+                <span class="text-xl">⚠️</span>
+                <div>
+                  <h3 class="font-black text-sm text-stone-900">Lowest Selling & Non-Moved Items</h3>
+                  <p class="text-[11px] text-amber-700 font-semibold">Items with zero or slow customer movement</p>
+                </div>
+              </div>
+              <div id="lowest-selling-list" class="divide-y space-y-2 text-xs">
+                <p class="text-stone-400 py-3 text-center">Loading inventory status...</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= 2. ORDERS PIPELINE TAB ================= -->
+        <section id="view-orders" class="tab-view space-y-4 hidden">
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+            <div>
+              <h1 class="text-2xl font-black text-stone-950">Orders Pipeline</h1>
+              <p class="text-xs text-stone-500">Track and advance orders across each progressive delivery stage.</p>
+            </div>
+            <button onclick="loadOrders()" class="bg-stone-200 text-stone-800 px-3 py-1.5 rounded-xl text-xs font-bold active:scale-95 transition">
+              🔄 Refresh Orders
+            </button>
+          </div>
+
+          <div class="flex flex-wrap gap-2 text-xs font-bold bg-white p-2.5 rounded-2xl border border-stone-200">
+            <button onclick="filterOrdersByStage('All')" class="stage-filter-btn bg-stone-900 text-white px-3 py-1.5 rounded-xl">All Orders</button>
+            <button onclick="filterOrdersByStage('New Order')" class="stage-filter-btn bg-stone-100 text-stone-600 px-3 py-1.5 rounded-xl">🆕 New Order</button>
+            <button onclick="filterOrdersByStage('Pending')" class="stage-filter-btn bg-stone-100 text-stone-600 px-3 py-1.5 rounded-xl">⏳ Pending</button>
+            <button onclick="filterOrdersByStage('Confirmed')" class="stage-filter-btn bg-stone-100 text-stone-600 px-3 py-1.5 rounded-xl">✓ Confirmed</button>
+            <button onclick="filterOrdersByStage('Out for Delivery')" class="stage-filter-btn bg-stone-100 text-stone-600 px-3 py-1.5 rounded-xl">🚚 Out for Delivery</button>
+            <button onclick="filterOrdersByStage('Delivered')" class="stage-filter-btn bg-stone-100 text-stone-600 px-3 py-1.5 rounded-xl">🎉 Delivered / Completed</button>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-stone-200 overflow-x-auto shadow-xs">
             <table class="w-full text-left text-xs whitespace-nowrap">
               <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
                 <tr>
-                  <th class="p-3">Zone / Area Name</th>
-                  <th class="p-3">Pincode</th>
-                  <th class="p-3">Matched Keywords</th>
-                  <th class="p-3">Delivery Charge (₹)</th>
-                  <th class="p-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody id="delivery-rates-table" class="divide-y divide-stone-100"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- SECTION B: PRODUCT CATALOG MANAGEMENT (IMAGE 1: NO SAVE BUTTON, CLEAN ACTIONS) -->
-        <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs space-y-4">
-          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b pb-3">
-            <div>
-              <h2 class="text-lg font-black text-stone-950">Product Catalog Management</h2>
-              <p class="text-xs text-stone-500">Import catalog files (Excel/PDF), edit items directly, or attach photos & videos.</p>
-            </div>
-
-            <div class="flex items-center space-x-2">
-              <input type="file" id="catalog-file-input" accept=".xlsx,.xls,.csv,.pdf" class="hidden" onchange="handleCatalogImport(event)" />
-              <button onclick="document.getElementById('catalog-file-input').click()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 shadow-xs active:scale-95 transition">
-                <span>📄</span>
-                <span>Import Products (Excel / PDF / CSV)</span>
-              </button>
-              <button onclick="openProductModal()" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs border border-amber-400 active:scale-95 transition">
-                + Add New Cracker
-              </button>
-            </div>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs whitespace-nowrap">
-              <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
-                <tr>
-                  <th class="p-3 w-96">Product Name</th>
-                  <th class="p-3">Category</th>
-                  <th class="p-3">MRP (₹)</th>
-                  <th class="p-3">Offer Price (₹)</th>
-                  <th class="p-3">Stock Units</th>
+                  <th class="p-3">Order ID</th>
+                  <th class="p-3">Customer & Phone</th>
+                  <th class="p-3">Delivery Area</th>
+                  <th class="p-3">Amount</th>
+                  <th class="p-3">Delivery Stage</th>
                   <th class="p-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody id="products-table" class="divide-y divide-stone-100"></tbody>
+              <tbody id="orders-table" class="divide-y divide-stone-100"></tbody>
             </table>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- ================= 5. LIVE PRICE SHEET ================= -->
-      <section id="view-price-sheet" class="tab-view space-y-4 hidden">
-        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+        <!-- ================= 3. INVENTORY & STOCK MANAGEMENT TAB ================= -->
+        <section id="view-inventory" class="tab-view space-y-6 hidden">
           <div>
-            <h1 class="text-2xl font-black text-stone-950">Live Price Sheet & Rate Editor</h1>
-            <p class="text-xs text-stone-500">Directly modify MRP and Offer Price; edit single rows or use "Save All Prices".</p>
+            <h1 class="text-2xl font-black text-stone-950">Inventory & Stock Tracking</h1>
+            <p class="text-xs text-stone-500">Monitor current stock, units sold, out-of-stock alerts, and adjust stock directly.</p>
           </div>
-          <div class="flex items-center space-x-2">
-            <button onclick="saveAllChangedPrices()" id="btn-save-all-prices" class="bg-red-700 hover:bg-red-800 text-amber-300 font-black text-xs px-4 py-2 rounded-xl border border-amber-400 active:scale-95 transition shadow-sm">
-              💾 Save All Prices
-            </button>
-            <button onclick="loadPriceSheet()" class="bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs px-3 py-2 rounded-xl font-bold active:scale-95 transition">
-              🔄 Refresh
-            </button>
-          </div>
-        </div>
 
-        <div class="flex flex-col sm:flex-row gap-2.5">
-          <input type="text" id="price-search" placeholder="Search cracker name..." oninput="renderPriceSheetTable()" class="flex-1 text-xs border border-stone-300 rounded-xl p-3 bg-white outline-none focus:border-red-700" />
-          <select id="price-category-filter" onchange="renderPriceSheetTable()" class="text-xs border border-stone-300 rounded-xl p-3 bg-white font-bold text-stone-700 outline-none focus:border-red-700">
-            <option value="All">All Categories (Filter)</option>
-            <option value="Sparklers">Sparklers</option>
-            <option value="Sound Crackers">Sound Crackers</option>
-            <option value="Ground Chakkars">Ground Chakkars</option>
-            <option value="Flower Pots">Flower Pots</option>
-            <option value="Sky Shots">Sky Shots</option>
-            <option value="Gift Boxes">Gift Boxes</option>
-          </select>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-stone-200 overflow-x-auto shadow-xs">
-          <table class="w-full text-left text-xs whitespace-nowrap">
-            <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
-              <tr>
-                <th class="p-3 w-96">Item Name</th>
-                <th class="p-3">Category</th>
-                <th class="p-3 w-28">MRP (₹)</th>
-                <th class="p-3 w-28">Offer Price (₹)</th>
-                <th class="p-3 text-center">Discount %</th>
-                <th class="p-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody id="price-sheet-table" class="divide-y divide-stone-100"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- ================= 6. STORE SETTINGS TAB ================= -->
-      <section id="view-store-settings" class="tab-view space-y-4 hidden">
-        <div>
-          <h1 class="text-2xl font-black text-stone-950">Store Settings & WhatsApp Numbers</h1>
-          <p class="text-xs text-stone-500">Configure store addresses, booking phone numbers, and WhatsApp gateways.</p>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-stone-200 p-5 max-w-xl space-y-4 text-xs shadow-xs">
-          <div>
-            <label class="block font-bold mb-1 text-stone-700">Store Name</label>
-            <input id="cfg-name" class="w-full border rounded-xl p-2.5 outline-none font-bold" value="BITTU CRACKERS" />
-          </div>
-          <div>
-            <label class="block font-bold mb-1 text-stone-700">Primary WhatsApp Orders Number</label>
-            <input id="cfg-wa" class="w-full border rounded-xl p-2.5 outline-none" value="+917829978883" />
-          </div>
-          
-          <div class="space-y-2 border-t pt-2">
-            <label class="block font-bold text-stone-700">Store Contact Display Numbers</label>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div>
-                <span class="text-[10px] text-stone-400 font-bold">Contact 1</span>
-                <input id="cfg-phone-1" class="w-full border rounded-lg p-2 text-xs" value="7993659115" />
-              </div>
-              <div>
-                <span class="text-[10px] text-stone-400 font-bold">Contact 2</span>
-                <input id="cfg-phone-2" class="w-full border rounded-lg p-2 text-xs" value="9848104866" />
-              </div>
-              <div>
-                <span class="text-[10px] text-stone-400 font-bold">Contact 3</span>
-                <input id="cfg-phone-3" class="w-full border rounded-lg p-2 text-xs" value="7661869408" />
-              </div>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+              <span class="text-xs font-bold text-stone-500">Total Stock in Hand</span>
+              <div id="inv-current-stock" class="text-2xl font-black text-stone-900 mt-1">0 units</div>
+              <span class="text-[10px] text-emerald-600 font-bold">Active inventory</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+              <span class="text-xs font-bold text-stone-500">Total Items Sold</span>
+              <div id="inv-total-sold" class="text-2xl font-black text-red-700 mt-1">0 units</div>
+              <span class="text-[10px] text-stone-400 font-medium">Dispatched to customers</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+              <span class="text-xs font-bold text-amber-600">Low & Out of Stock</span>
+              <div id="inv-out-stock" class="text-2xl font-black text-amber-600 mt-1">0 items</div>
+              <span class="text-[10px] text-amber-700 font-bold">Stock &lt;= 5 units</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+              <span class="text-xs font-bold text-stone-500">Non-Moved Crackers</span>
+              <div id="inv-not-moved" class="text-2xl font-black text-stone-900 mt-1">0 items</div>
+              <span class="text-[10px] text-stone-400 font-medium">0 units sold</span>
             </div>
           </div>
 
-          <div>
-            <label class="block font-bold mb-1 text-stone-700">Shop Address</label>
-            <textarea id="cfg-address" rows="3" class="w-full border rounded-xl p-2.5 outline-none">Vengal Rao Nagar, Kavali, SPSR Nellore District, Andhra Pradesh - 524201</textarea>
+          <div class="bg-white rounded-2xl border border-stone-200 overflow-x-auto shadow-xs">
+            <table class="w-full text-left text-xs whitespace-nowrap">
+              <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
+                <tr>
+                  <th class="p-3 w-72">Cracker Item</th>
+                  <th class="p-3 w-32">Category</th>
+                  <th class="p-3 w-28 text-center">In-Stock Qty</th>
+                  <th class="p-3 w-24 text-center">Sold Qty</th>
+                  <th class="p-3 w-28 text-center">Status</th>
+                  <th class="p-3 text-right">Quick Stock Adjustment</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-table" class="divide-y divide-stone-100"></tbody>
+            </table>
           </div>
-          <button type="button" onclick="saveStoreSettings()" class="w-full bg-red-700 hover:bg-red-800 text-amber-300 font-black py-3 rounded-xl text-xs uppercase tracking-wide border border-amber-400 shadow-sm active:scale-95 transition">
-            Save Store Settings
-          </button>
-        </div>
-      </section>
+        </section>
 
+        <!-- ================= 4. PRODUCTS CATALOG TAB (STANDALONE SECTION) ================= -->
+        <section id="view-products" class="tab-view space-y-6 hidden">
+          <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b pb-3">
+              <div>
+                <h2 class="text-lg font-black text-stone-950">Product Catalog Management</h2>
+                <p class="text-xs text-stone-500">Import catalog files (Excel/PDF), edit items directly, or attach photos & videos.</p>
+              </div>
+
+              <div class="flex items-center space-x-2">
+                <input type="file" id="catalog-file-input" accept=".xlsx,.xls,.csv,.pdf" class="hidden" onchange="handleCatalogImport(event)" />
+                <button onclick="document.getElementById('catalog-file-input').click()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 shadow-xs active:scale-95 transition">
+                  <span>📄</span>
+                  <span>Import Products (Excel / PDF / CSV)</span>
+                </button>
+                <button onclick="openProductModal()" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs border border-amber-400 active:scale-95 transition">
+                  + Add New Cracker
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs whitespace-nowrap">
+                <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
+                  <tr>
+                    <th class="p-3 w-96">Product Name</th>
+                    <th class="p-3">Category</th>
+                    <th class="p-3">MRP (₹)</th>
+                    <th class="p-3">Offer Price (₹)</th>
+                    <th class="p-3">Stock Units</th>
+                    <th class="p-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="products-table" class="divide-y divide-stone-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= 5. DELIVERY RATES TAB (SEPARATE SECTION WITH CLEAR STAGING) ================= -->
+        <section id="view-delivery" class="tab-view space-y-6 hidden">
+          <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs space-y-4">
+            
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b pb-3">
+              <div>
+                <h2 class="text-lg font-black text-stone-950 flex items-center space-x-2">
+                  <span>📍</span>
+                  <span>Delivery Rate Fixer (By Area & Pincode)</span>
+                </h2>
+                <p class="text-xs text-stone-500">Configure delivery charges, import files, review previews, and clear uploaded data.</p>
+              </div>
+              
+              <div class="flex flex-wrap items-center gap-2">
+                <!-- File Input for Delivery Rates -->
+                <input type="file" id="delivery-file-input" accept=".xlsx,.xls,.csv,.pdf" class="hidden" onchange="handleDeliveryRateImport(event)" />
+                <button onclick="document.getElementById('delivery-file-input').click()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 shadow-xs active:scale-95 transition">
+                  <span>📄</span>
+                  <span>Import (Excel / PDF / CSV)</span>
+                </button>
+                <button onclick="openDeliveryRateModal()" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs border border-amber-400 active:scale-95 transition">
+                  + Add Area / Pincode Rate
+                </button>
+                <button onclick="handleClearAllLiveRates()" class="bg-stone-200 hover:bg-red-50 text-stone-600 hover:text-red-700 font-bold px-3 py-2 rounded-xl text-xs border border-stone-300 active:scale-95 transition" title="Clear all currently stored delivery rates">
+                  🗑️ Clear All Live Rates
+                </button>
+              </div>
+            </div>
+
+            <!-- PREVIEW / STAGING ACTION BAR (SHOWN WHEN A FILE IS IMPORTED) -->
+            <div id="staging-bar" class="hidden bg-amber-50 border-2 border-amber-300 p-3.5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+              <div class="flex items-center space-x-2">
+                <span class="text-lg">⚠️</span>
+                <div>
+                  <h4 class="font-extrabold text-amber-900 text-xs">Review Uploaded Data (<span id="staged-count">0</span> records parsed)</h4>
+                  <p class="text-[11px] text-amber-800">These records are previewed below. If satisfied, click Save to add them to live rates. If incorrect, click Clear.</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2 shrink-0">
+                <button onclick="discardStagedDeliveryRates()" class="bg-white hover:bg-stone-100 text-red-700 border border-red-300 font-bold px-3 py-1.5 rounded-xl text-xs active:scale-95 transition">
+                  ✕ Clear Uploaded Data
+                </button>
+                <button onclick="commitStagedDeliveryRates()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-3.5 py-1.5 rounded-xl text-xs shadow-xs active:scale-95 transition">
+                  💾 Save & Apply to Live
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs whitespace-nowrap">
+                <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
+                  <tr>
+                    <th class="p-3">Zone / Area Name</th>
+                    <th class="p-3">Pincode</th>
+                    <th class="p-3">Matched Keywords</th>
+                    <th class="p-3">Delivery Charge (₹)</th>
+                    <th class="p-3 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="delivery-rates-table" class="divide-y divide-stone-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= 6. LIVE PRICE SHEET ================= -->
+        <section id="view-price-sheet" class="tab-view space-y-4 hidden">
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+            <div>
+              <h1 class="text-2xl font-black text-stone-950">Live Price Sheet & Rate Editor</h1>
+              <p class="text-xs text-stone-500">Directly modify MRP and Offer Price; edit single rows or use "Save All Prices".</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="saveAllChangedPrices()" id="btn-save-all-prices" class="bg-red-700 hover:bg-red-800 text-amber-300 font-black text-xs px-4 py-2 rounded-xl border border-amber-400 active:scale-95 transition shadow-sm">
+                💾 Save All Prices
+              </button>
+              <button onclick="loadPriceSheet()" class="bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs px-3 py-2 rounded-xl font-bold active:scale-95 transition">
+                🔄 Refresh
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-2.5">
+            <input type="text" id="price-search" placeholder="Search cracker name..." oninput="renderPriceSheetTable()" class="flex-1 text-xs border border-stone-300 rounded-xl p-3 bg-white outline-none focus:border-red-700" />
+            <select id="price-category-filter" onchange="renderPriceSheetTable()" class="text-xs border border-stone-300 rounded-xl p-3 bg-white font-bold text-stone-700 outline-none focus:border-red-700">
+              <option value="All">All Categories (Filter)</option>
+              <option value="Sparklers">Sparklers</option>
+              <option value="Sound Crackers">Sound Crackers</option>
+              <option value="Ground Chakkars">Ground Chakkars</option>
+              <option value="Flower Pots">Flower Pots</option>
+              <option value="Sky Shots">Sky Shots</option>
+              <option value="Gift Boxes">Gift Boxes</option>
+            </select>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-stone-200 overflow-x-auto shadow-xs">
+            <table class="w-full text-left text-xs whitespace-nowrap">
+              <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
+                <tr>
+                  <th class="p-3 w-96">Item Name</th>
+                  <th class="p-3">Category</th>
+                  <th class="p-3 w-28">MRP (₹)</th>
+                  <th class="p-3 w-28">Offer Price (₹)</th>
+                  <th class="p-3 text-center">Discount %</th>
+                  <th class="p-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="price-sheet-table" class="divide-y divide-stone-100"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= 7. STORE SETTINGS TAB ================= -->
+        <section id="view-store-settings" class="tab-view space-y-4 hidden">
+          <div>
+            <h1 class="text-2xl font-black text-stone-950">Store Settings & WhatsApp Numbers</h1>
+            <p class="text-xs text-stone-500">Configure store addresses, booking phone numbers, and WhatsApp gateways.</p>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-stone-200 p-5 max-w-xl space-y-4 text-xs shadow-xs">
+            <div>
+              <label class="block font-bold mb-1 text-stone-700">Store Name</label>
+              <input id="cfg-name" class="w-full border rounded-xl p-2.5 outline-none font-bold" value="BITTU CRACKERS" />
+            </div>
+            <div>
+              <label class="block font-bold mb-1 text-stone-700">Primary WhatsApp Orders Number</label>
+              <input id="cfg-wa" class="w-full border rounded-xl p-2.5 outline-none" value="+917829978883" />
+            </div>
+            
+            <div class="space-y-2 border-t pt-2">
+              <label class="block font-bold text-stone-700">Store Contact Display Numbers</label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div>
+                  <span class="text-[10px] text-stone-400 font-bold">Contact 1</span>
+                  <input id="cfg-phone-1" class="w-full border rounded-lg p-2 text-xs" value="7993659115" />
+                </div>
+                <div>
+                  <span class="text-[10px] text-stone-400 font-bold">Contact 2</span>
+                  <input id="cfg-phone-2" class="w-full border rounded-lg p-2 text-xs" value="9848104866" />
+                </div>
+                <div>
+                  <span class="text-[10px] text-stone-400 font-bold">Contact 3</span>
+                  <input id="cfg-phone-3" class="w-full border rounded-lg p-2 text-xs" value="7661869408" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold mb-1 text-stone-700">Shop Address</label>
+              <textarea id="cfg-address" rows="3" class="w-full border rounded-xl p-2.5 outline-none">Vengal Rao Nagar, Kavali, SPSR Nellore District, Andhra Pradesh - 524201</textarea>
+            </div>
+            <button type="button" onclick="saveStoreSettings()" class="w-full bg-red-700 hover:bg-red-800 text-amber-300 font-black py-3 rounded-xl text-xs uppercase tracking-wide border border-amber-400 shadow-sm active:scale-95 transition">
+              Save Store Settings
+            </button>
+          </div>
+        </section>
+
+      </div>
     </main>
   </div>
 
@@ -562,6 +598,7 @@
     let productsList = [];
     let ordersList = [];
     let deliveryZonesList = [];
+    let stagedDeliveryZones = []; // Staged preview container
     let currentStageFilter = 'All';
 
     let monthChartInstance = null;
@@ -699,7 +736,8 @@
       if (tabName === 'dashboard') loadDashboardMetrics();
       if (tabName === 'orders') renderOrdersTable();
       if (tabName === 'inventory') renderInventorySection();
-      if (tabName === 'products') { loadProducts(); loadDeliveryZones(); }
+      if (tabName === 'products') loadProducts();
+      if (tabName === 'delivery') loadDeliveryZones();
       if (tabName === 'price-sheet') loadPriceSheet();
       if (tabName === 'store-settings') loadStoreSettings();
     }
@@ -921,7 +959,7 @@
       loadDashboardMetrics();
     }
 
-    // 3. INVENTORY & STOCK TRACKING (MANUAL NUMBER INPUT & TIGHT SPACING)
+    // 3. INVENTORY & STOCK TRACKING (TIGHT SPACING & MANUAL INPUT)
     function renderInventorySection() {
       const totalStock = productsList.reduce((sum, p) => sum + (Number(p.stock_qty) || 0), 0);
       const totalSold = productsList.reduce((sum, p) => sum + (Number(p.sold_qty) || 0), 0);
@@ -982,259 +1020,7 @@
       }
     }
 
-    // 7. AREA & PINCODE DELIVERY RATE FIXER + BULK EXCEL/PDF/CSV IMPORT (IMAGE 1)
-    function openDeliveryRateModal(editId = null) {
-      const modal = document.getElementById('rate-modal');
-      const title = document.getElementById('rate-modal-title');
-      const btn = document.getElementById('btn-save-delivery-rate');
-      const editInput = document.getElementById('editing-rate-id');
-
-      if (editId) {
-        const item = deliveryZonesList.find(z => z.id.toString() === editId.toString());
-        if (item) {
-          title.innerText = 'Edit Delivery Rate';
-          btn.innerText = 'Update Delivery Rate';
-          editInput.value = item.id;
-          document.getElementById('rate-zone-name').value = item.zone_name || '';
-          document.getElementById('rate-pincode').value = item.pincode || '';
-          document.getElementById('rate-keywords').value = item.area_keywords || '';
-          document.getElementById('rate-charge').value = item.delivery_charge !== undefined ? item.delivery_charge : 0;
-        }
-      } else {
-        title.innerText = 'Add Delivery Rate';
-        btn.innerText = 'Save Delivery Rate';
-        editInput.value = '';
-        document.getElementById('rate-zone-name').value = '';
-        document.getElementById('rate-pincode').value = '';
-        document.getElementById('rate-keywords').value = '';
-        document.getElementById('rate-charge').value = '';
-      }
-
-      modal.style.display = 'flex';
-    }
-
-    function closeDeliveryRateModal() {
-      document.getElementById('rate-modal').style.display = 'none';
-      document.getElementById('editing-rate-id').value = '';
-    }
-
-    async function handleSaveDeliveryRate() {
-      const editId = document.getElementById('editing-rate-id').value;
-      const zone_name = document.getElementById('rate-zone-name').value.trim();
-      const pincode = document.getElementById('rate-pincode').value.trim();
-      const area_keywords = document.getElementById('rate-keywords').value.trim();
-      const delivery_charge = Number(document.getElementById('rate-charge').value);
-
-      if (!zone_name || !area_keywords || isNaN(delivery_charge)) {
-        return alert('Please fill in Zone Name, Keywords, and Delivery Charge.');
-      }
-
-      const payload = {
-        zone_name,
-        pincode: pincode || 'Any',
-        area_keywords,
-        delivery_charge
-      };
-
-      let error = null;
-      if (editId) {
-        const res = await window.db.from('delivery_zones').update(payload).eq('id', editId);
-        error = res.error;
-      } else {
-        const res = await window.db.from('delivery_zones').insert([payload]);
-        error = res.error;
-      }
-
-      if (error) {
-        alert('Error saving rate: ' + error.message);
-      } else {
-        closeDeliveryRateModal();
-        await loadDeliveryZones();
-        alert(editId ? 'Delivery rate updated successfully!' : 'New delivery rate added live!');
-      }
-    }
-
-    async function saveInlineDeliveryRate(id) {
-      const input = document.getElementById(`inline-rate-${id}`);
-      const newCharge = Number(input.value);
-
-      if (isNaN(newCharge) || newCharge < 0) {
-        return alert('Please enter a valid rate (0 or higher).');
-      }
-
-      const { error } = await window.db.from('delivery_zones').update({
-        delivery_charge: newCharge
-      }).eq('id', id);
-
-      if (error) {
-        alert('Failed to update rate: ' + error.message);
-      } else {
-        const item = deliveryZonesList.find(z => z.id.toString() === id.toString());
-        if (item) item.delivery_charge = newCharge;
-        renderDeliveryZonesTable();
-        alert('Delivery rate updated to ₹' + newCharge + '!');
-      }
-    }
-
-    function renderDeliveryZonesTable() {
-      const tbody = document.getElementById('delivery-rates-table');
-      if (!tbody) return;
-
-      if (deliveryZonesList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-stone-400">No custom delivery rates added yet.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = deliveryZonesList.map(z => `
-        <tr class="hover:bg-stone-50">
-          <td class="p-3 font-bold text-stone-900">${z.zone_name}</td>
-          <td class="p-3 font-mono font-bold text-amber-700">${z.pincode || 'Any'}</td>
-          <td class="p-3 text-stone-500 max-w-xs truncate" title="${z.area_keywords}">${z.area_keywords}</td>
-          <td class="p-3">
-            <div class="flex items-center space-x-1.5">
-              <span class="text-stone-400 font-bold">₹</span>
-              <input type="number" id="inline-rate-${z.id}" value="${z.delivery_charge || 0}" class="w-20 border border-stone-300 rounded-lg p-1.5 text-xs font-black text-red-700 bg-white outline-none focus:border-red-700" />
-              <button onclick="saveInlineDeliveryRate('${z.id}')" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-2 py-1 rounded-lg text-[11px] shadow-xs active:scale-95 transition">
-                Save
-              </button>
-            </div>
-          </td>
-          <td class="p-3 text-right space-x-2">
-            <button onclick="openDeliveryRateModal('${z.id}')" class="text-blue-600 hover:text-blue-800 font-bold hover:underline">
-              Edit
-            </button>
-            <button onclick="deleteDeliveryZone('${z.id}')" class="text-red-700 hover:text-red-900 font-bold hover:underline">
-              Delete
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    async function deleteDeliveryZone(id) {
-      if (!confirm('Are you sure you want to delete this delivery rate rule?')) return;
-      const { error } = await window.db.from('delivery_zones').delete().eq('id', id);
-      if (error) {
-        alert('Could not delete: ' + error.message);
-      } else {
-        deliveryZonesList = deliveryZonesList.filter(z => z.id.toString() !== id.toString());
-        renderDeliveryZonesTable();
-      }
-    }
-
-    async function handleDeliveryRateImport(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      alert(`Reading delivery rates file: ${file.name}...`);
-      const extractedZones = [];
-
-      try {
-        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv')) {
-          const buffer = await file.arrayBuffer();
-          const workbook = XLSX.read(buffer, { type: 'array' });
-          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-          const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
-
-          for (let i = 1; i < rows.length; i++) {
-            const r = rows[i];
-            if (!r || r.length === 0) continue;
-
-            let rowText = r.map(cell => cell.toString().trim()).join(' ');
-            let pinMatch = rowText.match(/\b\d{6}\b/);
-            let pincode = pinMatch ? pinMatch[0] : '';
-
-            let area = (r[0] || '').toString().trim();
-            let place = (r[1] || '').toString().trim();
-            let mandal = (r[2] || '').toString().trim();
-            let district = (r[3] || '').toString().trim();
-
-            let charge = 0;
-            for (let c = r.length - 1; c >= 0; c--) {
-              let val = Number(r[c]);
-              if (!isNaN(val) && val > 0 && r[c].toString().length < 6) {
-                charge = val;
-                break;
-              }
-            }
-
-            let nameParts = [area, place, mandal, district].filter(p => p && !p.match(/\b\d{6}\b/));
-            let zoneTitle = nameParts[0] || 'Delivery Area';
-            if (nameParts[1]) zoneTitle += ` (${nameParts[1]})`;
-
-            let keywords = nameParts.join(', ').toLowerCase();
-            if (pincode) keywords += `, ${pincode}`;
-
-            if (zoneTitle && zoneTitle !== 'Delivery Area') {
-              extractedZones.push({
-                zone_name: zoneTitle,
-                pincode: pincode || 'Any',
-                area_keywords: keywords,
-                delivery_charge: charge
-              });
-            }
-          }
-        } else if (file.name.endsWith('.pdf')) {
-          const typedarray = new Uint8Array(await file.arrayBuffer());
-          const pdf = await pdfjsLib.getDocument(typedarray).promise;
-          let fullLines = [];
-          for (let p = 1; p <= pdf.numPages; p++) {
-            const page = await pdf.getPage(p);
-            const content = await page.getTextContent();
-            let lineMap = {};
-            content.items.forEach(it => {
-              const y = Math.round(it.transform[5]);
-              if (!lineMap[y]) lineMap[y] = [];
-              lineMap[y].push(it.str.trim());
-            });
-            Object.keys(lineMap).sort((a,b) => b - a).forEach(y => {
-              const line = lineMap[y].join(' ').trim();
-              if (line) fullLines.push(line);
-            });
-          }
-
-          for (const line of fullLines) {
-            const pinMatch = line.match(/\b\d{6}\b/);
-            const pincode = pinMatch ? pinMatch[0] : 'Any';
-            
-            const numMatches = line.match(/\b\d+(\.\d+)?\b/g);
-            let charge = 0;
-            if (numMatches) {
-              const possibleCharges = numMatches.filter(n => n.length < 6);
-              if (possibleCharges.length > 0) charge = Number(possibleCharges[possibleCharges.length - 1]);
-            }
-
-            let areaName = line.replace(/\b\d{6}\b/, '').replace(/\b\d+(\.\d+)?\b/g, '').replace(/[,-]/g, ' ').trim();
-            if (areaName.length > 2) {
-              extractedZones.push({
-                zone_name: areaName,
-                pincode: pincode,
-                area_keywords: `${areaName.toLowerCase()}, ${pincode}`,
-                delivery_charge: isNaN(charge) ? 0 : charge
-              });
-            }
-          }
-        }
-
-        if (extractedZones.length > 0) {
-          const { error } = await window.db.from('delivery_zones').insert(extractedZones);
-          if (error) {
-            alert('Failed to insert imported rates: ' + error.message);
-          } else {
-            alert(`Successfully imported ${extractedZones.length} area & pincode delivery rates! You can now edit their charges in the table.`);
-            await loadDeliveryZones();
-          }
-        } else {
-          alert('Could not find recognizable area or pincode entries in this file.');
-        }
-      } catch (err) {
-        alert('File import error: ' + err.message);
-      } finally {
-        event.target.value = '';
-      }
-    }
-
-    // 8. PRODUCTS CATALOG (IMAGE 1: NO SAVE BUTTON IN ROW, CLEAN EDIT & DELETE)
+    // 4. PRODUCTS CATALOG (STANDALONE SECTION - EDIT & DELETE ONLY)
     function openProductModal(editId = null) {
       const modal = document.getElementById('product-modal');
       const title = document.getElementById('product-modal-title');
@@ -1346,7 +1132,6 @@
       }
     }
 
-    // RENDER PRODUCTS TABLE (IMAGE 1: NO SAVE BUTTON, CLEAN ACTIONS)
     function renderProductsTable() {
       const tbody = document.getElementById('products-table');
       if (!tbody) return;
@@ -1481,7 +1266,331 @@
       loadProducts();
     }
 
-    // 9. LIVE PRICE SHEET
+    // 5. DELIVERY RATES TAB (SEPARATE SECTION WITH PREVIEW & CLEAR STAGING LOGIC)
+    function openDeliveryRateModal(editId = null) {
+      const modal = document.getElementById('rate-modal');
+      const title = document.getElementById('rate-modal-title');
+      const btn = document.getElementById('btn-save-delivery-rate');
+      const editInput = document.getElementById('editing-rate-id');
+
+      if (editId) {
+        const item = deliveryZonesList.find(z => z.id.toString() === editId.toString());
+        if (item) {
+          title.innerText = 'Edit Delivery Rate';
+          btn.innerText = 'Update Delivery Rate';
+          editInput.value = item.id;
+          document.getElementById('rate-zone-name').value = item.zone_name || '';
+          document.getElementById('rate-pincode').value = item.pincode || '';
+          document.getElementById('rate-keywords').value = item.area_keywords || '';
+          document.getElementById('rate-charge').value = item.delivery_charge !== undefined ? item.delivery_charge : 0;
+        }
+      } else {
+        title.innerText = 'Add Delivery Rate';
+        btn.innerText = 'Save Delivery Rate';
+        editInput.value = '';
+        document.getElementById('rate-zone-name').value = '';
+        document.getElementById('rate-pincode').value = '';
+        document.getElementById('rate-keywords').value = '';
+        document.getElementById('rate-charge').value = '';
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeDeliveryRateModal() {
+      document.getElementById('rate-modal').style.display = 'none';
+      document.getElementById('editing-rate-id').value = '';
+    }
+
+    async function handleSaveDeliveryRate() {
+      const editId = document.getElementById('editing-rate-id').value;
+      const zone_name = document.getElementById('rate-zone-name').value.trim();
+      const pincode = document.getElementById('rate-pincode').value.trim();
+      const area_keywords = document.getElementById('rate-keywords').value.trim();
+      const delivery_charge = Number(document.getElementById('rate-charge').value);
+
+      if (!zone_name || !area_keywords || isNaN(delivery_charge)) {
+        return alert('Please fill in Zone Name, Keywords, and Delivery Charge.');
+      }
+
+      const payload = {
+        zone_name,
+        pincode: pincode || 'Any',
+        area_keywords,
+        delivery_charge
+      };
+
+      let error = null;
+      if (editId) {
+        const res = await window.db.from('delivery_zones').update(payload).eq('id', editId);
+        error = res.error;
+      } else {
+        const res = await window.db.from('delivery_zones').insert([payload]);
+        error = res.error;
+      }
+
+      if (error) {
+        alert('Error saving rate: ' + error.message);
+      } else {
+        closeDeliveryRateModal();
+        await loadDeliveryZones();
+        alert(editId ? 'Delivery rate updated successfully!' : 'New delivery rate added live!');
+      }
+    }
+
+    async function saveInlineDeliveryRate(id, isStaged = false) {
+      const input = document.getElementById(`inline-rate-${id}`);
+      const newCharge = Number(input.value);
+
+      if (isNaN(newCharge) || newCharge < 0) {
+        return alert('Please enter a valid rate (0 or higher).');
+      }
+
+      if (isStaged) {
+        const item = stagedDeliveryZones.find(z => z.id === id);
+        if (item) item.delivery_charge = newCharge;
+        renderDeliveryZonesTable();
+        return;
+      }
+
+      const { error } = await window.db.from('delivery_zones').update({
+        delivery_charge: newCharge
+      }).eq('id', id);
+
+      if (error) {
+        alert('Failed to update rate: ' + error.message);
+      } else {
+        const item = deliveryZonesList.find(z => z.id.toString() === id.toString());
+        if (item) item.delivery_charge = newCharge;
+        renderDeliveryZonesTable();
+        alert('Delivery rate updated to ₹' + newCharge + '!');
+      }
+    }
+
+    function renderDeliveryZonesTable() {
+      const tbody = document.getElementById('delivery-rates-table');
+      if (!tbody) return;
+
+      // Combine staged preview items with saved items
+      let combined = [];
+
+      if (stagedDeliveryZones.length > 0) {
+        document.getElementById('staging-bar').classList.remove('hidden');
+        document.getElementById('staged-count').innerText = stagedDeliveryZones.length;
+        combined = [...stagedDeliveryZones, ...deliveryZonesList];
+      } else {
+        document.getElementById('staging-bar').classList.add('hidden');
+        combined = [...deliveryZonesList];
+      }
+
+      if (combined.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-stone-400">No delivery rates added or imported yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = combined.map(z => {
+        const isStaged = Boolean(z.is_staged);
+        return `
+          <tr class="${isStaged ? 'bg-amber-50/70' : 'hover:bg-stone-50'}">
+            <td class="p-3">
+              <span class="font-bold text-stone-900">${z.zone_name}</span>
+              ${isStaged ? '<span class="ml-2 bg-amber-200 text-amber-900 font-black text-[9px] px-1.5 py-0.5 rounded">Imported Preview</span>' : ''}
+            </td>
+            <td class="p-3 font-mono font-bold text-amber-700">${z.pincode || 'Any'}</td>
+            <td class="p-3 text-stone-500 max-w-xs truncate" title="${z.area_keywords}">${z.area_keywords}</td>
+            <td class="p-3">
+              <div class="flex items-center space-x-1.5">
+                <span class="text-stone-400 font-bold">₹</span>
+                <input type="number" id="inline-rate-${z.id}" value="${z.delivery_charge || 0}" class="w-20 border border-stone-300 rounded-lg p-1.5 text-xs font-black text-red-700 bg-white outline-none focus:border-red-700" />
+                <button onclick="saveInlineDeliveryRate('${z.id}', ${isStaged})" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-2 py-1 rounded-lg text-[11px] shadow-xs active:scale-95 transition">
+                  Save
+                </button>
+              </div>
+            </td>
+            <td class="p-3 text-right space-x-2">
+              ${isStaged ? `
+                <button onclick="deleteSingleStagedRate('${z.id}')" class="text-red-700 hover:text-red-900 font-bold hover:underline">Remove</button>
+              ` : `
+                <button onclick="openDeliveryRateModal('${z.id}')" class="text-blue-600 hover:text-blue-800 font-bold hover:underline">Edit</button>
+                <button onclick="deleteDeliveryZone('${z.id}')" class="text-red-700 hover:text-red-900 font-bold hover:underline">Delete</button>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function deleteDeliveryZone(id) {
+      if (!confirm('Are you sure you want to delete this delivery rate rule?')) return;
+      const { error } = await window.db.from('delivery_zones').delete().eq('id', id);
+      if (error) {
+        alert('Could not delete: ' + error.message);
+      } else {
+        deliveryZonesList = deliveryZonesList.filter(z => z.id.toString() !== id.toString());
+        renderDeliveryZonesTable();
+      }
+    }
+
+    // CLEAR ALL SAVED LIVE RATES FROM SUPABASE
+    async function handleClearAllLiveRates() {
+      if (!confirm('WARNING: Are you sure you want to delete ALL live delivery rates? This cannot be undone.')) return;
+      const { error } = await window.db.from('delivery_zones').delete().neq('id', 0);
+      if (error) {
+        alert('Error clearing live rates: ' + error.message);
+      } else {
+        alert('All live delivery rates cleared!');
+        await loadDeliveryZones();
+      }
+    }
+
+    // DISCARD / CLEAR ONLY THE NEWLY UPLOADED DATA (DOES NOT TOUCH SAVED ONES)
+    function discardStagedDeliveryRates() {
+      if (!confirm('Discard all newly uploaded/imported preview data?')) return;
+      stagedDeliveryZones = [];
+      renderDeliveryZonesTable();
+      alert('Uploaded preview data cleared. Your saved live data is intact!');
+    }
+
+    function deleteSingleStagedRate(tempId) {
+      stagedDeliveryZones = stagedDeliveryZones.filter(z => z.id !== tempId);
+      renderDeliveryZonesTable();
+    }
+
+    // COMMIT STAGED IMPORT DATA TO LIVE SUPABASE
+    async function commitStagedDeliveryRates() {
+      if (stagedDeliveryZones.length === 0) return;
+      
+      const payload = stagedDeliveryZones.map(z => ({
+        zone_name: z.zone_name,
+        pincode: z.pincode,
+        area_keywords: z.area_keywords,
+        delivery_charge: z.delivery_charge
+      }));
+
+      const { error } = await window.db.from('delivery_zones').insert(payload);
+      if (error) {
+        alert('Error saving imported data: ' + error.message);
+      } else {
+        alert(`Successfully saved ${stagedDeliveryZones.length} delivery rates to live store!`);
+        stagedDeliveryZones = [];
+        await loadDeliveryZones();
+      }
+    }
+
+    // BULK IMPORT FOR DELIVERY RATES (PARSES AND POPULATES STAGING PREVIEW)
+    async function handleDeliveryRateImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      alert(`Reading delivery file: ${file.name}...`);
+      const extractedZones = [];
+
+      try {
+        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv')) {
+          const buffer = await file.arrayBuffer();
+          const workbook = XLSX.read(buffer, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
+
+          for (let i = 1; i < rows.length; i++) {
+            const r = rows[i];
+            if (!r || r.length === 0) continue;
+
+            let rowText = r.map(cell => cell.toString().trim()).join(' ');
+            let pinMatch = rowText.match(/\b\d{6}\b/);
+            let pincode = pinMatch ? pinMatch[0] : '';
+
+            let area = (r[0] || '').toString().trim();
+            let place = (r[1] || '').toString().trim();
+            let mandal = (r[2] || '').toString().trim();
+            let district = (r[3] || '').toString().trim();
+
+            let charge = 0;
+            for (let c = r.length - 1; c >= 0; c--) {
+              let val = Number(r[c]);
+              if (!isNaN(val) && val > 0 && r[c].toString().length < 6) {
+                charge = val;
+                break;
+              }
+            }
+
+            let nameParts = [area, place, mandal, district].filter(p => p && !p.match(/\b\d{6}\b/));
+            let zoneTitle = nameParts[0] || 'Delivery Area';
+            if (nameParts[1]) zoneTitle += ` (${nameParts[1]})`;
+
+            let keywords = nameParts.join(', ').toLowerCase();
+            if (pincode) keywords += `, ${pincode}`;
+
+            if (zoneTitle && zoneTitle !== 'Delivery Area') {
+              extractedZones.push({
+                id: 'staged_' + Math.random().toString(36).substr(2, 9),
+                zone_name: zoneTitle,
+                pincode: pincode || 'Any',
+                area_keywords: keywords,
+                delivery_charge: charge,
+                is_staged: true
+              });
+            }
+          }
+        } else if (file.name.endsWith('.pdf')) {
+          const typedarray = new Uint8Array(await file.arrayBuffer());
+          const pdf = await pdfjsLib.getDocument(typedarray).promise;
+          let fullLines = [];
+          for (let p = 1; p <= pdf.numPages; p++) {
+            const page = await pdf.getPage(p);
+            const content = await page.getTextContent();
+            let lineMap = {};
+            content.items.forEach(it => {
+              const y = Math.round(it.transform[5]);
+              if (!lineMap[y]) lineMap[y] = [];
+              lineMap[y].push(it.str.trim());
+            });
+            Object.keys(lineMap).sort((a,b) => b - a).forEach(y => {
+              const line = lineMap[y].join(' ').trim();
+              if (line) fullLines.push(line);
+            });
+          }
+
+          for (const line of fullLines) {
+            const pinMatch = line.match(/\b\d{6}\b/);
+            const pincode = pinMatch ? pinMatch[0] : 'Any';
+            
+            const numMatches = line.match(/\b\d+(\.\d+)?\b/g);
+            let charge = 0;
+            if (numMatches) {
+              const possibleCharges = numMatches.filter(n => n.length < 6);
+              if (possibleCharges.length > 0) charge = Number(possibleCharges[possibleCharges.length - 1]);
+            }
+
+            let areaName = line.replace(/\b\d{6}\b/, '').replace(/\b\d+(\.\d+)?\b/g, '').replace(/[,-]/g, ' ').trim();
+            if (areaName.length > 2) {
+              extractedZones.push({
+                id: 'staged_' + Math.random().toString(36).substr(2, 9),
+                zone_name: areaName,
+                pincode: pincode,
+                area_keywords: `${areaName.toLowerCase()}, ${pincode}`,
+                delivery_charge: isNaN(charge) ? 0 : charge,
+                is_staged: true
+              });
+            }
+          }
+        }
+
+        if (extractedZones.length > 0) {
+          stagedDeliveryZones = extractedZones;
+          renderDeliveryZonesTable();
+          alert(`Parsed ${extractedZones.length} records! Review the staged preview below. Click "Save & Apply to Live" or "Clear Uploaded Data" as needed.`);
+        } else {
+          alert('Could not find recognizable area or pincode entries in this file.');
+        }
+      } catch (err) {
+        alert('File import error: ' + err.message);
+      } finally {
+        event.target.value = '';
+      }
+    }
+
+    // 6. LIVE PRICE SHEET
     function loadPriceSheet() {
       renderPriceSheetTable();
     }
@@ -1598,7 +1707,7 @@
       alert(updateCount > 0 ? `Successfully updated prices for ${updateCount} items!` : 'No price changes detected.');
     }
 
-    // 10. STORE SETTINGS
+    // 7. STORE SETTINGS
     async function loadStoreSettings() {
       try {
         const { data } = await window.db.from('store_settings').select('*').eq('id', 1).single();
