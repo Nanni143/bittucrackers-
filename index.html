@@ -539,7 +539,7 @@
 
       <div class="bg-stone-50 border rounded-xl p-2.5 flex justify-between items-center text-xs">
         <div>
-          <span class="text-[9px] font-bold text-stone-400 uppercase block">Area / Locality</span>
+          <span class="text-[9px] font-bold text-stone-400 uppercase block">Area / Locality / Pincode</span>
           <p id="form-locality-text" class="font-semibold text-stone-800 text-[11px] truncate max-w-[240px]">---</p>
         </div>
         <button type="button" onclick="reopenMapPicker()" class="text-red-700 font-bold text-xs hover:underline">Change</button>
@@ -588,14 +588,13 @@
     let cart = [];
     let activeCategory = 'All';
     let currentViewMode = 'grid';
-    let currentSort = 'popular';
 
     let savedAddresses = [];
     let selectedAddress = null;
 
     let leafletMap = null;
     let tempMapCoords = { ...KAVALI_BASE_COORDS };
-    let tempDetectedInfo = { areaName: "Kavali", fullAddress: "Kavali, Andhra Pradesh", zoneName: "Local", deliveryCharge: 0 };
+    let tempDetectedInfo = { areaName: "Kavali", fullAddress: "Kavali, Andhra Pradesh", pincode: "524201", zoneName: "Local", deliveryCharge: 0 };
 
     async function init() {
       const stored = localStorage.getItem('bittu_saved_addresses');
@@ -606,12 +605,13 @@
         } catch(e) {}
       }
 
+      // Fetch dynamic delivery rules from Supabase (including imported pincodes and areas)
       const { data: zData } = await db.from('delivery_zones').select('*');
       deliveryZones = zData && zData.length > 0 ? zData : [
-        { zone_name: 'Kavali City & Town (Local)', area_keywords: 'kavali, vengal, musunuru, maddurupadu, rudrakota', delivery_charge: 0 },
-        { zone_name: 'Kavali Rural & Mandals', area_keywords: 'bogole, bitragunta, jaladanki, allur, dagadarthi, kaligiri, vinjamur', delivery_charge: 99 },
-        { zone_name: 'Nellore City & Towns', area_keywords: 'nellore, kovur, buchi, buchireddypalem, atmakur, udayagiri', delivery_charge: 150 },
-        { zone_name: 'Other District Border Areas', area_keywords: 'kandukur, singarayakonda, gudur, naidupeta', delivery_charge: 199 }
+        { zone_name: 'Kavali City & Town (Local)', pincode: '524201', area_keywords: 'kavali, vengal, musunuru, maddurupadu, rudrakota', delivery_charge: 0 },
+        { zone_name: 'Kavali Rural & Mandals', pincode: '524202', area_keywords: 'bogole, bitragunta, jaladanki, allur, dagadarthi, kaligiri, vinjamur', delivery_charge: 99 },
+        { zone_name: 'Nellore City & Towns', pincode: '524001', area_keywords: 'nellore, kovur, buchi, buchireddypalem, atmakur, udayagiri', delivery_charge: 150 },
+        { zone_name: 'Other District Border Areas', pincode: 'Any', area_keywords: 'kandukur, singarayakonda, gudur, naidupeta', delivery_charge: 199 }
       ];
 
       const { data: sData } = await db.from('store_settings').select('*').eq('id', 1).single();
@@ -812,16 +812,17 @@
         const areaTitle = addr.suburb || addr.neighbourhood || addr.village || addr.road || addr.town || addr.city || "Detected Area";
         const district = addr.county || addr.city_district || addr.state_district || "";
         const state = addr.state || "";
-        const pincode = addr.postcode ? ` - ${addr.postcode}` : "";
+        const pincode = addr.postcode ? addr.postcode.toString().trim() : "";
 
         const addressParts = [areaTitle, district, state].filter(Boolean);
-        const fullAddress = addressParts.join(', ') + pincode;
+        const fullAddress = addressParts.join(', ') + (pincode ? ` - ${pincode}` : '');
 
-        const zoneInfo = evaluateDeliveryCharge(fullAddress, lat, lon);
+        const zoneInfo = evaluateDeliveryCharge(fullAddress, pincode);
 
         tempDetectedInfo = {
           areaName: areaTitle,
           fullAddress: fullAddress,
+          pincode: pincode,
           zoneName: zoneInfo.zoneName,
           deliveryCharge: zoneInfo.charge
         };
@@ -834,14 +835,29 @@
       }
     }
 
-    function evaluateDeliveryCharge(addressString, lat, lon) {
-      const lower = addressString.toLowerCase();
+    // ACCURATE PINCODE & KEYWORD DELIVERY MATCHING (SYNCED WITH ADMIN)
+    function evaluateDeliveryCharge(addressString, detectedPincode) {
+      const lowerAddr = (addressString || '').toLowerCase();
+      const pinToMatch = (detectedPincode || '').toString().trim();
+
+      // 1. Check exact 6-digit Pincode match first
+      if (pinToMatch && pinToMatch.length === 6) {
+        for (const z of deliveryZones) {
+          if (z.pincode && z.pincode.toString().trim() === pinToMatch) {
+            return { zoneName: z.zone_name, charge: Number(z.delivery_charge || 0) };
+          }
+        }
+      }
+
+      // 2. Check Area / Town / Mandal keywords match
       for (const z of deliveryZones) {
         const keys = (z.area_keywords || '').split(',').map(k => k.trim().toLowerCase());
-        if (keys.some(k => k && lower.includes(k))) {
+        if (keys.some(k => k && lowerAddr.includes(k))) {
           return { zoneName: z.zone_name, charge: Number(z.delivery_charge || 0) };
         }
       }
+
+      // 3. Fallback default
       return { zoneName: "Regional Delivery", charge: 99 };
     }
 
@@ -1082,6 +1098,7 @@
         const savings = (p.mrp > p.offer_price) ? (p.mrp - p.offer_price) : 0;
         const hasVideo = Boolean(p.video_url);
 
+        // Slideable Media Carousel: Image first, swipe for video demo
         const mediaGalleryHtml = hasVideo ? `
           <div class="relative w-full overflow-hidden rounded-xl bg-stone-100">
             <div id="media-carousel-${p.id}" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar w-full h-40 sm:h-44">
