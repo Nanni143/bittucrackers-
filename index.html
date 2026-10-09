@@ -797,7 +797,7 @@
 
     async function loadTeamAndProfile() {
       const session = localStorage.getItem('admin_session');
-      const cur = session ? JSON.parse(session) : { first_name: 'Bittu', last_name: 'Kumar', phone: '9999999999', email: 'admin@bittucrackers.in' };
+      const cur = session ? JSON.parse(session) : { first_name: 'Bittu', last_name: 'Crackers', phone: '7993659115', email: 'admin@bittucrackers.in' };
       document.getElementById('my-first-name').value = cur.first_name || '';
       document.getElementById('my-last-name').value = cur.last_name || '';
       document.getElementById('my-phone').value = cur.phone || '';
@@ -873,8 +873,8 @@
         document.getElementById('cfg-name').value = data.store_name || 'BITTU CRACKERS';
         document.getElementById('cfg-wa').value = data.whatsapp_number || '+917829978883';
         document.getElementById('cfg-phone-1').value = data.phone_1 || '7829978883';
-        document.getElementById('cfg-phone-2').value = data.phone_2 || '';
-        document.getElementById('cfg-phone-3').value = data.phone_3 || '';
+        document.getElementById('cfg-phone-2').value = data.phone_2 || '9848104866';
+        document.getElementById('cfg-phone-3').value = data.phone_3 || '7661869408 ';
         document.getElementById('cfg-address').value = data.shop_address || 'Vengal Rao Nagar, Kavali, SPSR Nellore District, Andhra Pradesh - 524201';
       }
     }
@@ -895,7 +895,7 @@
         id: 1,
         store_name,
         whatsapp_number,
-        display_phone: phone_1,
+        display_phone: phone_1,phone_2, phone_3
         phone_1, phone_2, phone_3,
         shop_address
       });
