@@ -53,18 +53,15 @@
 
       <!-- Action Buttons: Quick Enquiry + Contact + Direct Call Numbers -->
       <div class="flex items-center space-x-2 shrink-0">
-        <!-- Quick Enquiry (WhatsApp Instant Redirect) -->
         <button onclick="handleQuickEnquiryClick()" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 active:scale-95 text-amber-300 font-extrabold px-3 py-1.5 rounded-full text-[11px] flex items-center space-x-1 border border-amber-400 shadow-sm transition">
           <span>⚡</span>
           <span>QUICK ENQUIRY</span>
         </button>
 
-        <!-- Contact Page Toggle -->
         <button onclick="switchToContactView()" class="font-extrabold text-xs text-stone-800 hover:text-red-700 px-2 py-1 transition tracking-wide border border-transparent hover:border-red-100 rounded-lg">
           CONTACT
         </button>
 
-        <!-- Direct Click to Call Numbers -->
         <div class="hidden md:flex flex-col text-[11px] font-bold text-red-700 leading-tight border-l pl-2.5">
           <a href="tel:+917993659115" class="hover:underline flex items-center space-x-1"><span>📞</span><span>7993659115</span></a>
           <a href="tel:+919848104866" class="hover:underline flex items-center space-x-1"><span>📞</span><span>9848104866</span></a>
@@ -75,13 +72,12 @@
 
   <!-- ================= CONTACT US PAGE VIEW ================= -->
   <div id="contact-page-view" class="hidden">
-    <!-- Red & Gold Hero Banner -->
     <div class="bg-gradient-to-r from-red-900 via-red-700 to-red-900 text-white py-12 px-4 text-center border-b-4 border-amber-400">
       <h1 class="text-3xl sm:text-4xl font-black italic tracking-wider uppercase text-amber-300 drop-shadow-md">CONTACT US</h1>
       <p class="text-xs sm:text-sm text-stone-200 font-semibold tracking-widest mt-1 uppercase">REACH OUT TO KAVALI'S FINEST BITTU CRACKERS</p>
     </div>
 
-    <!-- 3 High Engagement Contact Cards -->
+    <!-- 3 High-Engagement Contact Cards -->
     <div class="max-w-4xl mx-auto px-4 -mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
       <!-- Card 1: Call Us -->
       <div class="bg-white rounded-2xl p-6 shadow-md border-2 border-stone-100 text-center space-y-3 hover:border-amber-400 transition">
@@ -97,16 +93,18 @@
         </div>
       </div>
 
-      <!-- Card 2: WhatsApp -->
-      <div class="bg-emerald-50/70 rounded-2xl p-6 shadow-md border-2 border-emerald-200 text-center space-y-3 hover:border-emerald-400 transition">
+      <!-- Card 2: WhatsApp (ALL 4 NUMBERS INCLUDED) -->
+      <div class="bg-emerald-50/70 rounded-2xl p-6 shadow-md border-2 border-emerald-300 text-center space-y-3 hover:border-emerald-500 transition">
         <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl shadow-xs">
           💬
         </div>
         <h3 class="font-black text-sm uppercase text-emerald-900 tracking-wider">WHATSAPP</h3>
         <p class="text-[11px] text-emerald-700 font-semibold">Instant Price List & Booking</p>
-        <div class="space-y-1 font-black text-xs text-emerald-700 font-mono">
-          <p><a href="https://wa.me/917829978883" target="_blank" class="hover:underline">+91 7829978883</a></p>
-          <p><a href="https://wa.me/917993659115" target="_blank" class="hover:underline">+91 7993659115</a></p>
+        <div class="grid grid-cols-1 gap-1.5 font-black text-xs text-emerald-700 font-mono">
+          <a href="https://wa.me/917829978883" target="_blank" class="hover:underline bg-white/70 py-1 rounded border border-emerald-200">+91 7829978883</a>
+          <a href="https://wa.me/917993659115" target="_blank" class="hover:underline bg-white/70 py-1 rounded border border-emerald-200">+91 7993659115</a>
+          <a href="https://wa.me/919848104866" target="_blank" class="hover:underline bg-white/70 py-1 rounded border border-emerald-200">+91 9848104866</a>
+          <a href="https://wa.me/917661869408" target="_blank" class="hover:underline bg-white/70 py-1 rounded border border-emerald-200">+91 7661869408</a>
         </div>
       </div>
 
@@ -144,11 +142,10 @@
       <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium">Gift Boxes</button>
     </div>
 
-    <!-- ================= FLOATING / STICKY STATS PILL (LOTUS PYROS STYLE) ================= -->
+    <!-- ================= FLOATING / STICKY STATS PILL ================= -->
     <div class="max-w-4xl mx-auto px-3 py-3">
       <div class="bg-white rounded-full border border-stone-200/90 shadow-md p-2 flex items-center justify-between gap-2 overflow-x-auto">
         
-        <!-- Left: Categories Pill + Search -->
         <div class="flex items-center space-x-2 shrink-0">
           <button onclick="scrollCategoryToView()" class="bg-red-700 hover:bg-red-800 active:scale-95 text-amber-300 font-extrabold text-[11px] px-3.5 py-2 rounded-full flex items-center space-x-1 border border-amber-400/50 shadow-sm transition">
             <span>⚙</span>
@@ -162,9 +159,7 @@
           <span class="text-stone-300 hidden sm:inline">|</span>
         </div>
 
-        <!-- Middle: Dynamic Cart Stats Badges (Clickable -> Opens Checkout) -->
         <div onclick="openCartView()" class="flex items-center space-x-2 cursor-pointer shrink-0">
-          <!-- Products Badge (Orange) -->
           <div class="flex items-center space-x-1.5 bg-orange-50 px-2 py-1 rounded-xl border border-orange-200">
             <div class="w-6 h-6 bg-orange-500 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">
               📦
@@ -175,7 +170,6 @@
             </div>
           </div>
 
-          <!-- Items Badge (Blue) -->
           <div class="flex items-center space-x-1.5 bg-blue-50 px-2 py-1 rounded-xl border border-blue-200">
             <div class="w-6 h-6 bg-blue-600 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">
               🛍️
@@ -186,7 +180,6 @@
             </div>
           </div>
 
-          <!-- Total Badge (Green) -->
           <div class="flex items-center space-x-1.5 bg-emerald-50 px-2 py-1 rounded-xl border border-emerald-200">
             <div class="w-6 h-6 bg-emerald-600 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">
               👛
@@ -198,7 +191,6 @@
           </div>
         </div>
 
-        <!-- Right: LIST / GRID View Switcher -->
         <div class="flex items-center bg-stone-100 p-0.5 rounded-full shrink-0 border border-stone-200">
           <button onclick="setViewMode('list')" id="btn-toggle-list" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold text-stone-500 flex items-center space-x-1 transition">
             <span>☰</span>
@@ -220,8 +212,8 @@
     </main>
   </div>
 
-  <!-- ================= COMPREHENSIVE HORIZONTAL MULTI-COLUMN FOOTER ================= -->
-  <footer class="bg-gradient-to-b from-stone-950 to-black text-white mt-16 border-t-4 border-amber-400">
+  <!-- ================= COMPREHENSIVE BEIGE / WARM CREAM FOOTER ================= -->
+  <footer class="bg-[#F8F4EA] text-stone-800 mt-16 border-t-4 border-amber-500 shadow-inner">
     <div class="max-w-5xl mx-auto px-4 py-12 space-y-8 text-xs">
       
       <!-- Top Row: 4 Columns (Brand, Quick Links, Contacts, WhatsApp) -->
@@ -231,64 +223,64 @@
         <div class="space-y-2">
           <div class="flex items-center space-x-2">
             <span class="bg-red-700 text-amber-300 font-black px-2 py-0.5 rounded border border-amber-400 text-sm">B</span>
-            <h2 class="text-base font-black text-amber-400 uppercase tracking-wide">Bittu Fireworks</h2>
+            <h2 class="text-base font-black text-red-800 uppercase tracking-wide">Bittu Fireworks</h2>
           </div>
-          <p class="text-stone-300 text-[11px] leading-relaxed">
+          <p class="text-stone-600 text-[11px] leading-relaxed">
             Premier destination for highest quality crackers and fireworks in KAVALI. Sivakasi direct pricing for unforgettable festival celebrations.
           </p>
         </div>
 
         <!-- Col 2: Quick Links -->
         <div class="space-y-2.5">
-          <h3 class="font-bold text-amber-400 uppercase tracking-wider text-[11px] border-b border-stone-800 pb-1">Quick Links</h3>
-          <ul class="space-y-1.5 text-stone-300 text-[11px]">
-            <li><button onclick="handleQuickEnquiryClick()" class="hover:text-amber-400 flex items-center space-x-1"><span>⚡</span><span>Quick Enquiry</span></button></li>
-            <li><button onclick="switchToContactView()" class="hover:text-amber-400 flex items-center space-x-1"><span>📞</span><span>Contact Us</span></button></li>
-            <li><button onclick="switchToCatalogView()" class="hover:text-amber-400 flex items-center space-x-1"><span>🎆</span><span>All Crackers</span></button></li>
-            <li class="text-stone-500">Terms & Conditions</li>
+          <h3 class="font-black text-red-800 uppercase tracking-wider text-[11px] border-b border-amber-300 pb-1">Quick Links</h3>
+          <ul class="space-y-1.5 text-stone-700 text-[11px] font-medium">
+            <li><button onclick="handleQuickEnquiryClick()" class="hover:text-red-700 flex items-center space-x-1"><span>⚡</span><span>Quick Enquiry</span></button></li>
+            <li><button onclick="switchToContactView()" class="hover:text-red-700 flex items-center space-x-1"><span>📞</span><span>Contact Us</span></button></li>
+            <li><button onclick="switchToCatalogView()" class="hover:text-red-700 flex items-center space-x-1"><span>🎆</span><span>All Crackers</span></button></li>
+            <li class="text-stone-400">Terms & Conditions</li>
           </ul>
         </div>
 
         <!-- Col 3: Contact Info -->
         <div class="space-y-2.5">
-          <h3 class="font-bold text-amber-400 uppercase tracking-wider text-[11px] border-b border-stone-800 pb-1">Contact Us</h3>
-          <p class="text-stone-300 text-[11px]">
+          <h3 class="font-black text-red-800 uppercase tracking-wider text-[11px] border-b border-amber-300 pb-1">Contact Us</h3>
+          <p class="text-stone-700 text-[11px]">
             📍 Vengal Rao Nagar, Kavali, S.P.S.R Nellore District, AP - 524201
           </p>
-          <div class="space-y-1 text-stone-300 font-mono text-[11px]">
-            <p><a href="tel:+917993659115" class="hover:text-amber-400">📞 +91 7993659115</a></p>
-            <p><a href="tel:+919848104866" class="hover:text-amber-400">📞 +91 9848104866</a></p>
-            <p><a href="tel:+917661869408" class="hover:text-amber-400">📞 +91 7661869408</a></p>
+          <div class="space-y-1 text-red-800 font-mono text-[11px] font-bold">
+            <p><a href="tel:+917993659115" class="hover:underline">📞 +91 7993659115</a></p>
+            <p><a href="tel:+919848104866" class="hover:underline">📞 +91 9848104866</a></p>
+            <p><a href="tel:+917661869408" class="hover:underline">📞 +91 7661869408</a></p>
           </div>
         </div>
 
         <!-- Col 4: WhatsApp Direct Us -->
         <div class="space-y-2.5">
-          <h3 class="font-bold text-emerald-400 uppercase tracking-wider text-[11px] border-b border-stone-800 pb-1">WhatsApp Us</h3>
-          <p class="text-stone-400 text-[10px]">Tap any number to open instant chat:</p>
+          <h3 class="font-black text-emerald-800 uppercase tracking-wider text-[11px] border-b border-amber-300 pb-1">WhatsApp Us</h3>
+          <p class="text-stone-500 text-[10px]">Tap any number to open instant chat:</p>
           <div class="grid grid-cols-2 gap-1.5 font-mono text-[10px]">
-            <a href="https://wa.me/917829978883" target="_blank" class="bg-stone-900 hover:bg-stone-800 px-2 py-1.5 rounded border border-stone-800 text-emerald-400 font-bold text-center">+91 7829978883</a>
-            <a href="https://wa.me/917993659115" target="_blank" class="bg-stone-900 hover:bg-stone-800 px-2 py-1.5 rounded border border-stone-800 text-emerald-400 font-bold text-center">+91 7993659115</a>
-            <a href="https://wa.me/919848104866" target="_blank" class="bg-stone-900 hover:bg-stone-800 px-2 py-1.5 rounded border border-stone-800 text-emerald-400 font-bold text-center">+91 9848104866</a>
-            <a href="https://wa.me/917661869408" target="_blank" class="bg-stone-900 hover:bg-stone-800 px-2 py-1.5 rounded border border-stone-800 text-emerald-400 font-bold text-center">+91 7661869408</a>
+            <a href="https://wa.me/917829978883" target="_blank" class="bg-white hover:bg-emerald-50 px-2 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 font-bold text-center shadow-xs">+91 7829978883</a>
+            <a href="https://wa.me/917993659115" target="_blank" class="bg-white hover:bg-emerald-50 px-2 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 font-bold text-center shadow-xs">+91 7993659115</a>
+            <a href="https://wa.me/919848104866" target="_blank" class="bg-white hover:bg-emerald-50 px-2 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 font-bold text-center shadow-xs">+91 9848104866</a>
+            <a href="https://wa.me/917661869408" target="_blank" class="bg-white hover:bg-emerald-50 px-2 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 font-bold text-center shadow-xs">+91 7661869408</a>
           </div>
         </div>
       </div>
 
       <!-- Payment / Banking Details Box -->
-      <div class="bg-gradient-to-r from-stone-900 via-stone-900 to-stone-950 p-4 rounded-2xl border border-amber-500/40 space-y-1.5">
+      <div class="bg-white p-4 rounded-2xl border-2 border-amber-400/60 shadow-xs space-y-1.5">
         <div class="flex items-center space-x-2">
           <span class="text-base">💳</span>
-          <h3 class="font-black text-amber-400 uppercase tracking-wider text-[11px]">Payment & Banking Info</h3>
+          <h3 class="font-black text-red-800 uppercase tracking-wider text-[11px]">Payment & Banking Info</h3>
         </div>
-        <p class="text-stone-300 leading-relaxed text-[11px]">
-          Once placed an enquiry, please call us at <span class="text-amber-300 font-bold">7661869408</span> / <span class="text-amber-300 font-bold">9848104866</span> or send a message to admin WhatsApp numbers (<span class="text-emerald-400">+91 7829978883</span>, <span class="text-emerald-400">+91 7993659115</span>, <span class="text-emerald-400">+91 9848104866</span>, <span class="text-emerald-400">+91 7661869408</span>) to receive official UPI QR code & banking payment details.
+        <p class="text-stone-700 leading-relaxed text-[11px]">
+          Once placed an enquiry, please call us at <span class="text-red-700 font-bold">7661869408</span> / <span class="text-red-700 font-bold">9848104866</span> or send a message to admin WhatsApp numbers (<span class="text-emerald-700 font-bold">+91 7829978883</span>, <span class="text-emerald-700 font-bold">+91 7993659115</span>, <span class="text-emerald-700 font-bold">+91 9848104866</span>, <span class="text-emerald-700 font-bold">+91 7661869408</span>) to receive official UPI QR code & banking payment details.
         </p>
       </div>
 
       <!-- Legal Compliance Notice -->
-      <div class="border-t border-stone-800 pt-5 space-y-2 text-stone-400 text-[10px] leading-relaxed">
-        <h4 class="font-bold text-amber-400 uppercase tracking-wider">Legal Compliance Notice</h4>
+      <div class="border-t border-stone-300 pt-5 space-y-2 text-stone-600 text-[10px] leading-relaxed">
+        <h4 class="font-bold text-red-800 uppercase tracking-wider">Legal Compliance Notice</h4>
         <p>
           As per 2018 Supreme Court order, online direct sale of firecrackers is not permitted! We value our customers and strictly respect jurisdiction. We request you to add your products to the cart and submit the required crackers through the enquiry booking button. We will contact you within 24 hours and confirm the order through WhatsApp or phone call.
         </p>
@@ -298,7 +290,7 @@
       </div>
 
       <!-- Bottom Copyright -->
-      <div class="border-t border-stone-800 pt-4 text-center text-stone-500 text-[10px]">
+      <div class="border-t border-stone-300 pt-4 text-center text-stone-500 text-[10px] font-medium">
         © 2026 Bittu Fireworks, Kavali. All rights reserved.
       </div>
     </div>
@@ -577,7 +569,7 @@
       loadLiveProducts();
     }
 
-    // QUICK ENQUIRY BUTTON -> WHATSAPP REDIRECT (LOTUS PYROS)
+    // QUICK ENQUIRY BUTTON -> WHATSAPP REDIRECT
     function handleQuickEnquiryClick() {
       const greetingMsg = encodeURIComponent(
         `*Hello Bittu Crackers, Kavali!*\n` +
@@ -855,7 +847,6 @@
       `).join('');
     }
 
-    // STATS UPDATE FOR FLOATING PILL & CART
     function updateTotal() {
       const distinctProductsCount = cart.length;
       const totalUnits = cart.reduce((sum, i) => sum + i.qty, 0);
@@ -865,12 +856,10 @@
       const deliveryFee = selectedAddress ? Number(selectedAddress.deliveryCharge || 0) : 0;
       const grandTotal = offerSubtotal + deliveryFee;
 
-      // Update Lotus Pyros Style Floating Pill
       document.getElementById('pill-distinct-products').innerText = distinctProductsCount;
       document.getElementById('pill-total-items').innerText = totalUnits;
       document.getElementById('pill-total-rupees').innerText = `₹${offerSubtotal.toFixed(0)}`;
 
-      // Update Modal summary
       document.getElementById('summary-items-count').innerText = totalUnits;
       document.getElementById('summary-mrp-total').innerText = `₹${mrpSubtotal.toFixed(0)}`;
       document.getElementById('summary-discount-val').innerText = `- ₹${discount.toFixed(0)}`;
