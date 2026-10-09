@@ -338,7 +338,6 @@
             </div>
 
             <div class="flex items-center space-x-2">
-              <!-- Catalog File Import Input & Button -->
               <input type="file" id="catalog-file-input" accept=".xlsx,.xls,.csv,.pdf" class="hidden" onchange="handleCatalogImport(event)" />
               <button onclick="document.getElementById('catalog-file-input').click()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 shadow-xs active:scale-95 transition">
                 <span>📄</span>
@@ -1222,7 +1221,7 @@
       }
     }
 
-    // 8. PRODUCTS CATALOG (IMAGE 2: SAVE BUTTON MOVED TO LAST ACTIONS COLUMN & EDIT RENAMED)
+    // 8. PRODUCTS CATALOG (IMAGE 2: SAVE BUTTON IN ACTIONS COLUMN, 'Edit' INSTEAD OF 'Edit Full')
     function openProductModal(editId = null) {
       const modal = document.getElementById('product-modal');
       const title = document.getElementById('product-modal-title');
