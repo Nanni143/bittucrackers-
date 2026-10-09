@@ -3,1031 +3,881 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bittu Crackers - Admin Portal</title>
+  <title>Bittu Crackers - Online Booking</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-  <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-  </script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    .leaflet-control-attribution { display: none !important; }
+    .leaflet-pane { z-index: 10 !important; }
+    .leaflet-top, .leaflet-bottom { z-index: 11 !important; }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans antialiased min-h-screen">
+<body class="bg-gray-100 text-gray-800 pb-28">
 
-  <!-- ================= AUTHENTICATION MODAL ================= -->
-  <div id="auth-modal" style="display: flex;" class="fixed inset-0 bg-neutral-950/90 backdrop-blur-sm z-50 items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-gray-100">
-      <div class="flex items-center space-x-2.5 mb-5">
-        <span class="bg-red-600 text-white font-black px-2.5 py-1 rounded-lg text-sm">B</span>
-        <div>
-          <h2 class="text-base font-extrabold text-gray-950">BITTU CRACKERS</h2>
-          <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Secure Admin Portal</p>
+  <!-- ================= TOP LOCATION HEADER ================= -->
+  <header class="bg-white border-b px-4 py-2.5 sticky top-0 z-40 shadow-xs flex items-center justify-between">
+    <div onclick="handleTopLocationClick()" class="flex items-center space-x-2.5 cursor-pointer flex-1 min-w-0 pr-2">
+      <div class="bg-red-50 text-red-600 p-2 rounded-xl shrink-0">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+      </div>
+      <div class="truncate">
+        <div class="flex items-center space-x-1">
+          <span class="text-[10px] font-black text-gray-400 uppercase tracking-wider">Delivering to</span>
+          <span id="top-loc-name" class="text-xs font-black text-gray-900 truncate">Select Address</span>
+          <span class="text-[9px] text-gray-400">▼</span>
+        </div>
+        <p id="top-loc-desc" class="text-[11px] text-gray-500 truncate">Tap to set delivery location</p>
+      </div>
+    </div>
+
+    <!-- Cart Button -->
+    <button onclick="openCartView()" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm active:scale-95 transition shrink-0">
+      <span>Cart</span>
+      <span id="cart-count" class="bg-white text-red-600 rounded-full px-1.5 py-0.2 text-[10px] font-black">0</span>
+    </button>
+  </header>
+
+  <!-- Notice Banner -->
+  <div class="bg-red-800 text-white text-[11px] text-center py-1.5 px-3 font-medium">
+    Online booking open in Kavali & SPSR Nellore — Sivakasi crackers, pay on delivery.
+  </div>
+
+  <!-- Categories Bar -->
+  <div class="px-3 pt-3 pb-1 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs bg-white border-b">
+    <button onclick="filterCategory('All')" class="cat-btn bg-red-600 text-white px-3.5 py-1.5 rounded-full font-bold">All</button>
+    <button onclick="filterCategory('Sparklers')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Sparklers</button>
+    <button onclick="filterCategory('Sound Crackers')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Sound Crackers</button>
+    <button onclick="filterCategory('Ground Chakkars')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Ground Chakkars</button>
+    <button onclick="filterCategory('Flower Pots')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Flower Pots</button>
+    <button onclick="filterCategory('Sky Shots')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Sky Shots</button>
+    <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium">Gift Boxes</button>
+  </div>
+
+  <!-- View Switcher (Only Big, Medium, Small) & Sort Toolbar -->
+  <div class="px-3.5 py-2 flex items-center justify-between bg-white border-b text-xs">
+    <div class="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg">
+      <button onclick="setViewMode('big')" id="btn-view-big" title="Big (1 by 1)" class="view-btn px-2 py-1 rounded text-gray-600">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"/></svg>
+      </button>
+      <button onclick="setViewMode('medium')" id="btn-view-medium" title="Medium (2 items)" class="view-btn px-2 py-1 rounded bg-white font-bold text-red-600 shadow-sm">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h4a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm8 0a1 1 0 011-1h4a1 1 0 011 1v12a1 1 0 01-1 1h-4a1 1 0 01-1-1V4z"/></svg>
+      </button>
+      <button onclick="setViewMode('small')" id="btn-view-small" title="Small (3 items)" class="view-btn px-2 py-1 rounded text-gray-600">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 4a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1H10a1 1 0 011 1v12a1 1 0 01-1 1H7.5a1 1 0 01-1-1V4zm5.5 0a1 1 0 011-1h2.5a1 1 0 011 1v12a1 1 0 01-1 1H13a1 1 0 01-1-1V4z"/></svg>
+      </button>
+    </div>
+    <div class="flex items-center space-x-1.5">
+      <span class="text-gray-400 font-medium">Sort:</span>
+      <select id="sort-select" onchange="changeSort(this.value)" class="border rounded-lg px-2 py-1 bg-white text-xs font-semibold outline-none focus:border-red-600">
+        <option value="popular">Popularity</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Dynamic Catalog Container -->
+  <main class="p-3 max-w-2xl mx-auto" id="product-container">
+    <div id="product-list" class="w-full">
+      <div class="text-center text-xs text-gray-400 py-12">Loading crackers catalog...</div>
+    </div>
+  </main>
+
+  <!-- ================= CHECKOUT / CONFIRM DETAILS MODAL ================= -->
+  <div id="cart-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-xs z-50 hidden flex justify-end">
+    <div class="bg-gray-50 w-full max-w-md h-full flex flex-col overflow-y-auto">
+      
+      <!-- Top Step Header -->
+      <div class="bg-white px-4 py-3 border-b flex items-center justify-between sticky top-0 z-10 shadow-2xs">
+        <div class="flex items-center space-x-3">
+          <button onclick="closeCartView()" class="text-gray-600 hover:text-black font-bold text-lg">←</button>
+          <h2 class="text-base font-extrabold text-gray-900">Confirm details</h2>
+        </div>
+        <div class="flex items-center space-x-3 text-[11px] font-bold">
+          <span class="text-blue-600">✓ Address</span>
+          <span class="text-blue-600 font-black">② Confirm</span>
+          <span class="text-gray-400">③ Book</span>
         </div>
       </div>
 
-      <!-- Password Login Form -->
-      <div id="standard-login-box" class="space-y-3 text-xs">
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">Username or Email</label>
-          <input id="login-id" type="text" placeholder="Enter username or email" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 text-xs" />
-        </div>
-        <div>
-          <div class="flex justify-between items-center mb-1">
-            <label class="block font-semibold text-gray-700">Password</label>
-            <button type="button" onclick="showForgotPasswordModal()" class="text-red-600 hover:underline text-[11px] font-semibold">Forgot Password?</button>
+      <div class="flex-1 p-3.5 space-y-3 overflow-y-auto">
+        <!-- Delivering To Card -->
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-2xs space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-black text-gray-900 uppercase tracking-wide">Delivering to</span>
+            <button type="button" onclick="openAddressSelectModal()" class="text-blue-600 font-bold text-xs hover:underline">Change</button>
           </div>
-          <input id="login-pass" type="password" placeholder="••••••••" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 text-xs" />
+          <div id="address-card-content" class="pt-1"></div>
         </div>
-        <p id="login-error" class="text-red-600 text-[11px] hidden font-semibold"></p>
-        
-        <button type="button" onclick="performLogin()" id="login-submit-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs shadow-sm transition active:scale-95">
-          Sign In with Password
-        </button>
 
-        <!-- Face Unlock / Fingerprint Biometric -->
-        <button type="button" onclick="loginWithBiometrics()" class="w-full bg-neutral-800 hover:bg-black text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center space-x-1.5 transition active:scale-95">
-          <span>🛡️</span>
-          <span>Sign In with Face Unlock / Fingerprint</span>
-        </button>
+        <!-- Ordered Items List -->
+        <div class="bg-white rounded-2xl p-3 border border-gray-200 shadow-2xs space-y-2.5">
+          <h3 class="text-xs font-black text-gray-900 uppercase tracking-wide border-b pb-2">Order Items</h3>
+          <div id="cart-items-list" class="divide-y space-y-2"></div>
+        </div>
 
-        <!-- Mobile OTP Alternative -->
-        <button type="button" onclick="switchLoginMode('otp')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-lg text-xs border transition">
-          📱 Sign In with Mobile OTP
-        </button>
+        <!-- Price Details Card -->
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-2xs space-y-2 text-xs">
+          <h3 class="font-black text-gray-900 uppercase tracking-wide border-b pb-2">Price Details</h3>
+          <div class="flex justify-between text-gray-600">
+            <span>Price (<span id="summary-items-count">0</span> items)</span>
+            <span id="summary-mrp-total">₹0</span>
+          </div>
+          <div class="flex justify-between text-emerald-600 font-semibold">
+            <span>Discount</span>
+            <span id="summary-discount-val">- ₹0</span>
+          </div>
+          <div class="flex justify-between text-gray-600 items-center">
+            <div class="flex items-center space-x-1">
+              <span>Delivery Charges</span>
+              <span id="delivery-zone-badge" class="bg-gray-100 text-gray-600 px-1.5 py-0.2 rounded text-[10px] font-bold">Local</span>
+            </div>
+            <span id="summary-delivery-charge" class="font-bold text-gray-900">FREE</span>
+          </div>
+          <div class="border-t pt-2 flex justify-between items-center text-sm font-black text-gray-950">
+            <span>Total Payable Amount</span>
+            <span id="summary-grand-total" class="text-red-600 text-base">₹0</span>
+          </div>
+          <div class="bg-emerald-50 text-emerald-700 p-2 rounded-xl text-[11px] font-bold text-center">
+            🎉 You will save <span id="summary-savings-text">₹0</span> on this festival order
+          </div>
+        </div>
       </div>
 
-      <!-- OTP Login Form -->
-      <div id="otp-login-box" class="space-y-3 text-xs hidden">
+      <!-- Bottom Booking Bar -->
+      <div class="bg-white border-t p-3 sticky bottom-0 shadow-lg flex items-center justify-between">
         <div>
-          <label class="block font-semibold text-gray-700 mb-1">Registered Mobile Number / Username</label>
-          <input id="otp-phone" type="text" placeholder="e.g. 7829978883" class="w-full border rounded-lg p-2.5 outline-none focus:border-red-600" />
+          <span class="text-[10px] text-gray-400 font-bold uppercase block">Pay on Delivery</span>
+          <span id="bottom-bar-total" class="text-lg font-black text-gray-950">₹0</span>
         </div>
-        <div id="otp-input-group" class="hidden">
-          <label class="block font-semibold text-gray-700 mb-1">Enter 6-Digit OTP</label>
-          <input id="otp-code" type="number" placeholder="123456" class="w-full border rounded-lg p-2.5 outline-none focus:border-red-600 tracking-widest text-center text-sm font-bold" />
-        </div>
-        <button type="button" id="btn-send-otp" onclick="handleSendOtp()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs">
-          Send OTP
-        </button>
-        <button type="button" onclick="switchLoginMode('password')" class="w-full text-center text-gray-500 hover:underline text-[11px]">
-          ← Back to Password Login
+        <button type="button" onclick="confirmOrderAndWhatsApp()" id="btn-submit-order" class="bg-amber-400 hover:bg-amber-500 active:scale-95 text-gray-950 font-black px-6 py-3 rounded-xl text-xs uppercase tracking-wide shadow-sm transition">
+          Continue & Book on WhatsApp
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ================= FORGOT PASSWORD MODAL ================= -->
-  <div id="forgot-modal" style="display: none;" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border">
-      <div class="flex justify-between items-center mb-3 pb-2 border-b">
-        <h3 class="text-sm font-bold text-gray-900">Reset Your Password</h3>
-        <button type="button" onclick="document.getElementById('forgot-modal').style.display='none'" class="text-gray-400 hover:text-black text-2xl font-bold leading-none">&times;</button>
+  <!-- ================= SUCCESS CONFIRMATION MODAL ================= -->
+  <div id="order-success-modal" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center space-y-4">
+      <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl font-black">
+        ✓
       </div>
-      <p class="text-[11px] text-gray-500 mb-3">Enter your username or email. A reset verification code will be dispatched to your phone, and a reset request will be sent to the Super Admin.</p>
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="font-semibold block mb-1">Username or Email</label>
-          <input id="forgot-input-id" type="text" placeholder="username" class="w-full border rounded-lg p-2.5" />
-        </div>
-        <button type="button" onclick="handleSelfResetRequest()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs">
-          Send Reset Request
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= MAIN ADMIN DASHBOARD ================= -->
-  <div id="admin-layout" style="display: none;" class="min-h-screen flex flex-col md:flex-row">
-    
-    <!-- LEFT SIDEBAR -->
-    <aside class="w-full md:w-60 bg-neutral-900 text-white flex flex-col justify-between shrink-0 p-4 border-r border-neutral-800">
       <div>
-        <div class="flex items-center space-x-2.5 pb-5 border-b border-neutral-800 mb-5">
-          <span class="bg-red-600 text-white font-black px-2 py-0.5 rounded text-xs">B</span>
-          <div>
-            <h1 class="text-xs font-black tracking-wide">BITTU CRACKERS</h1>
-            <p class="text-[9px] text-gray-400 tracking-wider">ADMIN PANEL</p>
-          </div>
-        </div>
-
-        <nav class="space-y-1 text-xs font-medium">
-          <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-600 text-white">
-            <span>⊞</span><span>Dashboard</span>
-          </button>
-          <button onclick="navigate('orders')" id="nav-orders" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
-            <span>☰</span><span>Orders</span>
-          </button>
-          <button onclick="navigate('products')" id="nav-products" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
-            <span>⬚</span><span>Products</span>
-          </button>
-          <button onclick="navigate('price-sheet')" id="nav-price-sheet" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
-            <span>₹</span><span>Price Sheet & Rates</span>
-          </button>
-          <button onclick="navigate('team-profile')" id="nav-team-profile" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
-            <span>👥</span><span>Team & Profile</span>
-          </button>
-          <button onclick="navigate('store-settings')" id="nav-store-settings" class="nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white">
-            <span>⚙</span><span>Store Settings</span>
-          </button>
-        </nav>
+        <span class="bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">Booking Successful</span>
+        <h3 class="text-xl font-black text-gray-950 mt-1">Order Confirmed!</h3>
+        <p class="text-xs text-gray-500 mt-1">Order ID: <span id="success-order-id" class="font-mono font-bold text-gray-800">#---</span></p>
       </div>
 
-      <div class="pt-4 border-t border-neutral-800 text-xs">
-        <div class="flex items-center justify-between">
-          <div>
-            <p id="current-user-name" class="font-bold text-white text-xs">Bittu Kumar</p>
-            <p id="current-user-role" class="text-[10px] text-gray-400">Super Admin</p>
-          </div>
-          <button onclick="handleLogout()" class="text-[11px] text-red-400 hover:underline">Logout</button>
+      <div class="bg-gray-50 rounded-2xl p-3.5 text-left text-xs space-y-1.5 border">
+        <div class="flex justify-between text-gray-500">
+          <span>Deliver to:</span>
+          <span id="success-cust-name" class="font-bold text-gray-800">---</span>
+        </div>
+        <p id="success-cust-addr" class="text-[11px] text-gray-600 line-clamp-2">---</p>
+        <div class="border-t pt-1.5 flex justify-between font-bold text-gray-900">
+          <span>Pay on Delivery:</span>
+          <span id="success-total" class="text-red-600 text-sm">₹0</span>
         </div>
       </div>
-    </aside>
 
-    <!-- MAIN RIGHT VIEWPORT -->
-    <main class="flex-1 p-4 md:p-8 max-w-6xl mx-auto overflow-y-auto">
-
-      <!-- 1. DASHBOARD TAB -->
-      <section id="view-dashboard" class="tab-view space-y-6">
-        <div>
-          <h1 class="text-2xl font-black text-gray-950">Dashboard</h1>
-          <p class="text-xs text-gray-500">Live snapshot of bookings, revenue and stock.</p>
-        </div>
-
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div class="bg-white p-4 rounded-xl border shadow-sm">
-            <span class="text-xs font-semibold text-gray-500">Today's Orders</span>
-            <div id="stat-today" class="text-2xl font-black text-gray-900 mt-2">0</div>
-          </div>
-          <div class="bg-white p-4 rounded-xl border shadow-sm">
-            <span class="text-xs font-semibold text-amber-600">Pending Orders</span>
-            <div id="stat-pending" class="text-2xl font-black text-amber-600 mt-2">0</div>
-          </div>
-          <div class="bg-white p-4 rounded-xl border shadow-sm">
-            <span class="text-xs font-semibold text-emerald-600">Total Booked Value</span>
-            <div id="stat-revenue" class="text-2xl font-black text-emerald-600 mt-2">₹0</div>
-          </div>
-          <div class="bg-white p-4 rounded-xl border shadow-sm">
-            <span class="text-xs font-semibold text-gray-500">Total Products</span>
-            <div id="stat-products-count" class="text-2xl font-black text-gray-900 mt-2">0</div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl border shadow-sm p-4 space-y-3">
-          <div class="flex justify-between items-center border-b pb-2">
-            <div>
-              <h2 class="text-sm font-bold text-gray-900">Latest Orders</h2>
-              <p class="text-[11px] text-gray-400">Live order snapshot</p>
-            </div>
-            <button onclick="loadDashboardMetrics()" class="text-xs bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded font-semibold text-gray-700">Refresh</button>
-          </div>
-          <div id="dashboard-recent-orders" class="divide-y text-xs">Loading orders...</div>
-        </div>
-      </section>
-
-      <!-- 2. ORDERS TAB -->
-      <section id="view-orders" class="tab-view space-y-4 hidden">
-        <div class="flex justify-between items-center">
-          <div>
-            <h1 class="text-2xl font-black text-gray-950">Orders</h1>
-            <p class="text-xs text-gray-500">Verify customer details and dispatch orders.</p>
-          </div>
-          <button onclick="loadOrders()" class="text-xs bg-gray-200 px-3 py-1.5 rounded-lg font-semibold active:scale-95 transition">Refresh</button>
-        </div>
-        <div class="bg-white rounded-xl border overflow-x-auto shadow-sm">
-          <table class="w-full text-left text-xs whitespace-nowrap">
-            <thead class="bg-gray-50 border-b text-gray-500 font-bold uppercase text-[10px]">
-              <tr>
-                <th class="p-3">Order</th>
-                <th class="p-3">Customer</th>
-                <th class="p-3">Location</th>
-                <th class="p-3">Total</th>
-                <th class="p-3">Status</th>
-                <th class="p-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="orders-table" class="divide-y"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- 3. PRODUCTS TAB -->
-      <section id="view-products" class="tab-view space-y-4 hidden">
-        <div class="flex justify-between items-center">
-          <div>
-            <h1 class="text-2xl font-black text-gray-950">Products</h1>
-            <p class="text-xs text-gray-500">Manage catalog with photos picked directly from gallery.</p>
-          </div>
-          <button onclick="openProductModal()" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3.5 py-2 rounded-xl font-bold shadow-sm transition active:scale-95">+ Add Cracker</button>
-        </div>
-
-        <div class="bg-white rounded-xl border overflow-x-auto shadow-sm">
-          <table class="w-full text-left text-xs whitespace-nowrap">
-            <thead class="bg-gray-50 border-b text-gray-500 font-bold uppercase text-[10px]">
-              <tr>
-                <th class="p-3">Product</th>
-                <th class="p-3">Category</th>
-                <th class="p-3">MRP (₹)</th>
-                <th class="p-3">Offer (₹)</th>
-                <th class="p-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody id="products-table" class="divide-y"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- 4. PRICE SHEET TAB (With PDF / CSV Import) -->
-      <section id="view-price-sheet" class="tab-view space-y-4 hidden">
-        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-          <div>
-            <h1 class="text-2xl font-black text-gray-950">Price Sheet & Rate Editor</h1>
-            <p class="text-xs text-gray-500">Edit MRP & Offer prices in real-time. Changes sync to storefront immediately.</p>
-          </div>
-          <div class="flex items-center space-x-2">
-            <input type="file" id="pdf-price-input" accept=".pdf,.csv,.txt" class="hidden" onchange="handlePriceListFile(event)" />
-            <button onclick="document.getElementById('pdf-price-input').click()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs px-3.5 py-2 rounded-xl font-bold flex items-center space-x-1 shadow-sm transition">
-              <span>📄</span>
-              <span>Upload Price Sheet / PDF</span>
-            </button>
-            <button onclick="loadPriceSheet()" class="bg-gray-200 text-xs px-3 py-2 rounded-xl font-semibold">Refresh</button>
-          </div>
-        </div>
-
-        <div class="flex gap-2">
-          <input type="text" id="price-search" placeholder="Search cracker name..." oninput="renderPriceSheetTable()" class="w-full text-xs border rounded-lg p-2 bg-white" />
-        </div>
-
-        <div class="bg-white rounded-xl border overflow-x-auto shadow-sm">
-          <table class="w-full text-left text-xs whitespace-nowrap">
-            <thead class="bg-gray-50 border-b text-gray-500 font-bold uppercase text-[10px]">
-              <tr>
-                <th class="p-3">Item Name</th>
-                <th class="p-3">Category</th>
-                <th class="p-3 w-28">MRP (₹)</th>
-                <th class="p-3 w-28">Offer Price (₹)</th>
-                <th class="p-3 text-center">Discount %</th>
-                <th class="p-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody id="price-sheet-table" class="divide-y"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- 5. TEAM & PROFILE TAB -->
-      <section id="view-team-profile" class="tab-view space-y-6 hidden">
-        <div>
-          <h1 class="text-2xl font-black text-gray-950">Team & Profile</h1>
-          <p class="text-xs text-gray-500">Manage administrator privileges and account security.</p>
-        </div>
-
-        <div class="bg-white rounded-2xl border p-5 max-w-xl shadow-sm space-y-4">
-          <h2 class="text-sm font-bold text-gray-900 border-b pb-2">My Profile</h2>
-          <div class="space-y-3 text-xs">
-            <div>
-              <label class="block font-semibold mb-1 text-gray-600">First name</label>
-              <input id="my-first-name" class="w-full border rounded-lg p-2.5 outline-none focus:border-red-600" value="Bittu" />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1 text-gray-600">Last name</label>
-              <input id="my-last-name" class="w-full border rounded-lg p-2.5 outline-none focus:border-red-600" value="Kumar" />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1 text-gray-600">Phone</label>
-              <input id="my-phone" class="w-full border rounded-lg p-2.5 outline-none focus:border-red-600" value="9999999999" />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1 text-gray-600">Email</label>
-              <input id="my-email" class="w-full border rounded-lg p-2.5 outline-none focus:border-red-600" value="admin@bittucrackers.in" />
-            </div>
-          </div>
-          <button type="button" onclick="saveMyProfile()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2.5 rounded-lg text-xs transition active:scale-95">Save Profile</button>
-        </div>
-
-        <div class="bg-white rounded-2xl border p-5 max-w-xl shadow-sm space-y-4">
-          <div class="flex justify-between items-center border-b pb-2">
-            <div>
-              <h2 class="text-sm font-bold text-gray-900">Admin Team</h2>
-              <p class="text-[10px] text-gray-400">Team members can sign in using their credentials</p>
-            </div>
-            <button type="button" onclick="openAddAdminModal()" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3.5 py-1.5 rounded-lg font-bold shadow-sm transition active:scale-95">+ Add Admin</button>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs whitespace-nowrap">
-              <thead class="bg-gray-50 border-b text-gray-500 font-bold uppercase text-[10px]">
-                <tr>
-                  <th class="p-3">Admin</th>
-                  <th class="p-3">Contact</th>
-                  <th class="p-3">Role</th>
-                  <th class="p-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="team-table" class="divide-y"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- 6. STORE SETTINGS TAB (With 3 Phone Numbers) -->
-      <section id="view-store-settings" class="tab-view space-y-4 hidden">
-        <div>
-          <h1 class="text-2xl font-black text-gray-950">Store Settings</h1>
-          <p class="text-xs text-gray-500">Configure store addresses, delivery zones, and 3 display phone numbers.</p>
-        </div>
-
-        <div class="bg-white rounded-2xl border p-5 max-w-xl space-y-4 text-xs shadow-sm">
-          <div>
-            <label class="block font-semibold mb-1 text-gray-700">Store Name</label>
-            <input id="cfg-name" class="w-full border rounded-lg p-2.5 outline-none focus:border-red-600 font-semibold" value="BITTU CRACKERS" />
-          </div>
-          <div>
-            <label class="block font-semibold mb-1 text-gray-700">WhatsApp Orders Number (With country code)</label>
-            <input id="cfg-wa" class="w-full border rounded-lg p-2.5 outline-none focus:border-red-600" placeholder="+917829978883" />
-          </div>
-          
-          <div class="space-y-2 border-t pt-2">
-            <label class="block font-semibold text-gray-700">Store Display Phone Numbers (3 Contacts)</label>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div>
-                <span class="text-[10px] text-gray-400 font-bold">Contact #1</span>
-                <input id="cfg-phone-1" class="w-full border rounded-lg p-2 text-xs" placeholder="7829978883" />
-              </div>
-              <div>
-                <span class="text-[10px] text-gray-400 font-bold">Contact #2</span>
-                <input id="cfg-phone-2" class="w-full border rounded-lg p-2 text-xs" placeholder="Second number" />
-              </div>
-              <div>
-                <span class="text-[10px] text-gray-400 font-bold">Contact #3</span>
-                <input id="cfg-phone-3" class="w-full border rounded-lg p-2 text-xs" placeholder="Third number" />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label class="block font-semibold mb-1 text-gray-700">Shop Address</label>
-            <textarea id="cfg-address" rows="3" class="w-full border rounded-lg p-2.5 outline-none focus:border-red-600" placeholder="Full shop address..."></textarea>
-          </div>
-          <button type="button" onclick="saveStoreSettings()" id="btn-save-settings" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs transition active:scale-95 shadow-sm">
-            Save Store Settings
-          </button>
-        </div>
-      </section>
-
-    </main>
-  </div>
-
-  <!-- ================= ADD ADMIN MODAL ================= -->
-  <div id="add-admin-modal" style="display: none;" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border">
-      <div class="flex justify-between items-center mb-3 pb-2 border-b">
-        <h3 class="text-sm font-bold text-gray-900">Add Team Admin</h3>
-        <button type="button" onclick="closeAddAdminModal()" class="text-gray-400 hover:text-black text-2xl font-bold leading-none">&times;</button>
-      </div>
-      <div class="space-y-3 text-xs">
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="font-semibold block mb-0.5">Username *</label>
-            <input id="new-admin-user" class="w-full border rounded-lg p-2" placeholder="username" />
-          </div>
-          <div>
-            <label class="font-semibold block mb-0.5">Role *</label>
-            <select id="new-admin-role" class="w-full border rounded-lg p-2 bg-white">
-              <option value="Admin">Admin</option>
-              <option value="Super Admin">Super Admin</option>
-              <option value="Inventory & Delivery Manager">Inventory & Delivery Manager</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="font-semibold block mb-0.5">First name *</label>
-            <input id="new-admin-fname" class="w-full border rounded-lg p-2" placeholder="First name" />
-          </div>
-          <div>
-            <label class="font-semibold block mb-0.5">Last name</label>
-            <input id="new-admin-lname" class="w-full border rounded-lg p-2" placeholder="Last name" />
-          </div>
-        </div>
-        <div>
-          <label class="font-semibold block mb-0.5">Email *</label>
-          <input id="new-admin-email" type="email" class="w-full border rounded-lg p-2" placeholder="name@email.com" />
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="font-semibold block mb-0.5">Phone *</label>
-            <input id="new-admin-phone" class="w-full border rounded-lg p-2" placeholder="Phone number" />
-          </div>
-          <div>
-            <label class="font-semibold block mb-0.5">Initial Password *</label>
-            <input id="new-admin-pass" type="password" class="w-full border rounded-lg p-2" placeholder="••••••••" />
-          </div>
-        </div>
-        <button type="button" onclick="handleCreateAdmin()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs mt-2 transition active:scale-95 shadow-sm">Create Admin</button>
-      </div>
+      <button type="button" onclick="closeSuccessAndShopMore()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl text-xs active:scale-95 transition shadow-sm">
+        Done & Continue Shopping
+      </button>
     </div>
   </div>
 
-  <!-- ================= ADD PRODUCT MODAL ================= -->
-  <div id="product-modal" style="display: none;" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border">
-      <div class="flex justify-between items-center mb-4 pb-2 border-b">
-        <h3 class="text-sm font-bold text-gray-950">Add New Cracker</h3>
-        <button type="button" onclick="closeProductModal()" class="text-gray-400 hover:text-black text-2xl font-black leading-none">&times;</button>
+  <!-- ================= SAVED ADDRESSES BOTTOM SHEET ================= -->
+  <div id="address-select-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-2xs z-50 hidden flex items-end justify-center p-0">
+    <div class="bg-white w-full max-w-md rounded-t-3xl p-4 shadow-2xl flex flex-col max-h-[85vh] space-y-3">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="text-sm font-extrabold text-gray-900">Select delivery address</h3>
+        <button onclick="closeAddressSelectModal()" class="text-gray-400 hover:text-black text-2xl font-bold">&times;</button>
       </div>
 
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="font-semibold block mb-1">Cracker Name *</label>
-          <input id="prod-name" type="text" placeholder="e.g. 10cm Electric Sparklers" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600" />
+      <button onclick="startAddNewAddressFlow()" class="w-full bg-blue-50 border border-blue-200 text-blue-700 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-between hover:bg-blue-100 transition">
+        <span class="flex items-center space-x-2">
+          <span class="text-base font-black">+</span>
+          <span>Add New Address</span>
+        </span>
+        <span>➔</span>
+      </button>
+
+      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Saved addresses</span>
+      <div id="saved-addresses-list" class="space-y-2 overflow-y-auto max-h-64 pr-1"></div>
+    </div>
+  </div>
+
+  <!-- ================= FULLSCREEN INTERACTIVE MAP PIN PICKER ================= -->
+  <div id="map-pin-modal" class="fixed inset-0 bg-white z-50 hidden flex flex-col h-screen w-screen">
+    <div class="px-4 py-3 border-b flex items-center justify-between bg-white z-30 shadow-xs shrink-0">
+      <div class="flex items-center space-x-3">
+        <button onclick="closeMapPinModal()" class="text-gray-700 text-lg font-bold">←</button>
+        <h3 class="font-extrabold text-sm text-gray-900">Add new address</h3>
+      </div>
+      <span class="text-[11px] text-gray-400 font-semibold">Step 1 of 2</span>
+    </div>
+
+    <div class="relative flex-1 w-full h-full overflow-hidden">
+      <div id="interactive-map" class="absolute inset-0 w-full h-full"></div>
+
+      <!-- Center Fixed Map Pin Overlay -->
+      <div class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center z-20 pb-10">
+        <div class="bg-neutral-900 text-white font-bold text-[10px] px-3 py-1 rounded-full shadow-xl mb-1.5 animate-bounce">
+          Place pin on the exact location
         </div>
-        <div>
-          <label class="font-semibold block mb-1">Category *</label>
-          <select id="prod-category" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 bg-white">
-            <option value="Sparklers">Sparklers</option>
-            <option value="Sound Crackers">Sound Crackers</option>
-            <option value="Ground Chakkars">Ground Chakkars</option>
-            <option value="Flower Pots">Flower Pots</option>
-            <option value="Sky Shots">Sky Shots</option>
-            <option value="Gift Boxes">Gift Boxes</option>
-          </select>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="font-semibold block mb-1">MRP (₹) *</label>
-            <input id="prod-mrp" type="number" placeholder="100" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600" />
-          </div>
-          <div>
-            <label class="font-semibold block mb-1">Offer Price (₹) *</label>
-            <input id="prod-price" type="number" placeholder="75" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-red-600 font-bold text-red-600" />
-          </div>
-        </div>
-        <div>
-          <label class="font-semibold block mb-1">Photo from Gallery</label>
-          <input id="prod-gallery-file" type="file" accept="image/*" onchange="previewGalleryImage(event)" class="w-full border rounded-lg p-2 text-xs bg-gray-50 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-gray-200" />
-          <div id="image-preview-box" class="mt-2 hidden flex items-center space-x-2 p-1 border rounded-lg bg-gray-50">
-            <img id="preview-img" class="w-10 h-10 object-cover rounded" />
-            <span class="text-[10px] text-emerald-700 font-semibold">Photo selected ✓</span>
-          </div>
-        </div>
-        <button type="button" onclick="handleSaveProduct()" id="save-prod-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs mt-3 shadow-sm active:scale-95 transition">
-          Save Cracker to Store
+        <div class="text-red-600 text-4xl drop-shadow-lg">📍</div>
+      </div>
+
+      <!-- Floating "Use My Current Location" GPS Pill Overlay -->
+      <div class="absolute bottom-5 inset-x-0 flex justify-center z-20 px-4 pointer-events-auto">
+        <button type="button" onclick="triggerGPSCurrentLocation()" id="btn-use-gps-pill" class="bg-white hover:bg-gray-50 text-blue-600 border border-blue-200 font-extrabold text-xs px-5 py-3 rounded-full shadow-2xl flex items-center space-x-2 active:scale-95 transition">
+          <span class="text-sm">🎯</span>
+          <span id="gps-pill-text">Use my current location</span>
         </button>
       </div>
     </div>
+
+    <!-- Bottom Detected Location Card -->
+    <div class="bg-white border-t p-4 space-y-3 z-30 shadow-lg shrink-0">
+      <div>
+        <span class="text-[10px] text-gray-400 font-bold uppercase block">Deliver To</span>
+        <div class="flex justify-between items-start mt-0.5">
+          <div class="pr-2 flex-1 min-w-0">
+            <h4 id="map-detected-title" class="font-extrabold text-gray-900 text-xs truncate">Locating area...</h4>
+            <p id="map-detected-full" class="text-[11px] text-gray-500 line-clamp-2 mt-0.5">Move pin to your exact delivery building or house</p>
+          </div>
+          <span id="map-zone-rate-pill" class="bg-emerald-50 text-emerald-700 font-bold text-[10px] px-2.5 py-1 rounded-full shrink-0">Checking rate...</span>
+        </div>
+      </div>
+
+      <button type="button" onclick="proceedToAddressDetailsForm()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-xs shadow-md active:scale-95 transition">
+        Add address Details
+      </button>
+    </div>
   </div>
 
-  <!-- ================= JAVASCRIPT ENGINE ================= -->
+  <!-- ================= DELIVER TO DETAILS FORM ================= -->
+  <div id="address-form-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-2xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl flex flex-col space-y-3.5 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="text-sm font-extrabold text-gray-900">Deliver To</h3>
+        <button onclick="closeAddressFormModal()" class="text-gray-400 hover:text-black text-2xl font-bold">&times;</button>
+      </div>
+
+      <div class="bg-amber-50 text-amber-800 text-[10px] p-2 rounded-xl flex items-center space-x-1 border border-amber-200">
+        <span>ℹ️</span>
+        <span>Enter your building/flat details so our delivery boy reaches you easily.</span>
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-bold text-gray-700 mb-0.5">Flat/House/building name *</label>
+        <input id="input-house-no" type="text" placeholder="e.g. D.No 12/4, Near Water Tank" class="w-full border border-gray-300 rounded-lg p-2.5 text-xs outline-none focus:border-blue-600" />
+      </div>
+
+      <div class="bg-gray-50 border rounded-xl p-2.5 flex justify-between items-center text-xs">
+        <div>
+          <span class="text-[9px] font-bold text-gray-400 uppercase block">Area / Locality</span>
+          <p id="form-locality-text" class="font-semibold text-gray-800 text-[11px] truncate max-w-[240px]">---</p>
+        </div>
+        <button type="button" onclick="reopenMapPicker()" class="text-blue-600 font-bold text-xs hover:underline">Change</button>
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-bold text-gray-700 mb-0.5">Enter your full name *</label>
+        <input id="input-name" type="text" placeholder="Full Name" class="w-full border border-gray-300 rounded-lg p-2.5 text-xs outline-none focus:border-blue-600" />
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold text-gray-700 mb-0.5">10-digit mobile number *</label>
+        <input id="input-phone" type="tel" placeholder="Mobile Number" class="w-full border border-gray-300 rounded-lg p-2.5 text-xs outline-none focus:border-blue-600" />
+      </div>
+
+      <div>
+        <span class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Type of address</span>
+        <div class="flex space-x-2 text-xs">
+          <label class="flex items-center space-x-1.5 border px-3 py-1.5 rounded-lg cursor-pointer bg-blue-50 border-blue-300 text-blue-700 font-bold">
+            <input type="radio" name="addr-type" value="Home" checked class="hidden" />
+            <span>🏠 Home</span>
+          </label>
+          <label class="flex items-center space-x-1.5 border px-3 py-1.5 rounded-lg cursor-pointer bg-gray-50 text-gray-700 font-medium">
+            <input type="radio" name="addr-type" value="Work" class="hidden" />
+            <span>🏢 Work</span>
+          </label>
+        </div>
+      </div>
+
+      <button type="button" onclick="saveAndApplyAddress()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-xs shadow-md active:scale-95 transition">
+        Save address
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
     const SUPABASE_URL = "https://lqfrjlznszxexqmliupd.supabase.co";
     const SUPABASE_KEY = "sb_publishable_npJ_6_c3o1RRCRgaLVLpxg_RizK86NU";
-    window.db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const KAVALI_BASE_COORDS = { lat: 14.9132, lon: 79.9928 };
+    let storeWhatsAppNumber = "917829978883";
 
-    let currentImageData = 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300';
-    let productsList = [];
-    let ordersList = [];
-    let teamList = [];
-    let generatedOtp = null;
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    function sanitizeCustomerWhatsAppNumber(rawPhone) {
-      if (!rawPhone) return "";
-      let cleaned = rawPhone.toString().replace(/\D/g, '');
-      if (cleaned.startsWith('0')) cleaned = cleaned.replace(/^0+/, '');
-      if (cleaned.length === 10) cleaned = '91' + cleaned;
-      return cleaned;
-    }
+    let allProducts = [];
+    let deliveryZones = [];
+    let cart = [];
+    let activeCategory = 'All';
+    let currentViewMode = 'medium'; // 'big' | 'medium' | 'small'
+    let currentSort = 'popular';
 
-    // 1. AUTHENTICATION & LOGIN FLOW
-    function switchLoginMode(mode) {
-      if (mode === 'otp') {
-        document.getElementById('standard-login-box').classList.add('hidden');
-        document.getElementById('otp-login-box').classList.remove('hidden');
-      } else {
-        document.getElementById('otp-login-box').classList.add('hidden');
-        document.getElementById('standard-login-box').classList.remove('hidden');
-      }
-    }
+    let savedAddresses = [];
+    let selectedAddress = null;
 
-    async function performLogin() {
-      const user = document.getElementById('login-id').value.trim();
-      const pass = document.getElementById('login-pass').value.trim();
-      const errBox = document.getElementById('login-error');
+    let leafletMap = null;
+    let tempMapCoords = { ...KAVALI_BASE_COORDS };
+    let tempDetectedInfo = { areaName: "Kavali", fullAddress: "Kavali, Andhra Pradesh", zoneName: "Local", deliveryCharge: 0 };
 
-      if (!user || !pass) {
-        errBox.innerText = 'Please enter your username and password.';
-        errBox.classList.remove('hidden');
-        return;
+    async function init() {
+      const stored = localStorage.getItem('bittu_saved_addresses');
+      if (stored) {
+        try {
+          savedAddresses = JSON.parse(stored);
+          if (savedAddresses.length > 0) selectedAddress = savedAddresses[0];
+        } catch(e) {}
       }
 
-      // Hardcoded fallback for primary super admin
-      if ((user === 'bittu_admin' || user === 'admin@bittucrackers.in') && pass === 'admin@bittu123') {
-        revealDashboard({ username: 'bittu_admin', first_name: 'Bittu', last_name: 'Kumar', email: 'admin@bittucrackers.in', role: 'Super Admin' });
-        return;
-      }
+      const { data: zData } = await db.from('delivery_zones').select('*');
+      deliveryZones = zData && zData.length > 0 ? zData : [
+        { zone_name: 'Kavali City & Town (Local)', area_keywords: 'kavali, vengal, musunuru, maddurupadu, rudrakota', delivery_charge: 0 },
+        { zone_name: 'Kavali Rural & Mandals', area_keywords: 'bogole, bitragunta, jaladanki, allur, dagadarthi, kaligiri, vinjamur', delivery_charge: 99 },
+        { zone_name: 'Nellore City & Towns', area_keywords: 'nellore, kovur, buchi, buchireddypalem, atmakur, udayagiri', delivery_charge: 150 },
+        { zone_name: 'Other District Border Areas', area_keywords: 'kandukur, singarayakonda, gudur, naidupeta', delivery_charge: 199 }
+      ];
 
-      // Secure RPC verification
-      const { data, error } = await window.db.rpc('verify_admin_login', {
-        p_user: user,
-        p_pass: pass
-      });
+      const { data: sData } = await db.from('store_settings').select('*').eq('id', 1).single();
+      if (sData && sData.whatsapp_number) storeWhatsAppNumber = sData.whatsapp_number.replace(/\D/g, '');
 
-      if (data && data.length > 0) {
-        revealDashboard(data[0]);
-      } else {
-        errBox.innerText = 'Invalid username/email or password.';
-        errBox.classList.remove('hidden');
-      }
+      updateAddressUI();
+      loadLiveProducts();
     }
 
-    async function loginWithBiometrics() {
-      if (!window.PublicKeyCredential) {
-        return alert('Biometric Face Unlock is not supported on this browser. Please use standard password or OTP.');
-      }
-      try {
-        const challenge = new Uint8Array(32);
-        window.crypto.getRandomValues(challenge);
-        const cred = await navigator.credentials.get({
-          publicKey: {
-            challenge: challenge,
-            timeout: 60000,
-            userVerification: "required"
-          }
-        });
-        if (cred) {
-          revealDashboard({ username: 'bittu_admin', first_name: 'Bittu', last_name: 'Kumar', email: 'admin@bittucrackers.in', role: 'Super Admin' });
-        }
-      } catch (err) {
-        alert('Biometric verification cancelled or unavailable. Sign in using password or OTP.');
-      }
+    function handleTopLocationClick() {
+      if (savedAddresses.length === 0) startAddNewAddressFlow();
+      else openAddressSelectModal();
     }
 
-    function handleSendOtp() {
-      const phoneInput = document.getElementById('otp-phone').value.trim();
-      if (!phoneInput) return alert('Please enter your phone number or username.');
+    function updateAddressUI() {
+      const topName = document.getElementById('top-loc-name');
+      const topDesc = document.getElementById('top-loc-desc');
+      const cardContent = document.getElementById('address-card-content');
 
-      const codeBox = document.getElementById('otp-input-group');
-      const btn = document.getElementById('btn-send-otp');
+      if (selectedAddress) {
+        topName.innerText = selectedAddress.name + ' - ' + (selectedAddress.house || selectedAddress.area.split(',')[0]);
+        topDesc.innerText = selectedAddress.area;
 
-      if (codeBox.classList.contains('hidden')) {
-        generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-        alert(`Verification Code for ${phoneInput}: ${generatedOtp}`);
-        codeBox.classList.remove('hidden');
-        btn.innerText = 'Verify & Sign In';
-      } else {
-        const entered = document.getElementById('otp-code').value.trim();
-        if (entered === generatedOtp) {
-          revealDashboard({ username: phoneInput, first_name: 'Admin', role: 'Admin' });
-        } else {
-          alert('Incorrect OTP. Please try again.');
-        }
-      }
-    }
-
-    function showForgotPasswordModal() {
-      document.getElementById('forgot-modal').style.display = 'flex';
-    }
-
-    function handleSelfResetRequest() {
-      const id = document.getElementById('forgot-input-id').value.trim();
-      if (!id) return alert('Enter your username or email.');
-      const tempPass = Math.random().toString(36).substring(2, 8);
-      alert(`Temporary password generated for ${id}: ${tempPass}\nSuper Admin has been notified.`);
-      document.getElementById('forgot-modal').style.display = 'none';
-    }
-
-    function revealDashboard(user) {
-      localStorage.setItem('admin_session', JSON.stringify(user));
-      document.getElementById('auth-modal').style.display = 'none';
-      document.getElementById('admin-layout').style.display = 'flex';
-      document.getElementById('current-user-name').innerText = user.first_name + ' ' + (user.last_name || '');
-      document.getElementById('current-user-role').innerText = user.role || 'Admin';
-      loadDashboardMetrics();
-    }
-
-    function checkSession() {
-      const session = localStorage.getItem('admin_session');
-      if (session) {
-        try { revealDashboard(JSON.parse(session)); } catch (e) { localStorage.removeItem('admin_session'); }
-      }
-    }
-
-    function handleLogout() {
-      localStorage.removeItem('admin_session');
-      window.location.reload();
-    }
-
-    // 2. NAVIGATION
-    function navigate(tabName) {
-      document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
-      document.querySelectorAll('.nav-item').forEach(b => {
-        b.className = 'nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-gray-400 hover:text-white';
-      });
-
-      document.getElementById('view-' + tabName).classList.remove('hidden');
-      const activeBtn = document.getElementById('nav-' + tabName);
-      if (activeBtn) activeBtn.className = 'nav-item w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-600 text-white';
-
-      if (tabName === 'dashboard') loadDashboardMetrics();
-      if (tabName === 'orders') loadOrders();
-      if (tabName === 'products') loadProducts();
-      if (tabName === 'price-sheet') loadPriceSheet();
-      if (tabName === 'team-profile') loadTeamAndProfile();
-      if (tabName === 'store-settings') loadStoreSettings();
-    }
-
-    // 3. DASHBOARD METRICS
-    async function loadDashboardMetrics() {
-      try {
-        const { data: oData } = await window.db.from('orders').select('*').order('created_at', { ascending: false });
-        ordersList = oData || [];
-
-        const { data: pData } = await window.db.from('products').select('*');
-        productsList = pData || [];
-
-        const today = new Date().toISOString().slice(0, 10);
-        const todayCount = ordersList.filter(o => o.created_at && o.created_at.startsWith(today)).length;
-        const pendingCount = ordersList.filter(o => o.status === 'Pending').length;
-        const totalRev = ordersList.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
-
-        document.getElementById('stat-today').innerText = todayCount;
-        document.getElementById('stat-pending').innerText = pendingCount;
-        document.getElementById('stat-revenue').innerText = '₹' + totalRev;
-        document.getElementById('stat-products-count').innerText = productsList.length;
-
-        const recDiv = document.getElementById('dashboard-recent-orders');
-        recDiv.innerHTML = ordersList.slice(0, 5).map(o => `
-          <div class="py-3 flex justify-between items-center">
-            <div>
-              <p class="font-bold text-gray-900">#${o.id.toString().slice(0, 8)} • ${o.customer_name}</p>
-              <p class="text-[11px] text-gray-500">${o.customer_phone || ''} • ${o.delivery_location || 'Standard Delivery'}</p>
-            </div>
-            <div class="text-right">
-              <span class="font-bold text-gray-900">₹${o.total_amount}</span>
-              <span class="block text-[10px] uppercase font-bold ${o.status === 'Confirmed' ? 'text-emerald-600' : 'text-amber-600'}">${o.status || 'Pending'}</span>
+        cardContent.innerHTML = `
+          <div class="flex items-start space-x-2">
+            <span class="text-gray-900 mt-0.5 text-sm">📍</span>
+            <div class="flex-1 text-xs">
+              <h3 class="font-extrabold text-gray-900 text-sm">${selectedAddress.name}</h3>
+              <p class="text-gray-600 mt-0.5 leading-relaxed">${selectedAddress.house ? selectedAddress.house + ', ' : ''}${selectedAddress.area}</p>
+              <p class="text-gray-500 mt-1 font-semibold">📞 ${selectedAddress.phone}</p>
             </div>
           </div>
-        `).join('') || '<p class="py-4 text-center text-gray-400">No orders received yet.</p>';
-      } catch (e) {
-        console.error(e);
+        `;
+        document.getElementById('delivery-zone-badge').innerText = selectedAddress.zoneName || 'Local';
+      } else {
+        topName.innerText = "Add Delivery Address";
+        topDesc.innerText = "Tap to set GPS location for delivery";
+
+        cardContent.innerHTML = `
+          <div onclick="startAddNewAddressFlow()" class="p-3 border-2 border-dashed border-blue-300 rounded-xl bg-blue-50/50 text-center cursor-pointer">
+            <span class="text-blue-600 font-bold text-xs">+ Tap to Add Delivery Address</span>
+          </div>
+        `;
+        document.getElementById('delivery-zone-badge').innerText = "Not set";
+      }
+
+      renderSavedAddressesList();
+      updateTotal();
+    }
+
+    function renderSavedAddressesList() {
+      const container = document.getElementById('saved-addresses-list');
+      if (savedAddresses.length === 0) {
+        container.innerHTML = '<p class="text-xs text-gray-400 py-3 text-center">No saved addresses yet. Tap "+ Add New Address" above.</p>';
+        return;
+      }
+      container.innerHTML = savedAddresses.map(a => `
+        <div onclick="selectAddressById('${a.id}')" class="p-3 border rounded-xl cursor-pointer flex items-start justify-between ${selectedAddress && selectedAddress.id === a.id ? 'border-blue-500 bg-blue-50/50' : 'bg-white hover:bg-gray-50'}">
+          <div class="flex items-start space-x-2.5">
+            <span class="text-base text-gray-700 mt-0.5">📍</span>
+            <div class="text-xs">
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-gray-900">${a.name}</span>
+                ${selectedAddress && selectedAddress.id === a.id ? '<span class="bg-blue-100 text-blue-700 font-bold text-[9px] px-1.5 py-0.2 rounded">Selected</span>' : ''}
+              </div>
+              <p class="text-gray-600 mt-0.5 text-[11px]">${a.house ? a.house + ', ' : ''}${a.area}</p>
+              <p class="text-gray-500 font-semibold mt-0.5 text-[11px]">📞 ${a.phone}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectAddressById(id) {
+      const matched = savedAddresses.find(a => a.id === id);
+      if (matched) {
+        selectedAddress = matched;
+        updateAddressUI();
+        closeAddressSelectModal();
       }
     }
 
-    // 4. ORDERS TAB (DIRECT WHATSAPP + DELETE ACTION)
-    async function loadOrders() {
-      const { data } = await window.db.from('orders').select('*').order('created_at', { ascending: false });
-      ordersList = data || [];
-      const tbody = document.getElementById('orders-table');
+    function openAddressSelectModal() { document.getElementById('address-select-modal').classList.remove('hidden'); }
+    function closeAddressSelectModal() { document.getElementById('address-select-modal').classList.add('hidden'); }
 
-      if (ordersList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-400">No orders placed yet.</td></tr>';
+    // ================= MAP PIN PICKER =================
+    function startAddNewAddressFlow() {
+      closeAddressSelectModal();
+      document.getElementById('map-pin-modal').classList.remove('hidden');
+
+      setTimeout(() => {
+        initMapPicker();
+        triggerGPSCurrentLocation();
+      }, 250);
+    }
+
+    function closeMapPinModal() { document.getElementById('map-pin-modal').classList.add('hidden'); }
+
+    function initMapPicker() {
+      const startLat = (selectedAddress && selectedAddress.lat) || KAVALI_BASE_COORDS.lat;
+      const startLon = (selectedAddress && selectedAddress.lon) || KAVALI_BASE_COORDS.lon;
+      tempMapCoords = { lat: startLat, lon: startLon };
+
+      if (!leafletMap) {
+        leafletMap = L.map('interactive-map', { zoomControl: false }).setView([startLat, startLon], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
+
+        leafletMap.on('moveend', function() {
+          const center = leafletMap.getCenter();
+          tempMapCoords = { lat: center.lat, lon: center.lng };
+          reverseGeocodeMapCenter(center.lat, center.lng);
+        });
+      }
+
+      leafletMap.invalidateSize();
+      leafletMap.setView([startLat, startLon], 16);
+      reverseGeocodeMapCenter(startLat, startLon);
+    }
+
+    function triggerGPSCurrentLocation() {
+      const pillText = document.getElementById('gps-pill-text');
+      pillText.innerText = "Finding your GPS location...";
+
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        tempMapCoords = { lat, lon };
+
+        if (leafletMap) {
+          leafletMap.invalidateSize();
+          leafletMap.setView([lat, lon], 17);
+        }
+        reverseGeocodeMapCenter(lat, lon);
+        pillText.innerText = "Use my current location";
+      }, (err) => {
+        pillText.innerText = "Use my current location";
+        alert("Please enable GPS location permission in your browser.");
+      }, { enableHighAccuracy: true, timeout: 8000 });
+    }
+
+    async function reverseGeocodeMapCenter(lat, lon) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+        const data = await res.json();
+        const addr = data.address || {};
+
+        const areaTitle = addr.suburb || addr.neighbourhood || addr.village || addr.road || addr.town || addr.city || "Detected Area";
+        const district = addr.county || addr.city_district || addr.state_district || "";
+        const state = addr.state || "";
+        const pincode = addr.postcode ? ` - ${addr.postcode}` : "";
+
+        const addressParts = [areaTitle, district, state].filter(Boolean);
+        const fullAddress = addressParts.join(', ') + pincode;
+
+        const zoneInfo = evaluateDeliveryCharge(fullAddress, lat, lon);
+
+        tempDetectedInfo = {
+          areaName: areaTitle,
+          fullAddress: fullAddress,
+          zoneName: zoneInfo.zoneName,
+          deliveryCharge: zoneInfo.charge
+        };
+
+        document.getElementById('map-detected-title').innerText = areaTitle;
+        document.getElementById('map-detected-full').innerText = fullAddress;
+        document.getElementById('map-zone-rate-pill').innerText = zoneInfo.charge === 0 ? "FREE Delivery" : `₹${zoneInfo.charge} Delivery`;
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    function evaluateDeliveryCharge(addressString, lat, lon) {
+      const lower = addressString.toLowerCase();
+      for (const z of deliveryZones) {
+        const keys = (z.area_keywords || '').split(',').map(k => k.trim().toLowerCase());
+        if (keys.some(k => k && lower.includes(k))) {
+          return { zoneName: z.zone_name, charge: Number(z.delivery_charge || 0) };
+        }
+      }
+      return { zoneName: "Regional Delivery", charge: 99 };
+    }
+
+    function proceedToAddressDetailsForm() {
+      closeMapPinModal();
+      document.getElementById('form-locality-text').innerText = tempDetectedInfo.fullAddress;
+      document.getElementById('input-name').value = selectedAddress ? selectedAddress.name : "";
+      document.getElementById('input-phone').value = selectedAddress ? selectedAddress.phone : "";
+      document.getElementById('input-house-no').value = "";
+      document.getElementById('address-form-modal').classList.remove('hidden');
+    }
+
+    function closeAddressFormModal() { document.getElementById('address-form-modal').classList.add('hidden'); }
+    function reopenMapPicker() {
+      closeAddressFormModal();
+      document.getElementById('map-pin-modal').classList.remove('hidden');
+      setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 200);
+    }
+
+    function saveAndApplyAddress() {
+      const houseNo = document.getElementById('input-house-no').value.trim();
+      const name = document.getElementById('input-name').value.trim();
+      const phone = document.getElementById('input-phone').value.trim();
+
+      if (!houseNo) return alert("Please enter Flat / House / Building name.");
+      if (!name) return alert("Please enter your name.");
+      if (!phone || phone.length < 10) return alert("Please enter a valid 10-digit mobile number.");
+
+      const newAddr = {
+        id: "addr_" + Date.now(),
+        name: name,
+        phone: phone,
+        house: houseNo,
+        area: tempDetectedInfo.fullAddress,
+        lat: tempMapCoords.lat,
+        lon: tempMapCoords.lon,
+        zoneName: tempDetectedInfo.zoneName,
+        deliveryCharge: tempDetectedInfo.deliveryCharge
+      };
+
+      savedAddresses.unshift(newAddr);
+      selectedAddress = newAddr;
+      localStorage.setItem('bittu_saved_addresses', JSON.stringify(savedAddresses));
+
+      updateAddressUI();
+      closeAddressFormModal();
+    }
+
+    // CART VIEW
+    function openCartView() {
+      renderCartItems();
+      updateTotal();
+      document.getElementById('cart-modal').classList.remove('hidden');
+    }
+
+    function closeCartView() { document.getElementById('cart-modal').classList.add('hidden'); }
+
+    function renderCartItems() {
+      const container = document.getElementById('cart-items-list');
+      if (cart.length === 0) {
+        container.innerHTML = '<p class="text-xs text-gray-400 text-center py-6">Your cart is empty.</p>';
         return;
       }
 
-      tbody.innerHTML = ordersList.map(o => {
-        const customerWaPhone = sanitizeCustomerWhatsAppNumber(o.customer_phone);
-        const waMessage = encodeURIComponent(`Hello ${o.customer_name}, regarding your Bittu Crackers booking #${o.id.toString().slice(0, 8)} of ₹${o.total_amount}.`);
-        const waLink = customerWaPhone ? `https://wa.me/${customerWaPhone}?text=${waMessage}` : '#';
+      container.innerHTML = cart.map(item => `
+        <div class="py-2.5 flex items-center justify-between text-xs">
+          <div class="flex-1 pr-2">
+            <h4 class="font-bold text-gray-900 leading-tight">${item.name}</h4>
+            <div class="flex items-center space-x-1.5 mt-0.5">
+              <span class="font-extrabold text-red-600">₹${item.offer_price}</span>
+              <span class="line-through text-gray-400 text-[10px]">₹${item.mrp}</span>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden h-7">
+              <button onclick="updateItemQty('${item.id}', -1)" class="w-6 h-full font-black text-gray-600 hover:bg-gray-100 flex items-center justify-center">−</button>
+              <span class="font-bold text-xs px-2 text-gray-900">${item.qty}</span>
+              <button onclick="updateItemQty('${item.id}', 1)" class="w-6 h-full font-black text-gray-600 hover:bg-gray-100 flex items-center justify-center">+</button>
+            </div>
+            <span class="font-black text-xs text-gray-900 w-12 text-right">₹${item.offer_price * item.qty}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateTotal() {
+      const itemsCount = cart.reduce((sum, i) => sum + i.qty, 0);
+      const mrpSubtotal = cart.reduce((sum, i) => sum + (Number(i.mrp || i.offer_price) * i.qty), 0);
+      const offerSubtotal = cart.reduce((sum, i) => sum + (Number(i.offer_price) * i.qty), 0);
+      const discount = mrpSubtotal - offerSubtotal;
+      const deliveryFee = selectedAddress ? Number(selectedAddress.deliveryCharge || 0) : 0;
+      const grandTotal = offerSubtotal + deliveryFee;
+
+      document.getElementById('cart-count').innerText = itemsCount;
+      document.getElementById('summary-items-count').innerText = itemsCount;
+      document.getElementById('summary-mrp-total').innerText = `₹${mrpSubtotal.toFixed(0)}`;
+      document.getElementById('summary-discount-val').innerText = `- ₹${discount.toFixed(0)}`;
+      document.getElementById('summary-delivery-charge').innerText = deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`;
+      document.getElementById('summary-grand-total').innerText = `₹${grandTotal.toFixed(0)}`;
+      document.getElementById('bottom-bar-total').innerText = `₹${grandTotal.toFixed(0)}`;
+      document.getElementById('summary-savings-text').innerText = `₹${discount.toFixed(0)}`;
+    }
+
+    // CHECKOUT CONFIRMATION
+    async function confirmOrderAndWhatsApp() {
+      if (cart.length === 0) return alert("Your cart is empty. Please add items.");
+      if (!selectedAddress) {
+        alert("Please add and confirm your delivery address before placing your order.");
+        startAddNewAddressFlow();
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit-order');
+      btn.disabled = true;
+      btn.innerText = "Creating Booking...";
+
+      const orderId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const itemsCount = cart.reduce((sum, i) => sum + i.qty, 0);
+      const offerSubtotal = cart.reduce((sum, i) => sum + (Number(i.offer_price) * i.qty), 0);
+      const deliveryFee = Number(selectedAddress.deliveryCharge || 0);
+      const grandTotal = offerSubtotal + deliveryFee;
+      const mapPinUrl = `https://maps.google.com/?q=${selectedAddress.lat},${selectedAddress.lon}`;
+      const fullAddr = `${selectedAddress.house ? selectedAddress.house + ', ' : ''}${selectedAddress.area}`;
+
+      try {
+        await db.from('orders').insert([{
+          id: orderId,
+          customer_name: selectedAddress.name,
+          customer_phone: selectedAddress.phone,
+          delivery_address: fullAddr,
+          delivery_location: `${selectedAddress.zoneName} (${mapPinUrl})`,
+          delivery_fee: deliveryFee,
+          total_amount: grandTotal,
+          items: cart,
+          status: 'Confirmed'
+        }]);
+
+        const itemLines = cart.map(i => `• ${i.name} (x${i.qty}) = ₹${i.offer_price * i.qty}`).join('\n');
+        const message = encodeURIComponent(
+          `*NEW FESTIVAL ORDER #${orderId}*\n` +
+          `---------------------------------\n` +
+          `*Customer Name:* ${selectedAddress.name}\n` +
+          `*Phone:* ${selectedAddress.phone}\n` +
+          `*Delivery Address:* ${fullAddr}\n` +
+          `*Google Maps Pin:* ${mapPinUrl}\n` +
+          `*Delivery Zone:* ${selectedAddress.zoneName}\n` +
+          `---------------------------------\n` +
+          `*Items Ordered (${itemsCount} items):*\n${itemLines}\n` +
+          `---------------------------------\n` +
+          `*Delivery Fee:* ${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}\n` +
+          `*Total Pay on Delivery:* ₹${grandTotal.toFixed(0)}\n\n` +
+          `Please confirm my festival crackers booking! 🎉`
+        );
+
+        window.open(`https://wa.me/${storeWhatsAppNumber}?text=${message}`, '_blank');
+
+        closeCartView();
+        document.getElementById('success-order-id').innerText = '#' + orderId;
+        document.getElementById('success-cust-name').innerText = selectedAddress.name;
+        document.getElementById('success-cust-addr').innerText = fullAddr;
+        document.getElementById('success-total').innerText = `₹${grandTotal.toFixed(0)}`;
+        document.getElementById('order-success-modal').classList.remove('hidden');
+
+        cart = [];
+        renderProducts();
+        updateTotal();
+      } catch (err) {
+        alert("Booking error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Continue & Book on WhatsApp";
+      }
+    }
+
+    function closeSuccessAndShopMore() {
+      document.getElementById('order-success-modal').classList.add('hidden');
+    }
+
+    async function loadLiveProducts() {
+      const { data } = await db.from('products').select('*');
+      if (data) {
+        allProducts = data;
+        renderProducts();
+      }
+    }
+
+    // ================= VIEW SWITCHER (BIG, MEDIUM, SMALL) =================
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      document.querySelectorAll('.view-btn').forEach(b => b.className = "view-btn px-2 py-1 rounded text-gray-600");
+      const activeBtn = document.getElementById('btn-view-' + mode);
+      if (activeBtn) activeBtn.className = "view-btn px-2 py-1 rounded bg-white font-bold text-red-600 shadow-sm";
+      renderProducts();
+    }
+
+    function changeSort(val) { currentSort = val; renderProducts(); }
+
+    function renderProducts() {
+      const container = document.getElementById('product-list');
+      let filtered = activeCategory === 'All' ? [...allProducts] : allProducts.filter(p => p.category === activeCategory);
+
+      if (currentSort === 'price-asc') filtered.sort((a, b) => Number(a.offer_price) - Number(b.offer_price));
+      else if (currentSort === 'price-desc') filtered.sort((a, b) => Number(b.offer_price) - Number(a.offer_price));
+
+      if (filtered.length === 0) {
+        container.className = "w-full";
+        container.innerHTML = '<div class="text-center text-xs text-gray-400 py-12">No products found.</div>';
+        return;
+      }
+
+      if (currentViewMode === 'big') {
+        container.className = "w-full flex flex-col space-y-3.5";
+      } else if (currentViewMode === 'small') {
+        container.className = "w-full grid grid-cols-3 gap-2";
+      } else {
+        container.className = "w-full grid grid-cols-2 gap-2.5";
+      }
+
+      container.innerHTML = filtered.map(p => {
+        const inCartItem = cart.find(c => c.id === p.id);
+        const qty = inCartItem ? inCartItem.qty : 0;
+        const savings = (p.mrp > p.offer_price) ? (p.mrp - p.offer_price) : 0;
+
+        // BIG VIEW
+        if (currentViewMode === 'big') {
+          const bigStepperHtml = qty > 0 ? `
+            <div class="flex items-center border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-8 w-28">
+              <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
+              <span class="font-black text-red-700 text-xs px-2">${qty}</span>
+              <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
+            </div>
+          ` : `
+            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-28 bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
+              + Add
+            </button>
+          `;
+
+          return `
+            <div class="bg-white border border-gray-200 rounded-2xl p-3.5 shadow-xs space-y-2.5 w-full">
+              <div class="relative">
+                <img src="${p.image_url || 'https://placehold.co/400x200?text=Cracker'}" class="w-full h-44 object-cover rounded-xl" />
+                ${savings > 0 ? `<span class="absolute top-2 left-2 bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">Save ₹${savings}</span>` : ''}
+              </div>
+              <div class="flex justify-between items-start pt-1">
+                <div class="flex-1 pr-2">
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${p.category}</span>
+                  <h3 class="font-extrabold text-sm text-gray-900">${p.name}</h3>
+                  <div class="flex items-center space-x-2 mt-1">
+                    <span class="font-black text-red-600 text-base">₹${p.offer_price}</span>
+                    <span class="line-through text-gray-400 text-xs">₹${p.mrp}</span>
+                  </div>
+                </div>
+                <div class="shrink-0 pt-1">
+                  ${bigStepperHtml}
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        // SMALL VIEW
+        if (currentViewMode === 'small') {
+          const smallStepperHtml = qty > 0 ? `
+            <div class="flex items-center justify-between border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-7 w-full">
+              <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-6 h-full flex items-center justify-center font-extrabold text-red-600 text-xs active:scale-95 transition">−</button>
+              <span class="font-black text-red-700 text-[11px] px-1">${qty}</span>
+              <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-6 h-full flex items-center justify-center font-extrabold text-red-600 text-xs active:scale-95 transition">+</button>
+            </div>
+          ` : `
+            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold h-7 rounded-lg text-[11px] border border-red-200 active:scale-95 transition">
+              + Add
+            </button>
+          `;
+
+          return `
+            <div class="bg-white border border-gray-200 rounded-xl p-2 flex flex-col justify-between shadow-xs">
+              <div>
+                <img src="${p.image_url || 'https://placehold.co/150x120?text=Cracker'}" class="w-full h-16 object-cover rounded-lg mb-1.5" />
+                <span class="text-[8px] text-gray-400 uppercase font-black tracking-wider block truncate">${p.category}</span>
+                <h3 class="font-bold text-[11px] leading-tight text-gray-900 line-clamp-2 h-7">${p.name}</h3>
+                <div class="mt-1">
+                  <span class="font-black text-red-600 text-xs">₹${p.offer_price}</span>
+                  <span class="line-through text-gray-400 text-[9px]">₹${p.mrp}</span>
+                </div>
+              </div>
+              <div class="mt-2">
+                ${smallStepperHtml}
+              </div>
+            </div>
+          `;
+        }
+
+        // MEDIUM VIEW
+        const gridQtyButtonHtml = qty > 0 ? `
+          <div class="flex items-center justify-between border-2 border-red-600 bg-red-50 rounded-lg overflow-hidden h-8 w-full">
+            <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
+            <span class="font-black text-red-700 text-xs px-1">${qty}</span>
+            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
+          </div>
+        ` : `
+          <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
+            + Add
+          </button>
+        `;
 
         return `
-          <tr class="hover:bg-gray-50">
-            <td class="p-3 font-mono font-bold text-gray-700">#${o.id.toString().slice(0, 8)}</td>
-            <td class="p-3">
-              <span class="font-semibold text-gray-900 block">${o.customer_name}</span>
-              <span class="text-gray-400 font-mono text-[11px]">${o.customer_phone || 'No phone'}</span>
-            </td>
-            <td class="p-3 text-gray-600 max-w-xs truncate" title="${o.delivery_address || o.delivery_location}">
-              ${o.delivery_address || o.delivery_location || 'Standard Delivery'}
-            </td>
-            <td class="p-3 font-bold text-gray-900">₹${o.total_amount}</td>
-            <td class="p-3">
-              <select onchange="updateOrderStatus('${o.id}', this.value)" class="border rounded px-2 py-1 text-xs font-semibold bg-white outline-none">
-                <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-              </select>
-            </td>
-            <td class="p-3 text-right space-x-2">
-              <a href="${waLink}" target="_blank" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg text-xs font-bold inline-block active:scale-95 transition">
-                WhatsApp
-              </a>
-              <button onclick="deleteOrder('${o.id}', '${o.customer_name}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-2.5 py-1 rounded-lg text-xs font-bold active:scale-95 transition">
-                Delete
-              </button>
-            </td>
-          </tr>
+          <div class="bg-white border border-gray-200 rounded-xl p-3 flex flex-col justify-between shadow-2xs">
+            <div>
+              <img src="${p.image_url || 'https://placehold.co/200x150?text=Cracker'}" class="w-full h-24 object-cover rounded-lg mb-2" />
+              <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${p.category}</div>
+              <h3 class="font-bold text-xs mt-0.5 leading-snug line-clamp-2 h-8">${p.name}</h3>
+              <div class="flex items-center space-x-1.5 mt-1.5">
+                <span class="font-extrabold text-red-600 text-sm">₹${p.offer_price}</span>
+                <span class="line-through text-gray-400 text-[11px]">₹${p.mrp}</span>
+              </div>
+            </div>
+            <div class="mt-2.5">${gridQtyButtonHtml}</div>
+          </div>
         `;
       }).join('');
     }
 
-    async function updateOrderStatus(id, status) {
-      await window.db.from('orders').update({ status }).eq('id', id);
-    }
-
-    async function deleteOrder(id, customerName) {
-      if (!confirm(`Are you sure you want to delete order #${id.slice(0, 8)} for ${customerName}?`)) return;
-      const { error } = await window.db.from('orders').delete().eq('id', id);
-      if (error) alert("Failed to delete order: " + error.message);
-      else {
-        loadOrders();
-        loadDashboardMetrics();
+    function updateItemQty(id, change) {
+      const prod = allProducts.find(p => p.id === id);
+      const existing = cart.find(c => c.id === id);
+      if (existing) {
+        existing.qty += change;
+        if (existing.qty <= 0) cart = cart.filter(c => c.id !== id);
+      } else if (change > 0) {
+        cart.push({ ...prod, qty: 1 });
       }
+      renderProducts();
+      renderCartItems();
+      updateTotal();
     }
 
-    // 5. PRODUCTS & GALLERY PICKER
-    function openProductModal() {
-      document.getElementById('product-modal').style.display = 'flex';
-      document.getElementById('prod-name').focus();
-    }
-
-    function closeProductModal() {
-      document.getElementById('product-modal').style.display = 'none';
-      document.getElementById('image-preview-box').classList.add('hidden');
-      document.getElementById('prod-gallery-file').value = '';
-    }
-
-    function previewGalleryImage(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          const maxDim = 400;
-          let w = img.width, h = img.height;
-          if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
-          else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
-          canvas.width = w; canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          currentImageData = canvas.toDataURL('image/jpeg', 0.7);
-
-          document.getElementById('preview-img').src = currentImageData;
-          document.getElementById('image-preview-box').classList.remove('hidden');
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    async function handleSaveProduct() {
-      const name = document.getElementById('prod-name').value.trim();
-      const category = document.getElementById('prod-category').value;
-      const mrp = Number(document.getElementById('prod-mrp').value);
-      const offer_price = Number(document.getElementById('prod-price').value);
-
-      if (!name) return alert('Please enter a cracker name.');
-      if (!mrp || !offer_price) return alert('Please enter MRP and Offer Price.');
-
-      const { error } = await window.db.from('products').insert([{
-        name, category, mrp, offer_price, image_url: currentImageData
-      }]);
-
-      if (error) alert('Error: ' + error.message);
-      else {
-        closeProductModal();
-        alert('"' + name + '" saved to store!');
-        loadProducts();
-      }
-    }
-
-    async function loadProducts() {
-      const { data } = await window.db.from('products').select('*').order('name');
-      productsList = data || [];
-      document.getElementById('products-table').innerHTML = productsList.map(p => `
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 flex items-center space-x-2.5">
-            <img src="${p.image_url || 'https://placehold.co/40x40?text=Cracker'}" class="w-8 h-8 rounded object-cover border" />
-            <span class="font-bold text-gray-900">${p.name}</span>
-          </td>
-          <td class="p-3 text-gray-500">${p.category}</td>
-          <td class="p-3 font-semibold text-gray-500">₹${p.mrp}</td>
-          <td class="p-3 font-bold text-red-600">₹${p.offer_price}</td>
-          <td class="p-3 text-right">
-            <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:underline font-semibold">Delete</button>
-          </td>
-        </tr>
-      `).join('') || '<tr><td colspan="5" class="p-4 text-center text-gray-400">No products found.</td></tr>';
-    }
-
-    async function deleteProduct(id) {
-      if (!confirm('Delete this cracker?')) return;
-      await window.db.from('products').delete().eq('id', id);
-      loadProducts();
-    }
-
-    // 6. PRICE SHEET & PDF / CSV IMPORT
-    async function loadPriceSheet() {
-      const { data } = await window.db.from('products').select('*').order('name');
-      productsList = data || [];
-      renderPriceSheetTable();
-    }
-
-    function renderPriceSheetTable() {
-      const q = (document.getElementById('price-search').value || '').toLowerCase();
-      const filtered = productsList.filter(p => p.name.toLowerCase().includes(q) || (p.category && p.category.toLowerCase().includes(q)));
-      const tbody = document.getElementById('price-sheet-table');
-
-      tbody.innerHTML = filtered.map(p => {
-        const disc = p.mrp > 0 ? Math.round(((p.mrp - p.offer_price) / p.mrp) * 100) : 0;
-        return `
-          <tr class="hover:bg-gray-50">
-            <td class="p-3 font-semibold text-gray-900">${p.name}</td>
-            <td class="p-3 text-gray-500">${p.category}</td>
-            <td class="p-3"><input type="number" id="ps-mrp-${p.id}" value="${p.mrp}" oninput="recalcDisc('${p.id}')" class="w-16 border rounded p-1 text-xs" /></td>
-            <td class="p-3"><input type="number" id="ps-offer-${p.id}" value="${p.offer_price}" oninput="recalcDisc('${p.id}')" class="w-16 border border-red-300 rounded p-1 text-xs font-bold text-red-600" /></td>
-            <td class="p-3 text-center"><span id="ps-disc-${p.id}" class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full">${disc}% OFF</span></td>
-            <td class="p-3 text-right"><button onclick="saveRowPrice('${p.id}')" class="bg-red-600 text-white text-xs px-2.5 py-1 rounded font-bold">Save</button></td>
-          </tr>
-        `;
-      }).join('') || '<tr><td colspan="6" class="p-4 text-center text-gray-400">No items available. Upload a price sheet or add crackers.</td></tr>';
-    }
-
-    function recalcDisc(id) {
-      const mrp = Number(document.getElementById('ps-mrp-' + id).value);
-      const offer = Number(document.getElementById('ps-offer-' + id).value);
-      const badge = document.getElementById('ps-disc-' + id);
-      if (mrp > 0 && offer > 0) badge.innerText = Math.round(((mrp - offer) / mrp) * 100) + '% OFF';
-    }
-
-    async function saveRowPrice(id) {
-      const mrp = Number(document.getElementById('ps-mrp-' + id).value);
-      const offer_price = Number(document.getElementById('ps-offer-' + id).value);
-      await window.db.from('products').update({ mrp, offer_price }).eq('id', id);
-      alert('Price saved live!');
-    }
-
-    async function handlePriceListFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      alert('Parsing ' + file.name + '...');
-      try {
-        let extractedItems = [];
-        if (file.name.endsWith('.pdf')) {
-          const typedarray = new Uint8Array(await file.arrayBuffer());
-          const pdf = await pdfjsLib.getDocument(typedarray).promise;
-          let fullLines = [];
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            let linesMap = {};
-            content.items.forEach(item => {
-              const y = Math.round(item.transform[5]);
-              if (!linesMap[y]) linesMap[y] = [];
-              linesMap[y].push(item.str.trim());
-            });
-            const sortedYs = Object.keys(linesMap).sort((a, b) => b - a);
-            sortedYs.forEach(y => {
-              const lineText = linesMap[y].join(' ').trim();
-              if (lineText) fullLines.push(lineText);
-            });
-          }
-
-          let currentCat = 'Sparklers';
-          for (const line of fullLines) {
-            if (/sparkler|pot|chakkar|sound|bomb|shot|gift box/i.test(line) && !/\d/.test(line)) {
-              currentCat = line.trim();
-              continue;
-            }
-            const numbers = line.match(/\b\d+(\.\d+)?\b/g);
-            if (numbers && numbers.length >= 2) {
-              const offer = Number(numbers[numbers.length - 1]);
-              const mrp = Number(numbers[numbers.length - 2]);
-              let name = line.replace(/\b\d+(\.\d+)?\b/g, '').replace(/^[0-9\.\-\)\*\/]+/, '').replace(/[₹\$,]/g, '').trim();
-              if (name.length > 2 && mrp > 0) {
-                extractedItems.push({ name, category: currentCat, mrp, offer_price: offer, image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300' });
-              }
-            }
-          }
-        }
-        if (extractedItems.length > 0) {
-          await window.db.from('products').insert(extractedItems);
-          alert(`Imported ${extractedItems.length} products!`);
-          loadPriceSheet();
-        }
-      } catch (err) {
-        alert('File read error: ' + err.message);
-      }
-    }
-
-    // 7. TEAM & PROFILE
-    function openAddAdminModal() { document.getElementById('add-admin-modal').style.display = 'flex'; }
-    function closeAddAdminModal() { document.getElementById('add-admin-modal').style.display = 'none'; }
-
-    async function loadTeamAndProfile() {
-      const session = localStorage.getItem('admin_session');
-      const cur = session ? JSON.parse(session) : { first_name: 'Bittu', last_name: 'Kumar', phone: '9999999999', email: 'admin@bittucrackers.in' };
-      document.getElementById('my-first-name').value = cur.first_name || '';
-      document.getElementById('my-last-name').value = cur.last_name || '';
-      document.getElementById('my-phone').value = cur.phone || '';
-      document.getElementById('my-email').value = cur.email || '';
-
-      const { data } = await window.db.from('admin_users').select('*').order('created_at');
-      teamList = data || [];
-
-      document.getElementById('team-table').innerHTML = teamList.map(u => `
-        <tr>
-          <td class="p-3 font-bold text-gray-900">${u.first_name} ${u.last_name || ''}<br><span class="text-gray-400 font-normal text-[10px]">@${u.username}</span></td>
-          <td class="p-3 text-gray-500">${u.email}<br><span class="text-[10px]">${u.phone || ''}</span></td>
-          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.role === 'Super Admin' ? 'bg-red-100 text-red-700' : u.role === 'Inventory & Delivery Manager' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'}">${u.role || 'Admin'}</span></td>
-          <td class="p-3 text-right">
-            <button onclick="sendPasswordReset('${u.email}', '${u.username}')" class="text-blue-600 font-semibold hover:underline">Reset password</button>
-          </td>
-        </tr>
-      `).join('') || '<tr><td colspan="4" class="p-3 text-center text-gray-400">No extra admins found.</td></tr>';
-    }
-
-    async function saveMyProfile() {
-      const updated = {
-        first_name: document.getElementById('my-first-name').value.trim(),
-        last_name: document.getElementById('my-last-name').value.trim(),
-        phone: document.getElementById('my-phone').value.trim(),
-        email: document.getElementById('my-email').value.trim()
-      };
-      const session = localStorage.getItem('admin_session');
-      const cur = session ? JSON.parse(session) : {};
-      Object.assign(cur, updated);
-      localStorage.setItem('admin_session', JSON.stringify(cur));
-      document.getElementById('current-user-name').innerText = cur.first_name + ' ' + (cur.last_name || '');
-      alert('Profile saved successfully!');
-    }
-
-    async function handleCreateAdmin() {
-      const newAdmin = {
-        username: document.getElementById('new-admin-user').value.trim(),
-        role: document.getElementById('new-admin-role').value,
-        first_name: document.getElementById('new-admin-fname').value.trim(),
-        last_name: document.getElementById('new-admin-lname').value.trim(),
-        email: document.getElementById('new-admin-email').value.trim(),
-        phone: document.getElementById('new-admin-phone').value.trim(),
-        password_hash: document.getElementById('new-admin-pass').value.trim()
-      };
-
-      if (!newAdmin.username || !newAdmin.first_name || !newAdmin.email || !newAdmin.password_hash) {
-        return alert('Please fill in username, first name, email and password.');
-      }
-
-      const { error } = await window.db.from('admin_users').insert([newAdmin]);
-      if (error) alert('Could not create admin: ' + error.message);
-      else {
-        alert(`Admin @${newAdmin.username} added successfully!`);
-        closeAddAdminModal();
-        loadTeamAndProfile();
-      }
-    }
-
-    function sendPasswordReset(email, username) {
-      const newPass = prompt('Set a new password for ' + username + ':');
-      if (newPass) {
-        window.db.from('admin_users').update({ password_hash: newPass }).eq('email', email).then(() => {
-          alert('Password updated for ' + username + '!');
-        });
-      }
-    }
-
-    // 8. STORE SETTINGS
-    async function loadStoreSettings() {
-      const { data } = await window.db.from('store_settings').select('*').eq('id', 1).single();
-      if (data) {
-        document.getElementById('cfg-name').value = data.store_name || 'BITTU CRACKERS';
-        document.getElementById('cfg-wa').value = data.whatsapp_number || '+917829978883';
-        document.getElementById('cfg-phone-1').value = data.phone_1 || '7829978883';
-        document.getElementById('cfg-phone-2').value = data.phone_2 || '';
-        document.getElementById('cfg-phone-3').value = data.phone_3 || '';
-        document.getElementById('cfg-address').value = data.shop_address || 'Vengal Rao Nagar, Kavali, SPSR Nellore District, Andhra Pradesh - 524201';
-      }
-    }
-
-    async function saveStoreSettings() {
-      const btn = document.getElementById('btn-save-settings');
-      btn.innerText = 'Saving...';
-      btn.disabled = true;
-
-      const store_name = document.getElementById('cfg-name').value.trim();
-      const whatsapp_number = document.getElementById('cfg-wa').value.trim();
-      const phone_1 = document.getElementById('cfg-phone-1').value.trim();
-      const phone_2 = document.getElementById('cfg-phone-2').value.trim();
-      const phone_3 = document.getElementById('cfg-phone-3').value.trim();
-      const shop_address = document.getElementById('cfg-address').value.trim();
-
-      const { error } = await window.db.from('store_settings').upsert({
-        id: 1,
-        store_name,
-        whatsapp_number,
-        display_phone: phone_1,
-        phone_1, phone_2, phone_3,
-        shop_address
+    function filterCategory(cat) {
+      activeCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.className = btn.innerText === cat 
+          ? "cat-btn bg-red-600 text-white px-3.5 py-1.5 rounded-full font-bold" 
+          : "cat-btn bg-gray-100 text-gray-700 px-3.5 py-1.5 rounded-full font-medium";
       });
-
-      if (error) alert('Error saving settings: ' + error.message);
-      else alert('Store settings saved successfully!');
-
-      btn.innerText = 'Save Store Settings';
-      btn.disabled = false;
+      renderProducts();
     }
 
-    checkSession();
+    init();
   </script>
 </body>
 </html>
