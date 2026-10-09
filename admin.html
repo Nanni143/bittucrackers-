@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- PDF & Excel Parsing Engines -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
@@ -60,7 +61,7 @@
   <!-- ================= MAIN ADMIN DASHBOARD ================= -->
   <div id="admin-layout" style="display: none;" class="h-screen w-screen flex flex-col md:flex-row overflow-hidden">
     
-    <!-- LEFT SIDEBAR -->
+    <!-- LEFT SIDEBAR: FIXED INDEPENDENT SCROLL -->
     <aside class="w-full md:w-64 bg-neutral-900 text-white flex flex-col justify-between shrink-0 p-4 border-r border-neutral-800 h-full overflow-y-auto">
       <div>
         <div class="flex items-center space-x-2.5 pb-5 border-b border-neutral-800 mb-5">
@@ -107,7 +108,7 @@
       </div>
     </aside>
 
-    <!-- RIGHT VIEWPORT -->
+    <!-- RIGHT VIEWPORT: INDEPENDENT SCROLL -->
     <main class="flex-1 p-4 md:p-8 h-full overflow-y-auto">
       <div class="max-w-6xl mx-auto space-y-6">
 
@@ -241,11 +242,16 @@
           </div>
         </section>
 
-        <!-- ================= 3. INVENTORY & STOCK MANAGEMENT TAB ================= -->
+        <!-- ================= 3. INVENTORY & STOCK MANAGEMENT TAB (FIXED LOADING - IMAGE 2) ================= -->
         <section id="view-inventory" class="tab-view space-y-6 hidden">
-          <div>
-            <h1 class="text-2xl font-black text-stone-950">Inventory & Stock Tracking</h1>
-            <p class="text-xs text-stone-500">Monitor current stock, units sold, out-of-stock alerts, and adjust stock directly.</p>
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+            <div>
+              <h1 class="text-2xl font-black text-stone-950">Inventory & Stock Tracking</h1>
+              <p class="text-xs text-stone-500">Monitor current stock, units sold, out-of-stock alerts, and adjust stock directly.</p>
+            </div>
+            <button onclick="refreshInventoryData()" class="bg-stone-200 hover:bg-stone-300 text-stone-800 px-3 py-1.5 rounded-xl text-xs font-bold active:scale-95 transition">
+              🔄 Reload Inventory Data
+            </button>
           </div>
 
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -283,7 +289,9 @@
                   <th class="p-3 text-right">Quick Stock Adjustment</th>
                 </tr>
               </thead>
-              <tbody id="inventory-table" class="divide-y divide-stone-100"></tbody>
+              <tbody id="inventory-table" class="divide-y divide-stone-100">
+                <tr><td colspan="6" class="p-6 text-center text-stone-400">Loading stock data...</td></tr>
+              </tbody>
             </table>
           </div>
         </section>
@@ -337,7 +345,7 @@
                   <span>📍</span>
                   <span>Delivery Rate Fixer (By Area & Pincode)</span>
                 </h2>
-                <p class="text-xs text-stone-500">Configure delivery charges, import files, review previews, and clear uploaded data.</p>
+                <p class="text-xs text-stone-500">Configure delivery charges, import files, review previews, and select rows to delete.</p>
               </div>
               
               <div class="flex flex-wrap items-center gap-2">
@@ -349,8 +357,11 @@
                 <button onclick="openDeliveryRateModal()" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs border border-amber-400 active:scale-95 transition">
                   + Add Area / Pincode Rate
                 </button>
-                <button onclick="handleClearAllLiveRates()" class="bg-stone-200 hover:bg-red-50 text-stone-600 hover:text-red-700 font-bold px-3 py-2 rounded-xl text-xs border border-stone-300 active:scale-95 transition" title="Clear all currently stored delivery rates">
-                  🗑️ Clear All Live Rates
+                <button onclick="deleteSelectedDeliveryRates()" id="btn-delete-selected" class="hidden bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-2 rounded-xl text-xs shadow-xs active:scale-95 transition">
+                  🗑️ Delete Selected (<span id="selected-count">0</span>)
+                </button>
+                <button onclick="handleClearAllLiveRates()" class="bg-stone-200 hover:bg-red-50 text-stone-600 hover:text-red-700 font-bold px-3 py-2 rounded-xl text-xs border border-stone-300 active:scale-95 transition">
+                  Clear All Live Rates
                 </button>
               </div>
             </div>
@@ -378,6 +389,9 @@
               <table class="w-full text-left text-xs whitespace-nowrap">
                 <thead class="bg-stone-50 border-b text-stone-500 font-bold uppercase text-[10px]">
                   <tr>
+                    <th class="p-3 w-10 text-center">
+                      <input type="checkbox" id="select-all-rates" onchange="toggleSelectAllDeliveryRates(this.checked)" class="w-4 h-4 cursor-pointer rounded border-stone-300 text-red-700 focus:ring-0" />
+                    </th>
                     <th class="p-3">Zone / Area Name</th>
                     <th class="p-3">Pincode</th>
                     <th class="p-3">Matched Keywords</th>
@@ -408,7 +422,6 @@
             </div>
           </div>
 
-          <!-- All 18 Categories in Filter -->
           <div class="flex flex-col sm:flex-row gap-2.5">
             <input type="text" id="price-search" placeholder="Search cracker name..." oninput="renderPriceSheetTable()" class="flex-1 text-xs border border-stone-300 rounded-xl p-3 bg-white outline-none focus:border-red-700" />
             <select id="price-category-filter" onchange="renderPriceSheetTable()" class="text-xs border border-stone-300 rounded-xl p-3 bg-white font-bold text-stone-700 outline-none focus:border-red-700">
@@ -452,11 +465,11 @@
           </div>
         </section>
 
-        <!-- ================= 7. STORE SETTINGS & ADMIN USERS TAB (WITH FULL CRUD & PASSWORD RESET) ================= -->
+        <!-- ================= 7. STORE SETTINGS & ADMIN USERS TAB (IMAGE 1) ================= -->
         <section id="view-store-settings" class="tab-view space-y-6 hidden">
           <div>
             <h1 class="text-2xl font-black text-stone-950">Store Settings & Admin Accounts</h1>
-            <p class="text-xs text-stone-500">Configure phone numbers, store address, and manage multiple admin users with password resets.</p>
+            <p class="text-xs text-stone-500">Configure phone numbers, store address, and manage admin users with password resets.</p>
           </div>
 
           <!-- Section A: Store Phone Numbers & Info -->
@@ -498,7 +511,7 @@
             </button>
           </div>
 
-          <!-- Section B: Admin Team & Staff Accounts (FULL CRUD + PASSWORD RESET) -->
+          <!-- Section B: Admin Team & Staff Accounts (IMAGE 1: ADD, EDIT, RESET PASSWORD, DELETE) -->
           <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs space-y-4">
             <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b pb-2.5">
               <div>
@@ -539,7 +552,7 @@
     </main>
   </div>
 
-  <!-- ================= MODAL: ADD / EDIT ADMIN USER ================= -->
+  <!-- ================= MODAL: ADD / EDIT ADMIN USER (IMAGE 1) ================= -->
   <div id="admin-user-modal" style="display: none;" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl border border-stone-200">
       <div class="flex justify-between items-center mb-3 pb-2 border-b">
@@ -590,7 +603,7 @@
     </div>
   </div>
 
-  <!-- ================= MODAL: RESET ADMIN PASSWORD ================= -->
+  <!-- ================= MODAL: RESET ADMIN PASSWORD & SHARE LINK (IMAGE 1) ================= -->
   <div id="admin-password-modal" style="display: none;" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl border border-stone-200">
       <div class="flex justify-between items-center mb-3 pb-2 border-b">
@@ -598,19 +611,34 @@
         <button type="button" onclick="closeAdminPasswordModal()" class="text-stone-400 hover:text-black text-2xl font-black">&times;</button>
       </div>
       <input type="hidden" id="reset-admin-id" value="" />
-      <div class="space-y-3 text-xs">
-        <p class="text-stone-600">Resetting password for: <span id="reset-admin-username" class="font-bold text-stone-900">---</span></p>
-        <div>
-          <label class="font-bold block mb-1">New Password *</label>
-          <input id="new-admin-password" type="password" placeholder="Enter new password" class="w-full border rounded-xl p-2.5 outline-none font-mono" />
+      <div class="space-y-3.5 text-xs">
+        <p class="text-stone-600">Admin User: <span id="reset-admin-username" class="font-bold text-red-700">---</span></p>
+        
+        <!-- Option 1: Direct Reset -->
+        <div class="bg-stone-50 p-3 rounded-2xl border border-stone-200 space-y-2">
+          <span class="font-extrabold text-[11px] text-stone-800 block">Option 1: Set New Password Directly</span>
+          <div>
+            <label class="font-bold block mb-1 text-[10px] text-stone-600">New Password *</label>
+            <input id="new-admin-password" type="password" placeholder="Enter new password" class="w-full border rounded-xl p-2 outline-none font-mono text-xs bg-white" />
+          </div>
+          <div>
+            <label class="font-bold block mb-1 text-[10px] text-stone-600">Confirm Password *</label>
+            <input id="confirm-admin-password" type="password" placeholder="Re-enter password" class="w-full border rounded-xl p-2 outline-none font-mono text-xs bg-white" />
+          </div>
+          <button type="button" onclick="handleCommitPasswordReset()" class="w-full bg-red-700 hover:bg-red-800 text-amber-300 font-bold py-2 rounded-xl text-xs uppercase border border-amber-400 active:scale-95 transition">
+            Save & Update Password
+          </button>
         </div>
-        <div>
-          <label class="font-bold block mb-1">Confirm New Password *</label>
-          <input id="confirm-admin-password" type="password" placeholder="Re-enter new password" class="w-full border rounded-xl p-2.5 outline-none font-mono" />
+
+        <!-- Option 2: Copy Reset Link to Share -->
+        <div class="bg-stone-50 p-3 rounded-2xl border border-stone-200 space-y-2">
+          <span class="font-extrabold text-[11px] text-stone-800 block">Option 2: Copy Reset Link to Share</span>
+          <p class="text-[10px] text-stone-500">Copy a reset message to share with this admin via WhatsApp or Email.</p>
+          <button type="button" onclick="handleCopyPasswordResetLink()" class="w-full bg-stone-900 hover:bg-black text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center space-x-1.5 active:scale-95 transition">
+            <span>📋</span>
+            <span>Copy Reset Link for Admin</span>
+          </button>
         </div>
-        <button type="button" onclick="handleCommitPasswordReset()" class="w-full bg-red-700 hover:bg-red-800 text-amber-300 font-black py-2.5 rounded-xl text-xs uppercase border border-amber-400 active:scale-95 transition">
-          Update Password
-        </button>
       </div>
     </div>
   </div>
@@ -729,6 +757,7 @@
     let ordersList = [];
     let deliveryZonesList = [];
     let stagedDeliveryZones = [];
+    let selectedDeliveryZoneIds = new Set();
     let adminUsersList = [];
     let currentStageFilter = 'All';
 
@@ -749,7 +778,6 @@
       box.classList.remove('hidden');
     }
 
-    // AUTHENTIC LOGIN CHECK
     async function performLogin() {
       const user = document.getElementById('login-id').value.trim();
       const pass = document.getElementById('login-pass').value.trim();
@@ -764,7 +792,6 @@
       showStatus('Verifying credentials...', false);
 
       try {
-        // Query database for admin user matching username or email and password
         const { data, error } = await window.db
           .from('admin_users')
           .select('*')
@@ -777,7 +804,6 @@
           return;
         }
 
-        // Try RPC check if configured
         const { data: rpcData } = await window.db.rpc('verify_admin_login', {
           p_user: user,
           p_pass: pass
@@ -835,7 +861,7 @@
       window.location.reload();
     }
 
-    function navigate(tabName) {
+    async function navigate(tabName) {
       document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
       document.querySelectorAll('.nav-item').forEach(b => {
         b.className = 'nav-item w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl text-stone-400 hover:text-white';
@@ -847,7 +873,11 @@
 
       if (tabName === 'dashboard') loadDashboardMetrics();
       if (tabName === 'orders') renderOrdersTable();
-      if (tabName === 'inventory') renderInventorySection();
+      if (tabName === 'inventory') {
+        // Ensure products are freshly loaded before rendering inventory table
+        if (productsList.length === 0) await loadProducts();
+        renderInventorySection();
+      }
       if (tabName === 'products') loadProducts();
       if (tabName === 'delivery') loadDeliveryZones();
       if (tabName === 'price-sheet') loadPriceSheet();
@@ -869,25 +899,39 @@
 
     async function loadProducts() {
       try {
-        const { data } = await window.db.from('products').select('*').order('name');
-        productsList = (data || []).map(p => ({
-          ...p,
-          stock_qty: p.stock_qty !== undefined ? Number(p.stock_qty) : 100,
-          sold_qty: p.sold_qty !== undefined ? Number(p.sold_qty) : 0
-        }));
+        const { data, error } = await window.db.from('products').select('*').order('name');
+        if (data && data.length > 0) {
+          productsList = data.map(p => ({
+            ...p,
+            stock_qty: p.stock_qty !== undefined ? Number(p.stock_qty) : 100,
+            sold_qty: p.sold_qty !== undefined ? Number(p.sold_qty) : 0
+          }));
+        } else {
+          productsList = [];
+        }
         renderProductsTable();
-      } catch(e) { console.error(e); }
+        renderInventorySection();
+      } catch(e) {
+        console.error('Products load error:', e);
+      }
+    }
+
+    async function refreshInventoryData() {
+      await loadProducts();
+      renderInventorySection();
     }
 
     async function loadDeliveryZones() {
       try {
         const { data } = await window.db.from('delivery_zones').select('*').order('delivery_charge');
         deliveryZonesList = data || [];
+        selectedDeliveryZoneIds.clear();
+        updateBulkDeleteButtonState();
         renderDeliveryZonesTable();
       } catch(e) { console.error(e); }
     }
 
-    // ADMIN USERS CRUD OPERATIONS
+    // ADMIN USERS CRUD
     async function loadAdminUsersList() {
       const tbody = document.getElementById('admin-users-table');
       try {
@@ -933,7 +977,7 @@
           document.getElementById('admin-email').value = user.email || '';
           document.getElementById('admin-phone').value = user.phone || '';
           document.getElementById('admin-role').value = user.role || 'Admin';
-          passContainer.classList.add('hidden'); // Password reset done via separate dedicated modal
+          passContainer.classList.add('hidden');
         }
       } else {
         title.innerText = 'Add New Admin User';
@@ -1021,8 +1065,20 @@
         alert('Password update failed: ' + error.message);
       } else {
         closeAdminPasswordModal();
-        alert('Password reset successfully! The admin can now log in with the new password.');
+        alert('Password reset successfully! The admin can now log in with this new password.');
       }
+    }
+
+    function handleCopyPasswordResetLink() {
+      const username = document.getElementById('reset-admin-username').innerText;
+      const resetUrl = `${window.location.origin}/admin.html?reset_user=${encodeURIComponent(username)}`;
+      const message = `Hello ${username},\nHere is your portal login link to reset your credentials:\n${resetUrl}\nPlease reach out to the store manager if you need immediate assistance.`;
+      
+      navigator.clipboard.writeText(message).then(() => {
+        alert('Reset notification link copied to clipboard! You can now send it to the admin via WhatsApp or Email.');
+      }).catch(() => {
+        prompt('Copy this reset message for the admin:', message);
+      });
     }
 
     async function deleteAdminUser(id) {
@@ -1221,7 +1277,75 @@
       loadDashboardMetrics();
     }
 
-    // 4. PRODUCTS CATALOG
+    // INVENTORY SECTION (HANDLES INSTANT RENDERING & MANUAL ADJUSTMENTS)
+    function renderInventorySection() {
+      const totalStock = productsList.reduce((sum, p) => sum + (Number(p.stock_qty) || 0), 0);
+      const totalSold = productsList.reduce((sum, p) => sum + (Number(p.sold_qty) || 0), 0);
+      const lowStockCount = productsList.filter(p => (Number(p.stock_qty) || 0) <= 5).length;
+      const nonMovedCount = productsList.filter(p => (Number(p.sold_qty) || 0) === 0).length;
+
+      document.getElementById('inv-current-stock').innerText = totalStock + ' units';
+      document.getElementById('inv-total-sold').innerText = totalSold + ' units';
+      document.getElementById('inv-out-stock').innerText = lowStockCount + ' items';
+      document.getElementById('inv-not-moved').innerText = nonMovedCount + ' items';
+
+      const tbody = document.getElementById('inventory-table');
+      if (!tbody) return;
+
+      if (productsList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone-400">No cracker items available in catalog. Click "Products Catalog" to add or import items.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = productsList.map(p => {
+        const stock = Number(p.stock_qty) || 0;
+        const sold = Number(p.sold_qty) || 0;
+        const statusBadge = stock <= 0 
+          ? '<span class="bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-black text-[10px]">Out of Stock</span>'
+          : stock <= 10 
+          ? '<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-black text-[10px]">Low Stock</span>'
+          : '<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-black text-[10px]">In Stock</span>';
+
+        return `
+          <tr class="hover:bg-stone-50">
+            <td class="p-3 font-bold text-stone-900 w-72 truncate" title="${p.name}">${p.name}</td>
+            <td class="p-3 text-stone-500 font-medium w-40">${p.category}</td>
+            <td class="p-3 font-black text-stone-900 text-sm text-center w-28">${stock}</td>
+            <td class="p-3 font-bold text-red-700 text-center w-24">${sold}</td>
+            <td class="p-3 text-center w-28">${statusBadge}</td>
+            <td class="p-3 text-right">
+              <div class="inline-flex items-center space-x-1.5">
+                <input type="number" id="manual-stock-${p.id}" value="${stock}" min="0" class="w-20 border border-stone-300 rounded-lg p-1.5 text-xs text-center font-bold text-stone-900 bg-white outline-none focus:border-red-700" />
+                <button onclick="setManualProductStock('${p.id}')" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-2.5 py-1.5 rounded-lg text-xs shadow-xs active:scale-95 transition">
+                  Update
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function setManualProductStock(id) {
+      const input = document.getElementById(`manual-stock-${id}`);
+      const newStockVal = Number(input.value);
+
+      if (isNaN(newStockVal) || newStockVal < 0) {
+        return alert('Please enter a valid stock quantity (0 or higher).');
+      }
+
+      const { error } = await window.db.from('products').update({ stock_qty: newStockVal }).eq('id', id);
+      if (error) {
+        alert('Failed to update stock: ' + error.message);
+      } else {
+        const item = productsList.find(p => p.id === id);
+        if (item) item.stock_qty = newStockVal;
+        renderInventorySection();
+        alert('Stock updated successfully!');
+      }
+    }
+
+    // PRODUCTS CATALOG
     function openProductModal(editId = null) {
       const modal = document.getElementById('product-modal');
       const title = document.getElementById('product-modal-title');
@@ -1463,7 +1587,7 @@
       loadProducts();
     }
 
-    // 5. DELIVERY RATES TAB
+    // DELIVERY RATES BULK SELECT & DELETE
     function openDeliveryRateModal(editId = null) {
       const modal = document.getElementById('rate-modal');
       const title = document.getElementById('rate-modal-title');
@@ -1564,6 +1688,62 @@
       }
     }
 
+    function toggleSelectAllDeliveryRates(checked) {
+      selectedDeliveryZoneIds.clear();
+      if (checked) {
+        deliveryZonesList.forEach(z => selectedDeliveryZoneIds.add(z.id.toString()));
+      }
+      updateBulkDeleteButtonState();
+      renderDeliveryZonesTable();
+    }
+
+    function toggleSelectSingleDeliveryRate(id, checked) {
+      if (checked) {
+        selectedDeliveryZoneIds.add(id.toString());
+      } else {
+        selectedDeliveryZoneIds.delete(id.toString());
+      }
+      updateBulkDeleteButtonState();
+    }
+
+    function updateBulkDeleteButtonState() {
+      const btn = document.getElementById('btn-delete-selected');
+      const countEl = document.getElementById('selected-count');
+      const selectAllCb = document.getElementById('select-all-rates');
+
+      if (countEl) countEl.innerText = selectedDeliveryZoneIds.size;
+
+      if (btn) {
+        if (selectedDeliveryZoneIds.size > 0) {
+          btn.classList.remove('hidden');
+        } else {
+          btn.classList.add('hidden');
+        }
+      }
+
+      if (selectAllCb) {
+        selectAllCb.checked = (deliveryZonesList.length > 0 && selectedDeliveryZoneIds.size === deliveryZonesList.length);
+      }
+    }
+
+    async function deleteSelectedDeliveryRates() {
+      const count = selectedDeliveryZoneIds.size;
+      if (count === 0) return;
+      if (!confirm(`Are you sure you want to delete ${count} selected delivery rate(s)?`)) return;
+
+      const idsToDelete = Array.from(selectedDeliveryZoneIds);
+      const { error } = await window.db.from('delivery_zones').delete().in('id', idsToDelete);
+
+      if (error) {
+        alert('Error deleting selected items: ' + error.message);
+      } else {
+        alert(`Successfully deleted ${count} delivery rate records!`);
+        selectedDeliveryZoneIds.clear();
+        updateBulkDeleteButtonState();
+        await loadDeliveryZones();
+      }
+    }
+
     function renderDeliveryZonesTable() {
       const tbody = document.getElementById('delivery-rates-table');
       if (!tbody) return;
@@ -1580,14 +1760,21 @@
       }
 
       if (combined.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-stone-400">No delivery rates added or imported yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone-400">No delivery rates added or imported yet.</td></tr>';
         return;
       }
 
       tbody.innerHTML = combined.map(z => {
         const isStaged = Boolean(z.is_staged);
+        const isSelected = selectedDeliveryZoneIds.has(z.id.toString());
+
         return `
-          <tr class="${isStaged ? 'bg-amber-50/70' : 'hover:bg-stone-50'}">
+          <tr class="${isStaged ? 'bg-amber-50/70' : isSelected ? 'bg-red-50/60' : 'hover:bg-stone-50'}">
+            <td class="p-3 text-center">
+              ${isStaged ? '<span class="text-stone-300">•</span>' : `
+                <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelectSingleDeliveryRate('${z.id}', this.checked)" class="w-4 h-4 cursor-pointer rounded border-stone-300 text-red-700 focus:ring-0" />
+              `}
+            </td>
             <td class="p-3">
               <span class="font-bold text-stone-900">${z.zone_name}</span>
               ${isStaged ? '<span class="ml-2 bg-amber-200 text-amber-900 font-black text-[9px] px-1.5 py-0.5 rounded">Imported Preview</span>' : ''}
@@ -1623,17 +1810,21 @@
         alert('Could not delete: ' + error.message);
       } else {
         deliveryZonesList = deliveryZonesList.filter(z => z.id.toString() !== id.toString());
+        selectedDeliveryZoneIds.delete(id.toString());
+        updateBulkDeleteButtonState();
         renderDeliveryZonesTable();
       }
     }
 
     async function handleClearAllLiveRates() {
-      if (!confirm('WARNING: Are you sure you want to delete ALL live delivery rates? This cannot be undone.')) return;
+      if (!confirm('WARNING: Are you sure you want to delete ALL live delivery rates? This will completely empty the table.')) return;
       const { error } = await window.db.from('delivery_zones').delete().neq('id', 0);
       if (error) {
         alert('Error clearing live rates: ' + error.message);
       } else {
         alert('All live delivery rates cleared!');
+        selectedDeliveryZoneIds.clear();
+        updateBulkDeleteButtonState();
         await loadDeliveryZones();
       }
     }
@@ -1782,7 +1973,7 @@
       }
     }
 
-    // 6. LIVE PRICE SHEET
+    // LIVE PRICE SHEET
     function loadPriceSheet() {
       renderPriceSheetTable();
     }
@@ -1899,7 +2090,7 @@
       alert(updateCount > 0 ? `Successfully updated prices for ${updateCount} items!` : 'No price changes detected.');
     }
 
-    // 7. STORE SETTINGS
+    // STORE SETTINGS
     async function loadStoreSettings() {
       try {
         const { data } = await window.db.from('store_settings').select('*').eq('id', 1).single();
