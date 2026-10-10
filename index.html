@@ -8,7 +8,40 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- DYNAMIC THEME ENGINE STYLES (FOREST GREEN & WHITE DEFAULT) -->
   <style>
+    :root {
+      --theme-header-bg: #064e3b;       /* Forest Green */
+      --theme-header-text: #fde047;     /* Gold / Yellow Accent */
+      --theme-accent: #047857;          /* Emerald Green Accent */
+      --theme-page-bg: #f9fafb;         /* Clean Crisp White / Slate */
+    }
+
+    body {
+      background-color: var(--theme-page-bg) !important;
+    }
+
+    .theme-header-bg {
+      background-color: var(--theme-header-bg) !important;
+    }
+
+    .theme-header-text {
+      color: var(--theme-header-text) !important;
+    }
+
+    .theme-accent-bg {
+      background-color: var(--theme-accent) !important;
+    }
+
+    .theme-accent-text {
+      color: var(--theme-accent) !important;
+    }
+
+    .theme-accent-border {
+      border-color: var(--theme-accent) !important;
+    }
+
     .leaflet-control-attribution { display: none !important; }
     .leaflet-pane { z-index: 10 !important; }
     .leaflet-top, .leaflet-bottom { z-index: 11 !important; }
@@ -16,10 +49,10 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-stone-50 text-stone-800 pb-24 font-sans antialiased">
+<body id="portal-body" class="text-stone-800 pb-24 font-sans antialiased transition-colors duration-300">
 
   <!-- ================= TOP NOTICE TICKER ================= -->
-  <div class="bg-gradient-to-r from-red-900 via-red-800 to-red-900 text-amber-300 border-b border-amber-500/30 text-[10px] md:text-xs py-1.5 px-3 font-bold flex items-center justify-between overflow-x-auto whitespace-nowrap">
+  <div id="portal-ticker" class="theme-header-bg theme-header-text border-b border-black/10 text-[10px] md:text-xs py-1.5 px-3 font-bold flex items-center justify-between overflow-x-auto whitespace-nowrap shadow-xs">
     <div class="flex items-center space-x-6 mx-auto">
       <span>✨ 100% GENUINE QUALITY CRACKERS</span>
       <span>💥 SPECIAL FESTIVAL OFFERS ON ALL PRODUCTS</span>
@@ -28,21 +61,21 @@
   </div>
 
   <!-- ================= TOP NAVIGATION ================= -->
-  <nav class="bg-white border-b border-stone-200 px-3 py-2.5 sticky top-0 z-40 shadow-xs">
-    <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
+  <nav id="portal-nav" class="bg-white border-b border-stone-200 px-3 py-2.5 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-2">
       
       <!-- Brand & Location Pin -->
       <div class="flex items-center space-x-3 min-w-0">
         <div onclick="switchToCatalogView()" class="flex items-center space-x-1.5 cursor-pointer shrink-0">
-          <span class="bg-red-700 text-amber-300 font-black px-2.5 py-1 rounded-xl text-base shadow-sm border border-amber-400">B</span>
+          <span id="portal-logo-badge" class="theme-header-bg theme-header-text font-black px-2.5 py-1 rounded-xl text-base shadow-sm border theme-accent-border">B</span>
           <div class="hidden sm:block leading-tight">
-            <span class="font-black text-sm tracking-wide text-red-700 block">BITTU CRACKERS</span>
-            <span class="text-[9px] font-bold text-amber-600 uppercase tracking-widest block">KAVALI • SPECIAL FESTIVAL OFFERS</span>
+            <span id="portal-brand-title" class="font-black text-sm tracking-wide theme-accent-text block">BITTU CRACKERS</span>
+            <span class="text-[9px] font-bold text-stone-500 uppercase tracking-widest block">KAVALI • FESTIVAL BOOKINGS</span>
           </div>
         </div>
 
         <div onclick="handleTopLocationClick()" class="flex items-center space-x-1.5 cursor-pointer min-w-0 bg-stone-50 hover:bg-stone-100 p-1.5 rounded-xl border border-stone-200 transition">
-          <span class="text-red-600 text-xs">📍</span>
+          <span class="theme-accent-text text-xs">📍</span>
           <div class="truncate max-w-[130px] sm:max-w-[180px]">
             <div class="flex items-center space-x-1">
               <span id="top-loc-name" class="text-[11px] font-black text-stone-900 truncate">Select Address</span>
@@ -55,19 +88,19 @@
 
       <!-- Action Buttons -->
       <div class="flex items-center space-x-2 shrink-0">
-        <button onclick="openCartView()" id="nav-cart-btn" class="bg-red-700 hover:bg-red-800 active:scale-95 text-white font-extrabold px-3 py-1.5 rounded-full text-xs flex items-center space-x-1.5 shadow-sm border border-amber-400/80 transition">
+        <button onclick="openCartView()" id="nav-cart-btn" class="theme-accent-bg text-white font-extrabold px-3 py-1.5 rounded-full text-xs flex items-center space-x-1.5 shadow-sm active:scale-95 transition">
           <span>🛒</span>
           <span class="hidden sm:inline">Cart</span>
-          <span id="nav-cart-count" class="bg-amber-300 text-red-900 text-[11px] font-black px-1.5 py-0.2 rounded-full">0</span>
+          <span id="nav-cart-count" class="bg-white text-stone-900 text-[11px] font-black px-1.5 py-0.2 rounded-full shadow-2xs">0</span>
         </button>
 
-        <button onclick="handleQuickEnquiryClick()" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 active:scale-95 text-amber-300 font-extrabold px-3 py-1.5 rounded-full text-[11px] flex items-center space-x-1 border border-amber-400 shadow-sm transition">
+        <button onclick="handleQuickEnquiryClick()" id="nav-enquiry-btn" class="theme-header-bg theme-header-text font-extrabold px-3 py-1.5 rounded-full text-[11px] flex items-center space-x-1 border theme-accent-border shadow-sm active:scale-95 transition">
           <span>⚡</span>
           <span class="hidden sm:inline">QUICK ENQUIRY</span>
           <span class="sm:hidden">ENQUIRY</span>
         </button>
 
-        <button onclick="switchToContactView()" class="font-extrabold text-xs text-stone-800 hover:text-red-700 px-2 py-1 transition tracking-wide border border-transparent hover:border-red-100 rounded-lg">
+        <button onclick="switchToContactView()" class="font-extrabold text-xs text-stone-800 hover:opacity-80 px-2 py-1 transition tracking-wide border border-transparent rounded-lg">
           CONTACT
         </button>
       </div>
@@ -76,20 +109,20 @@
 
   <!-- ================= CONTACT US PAGE VIEW ================= -->
   <div id="contact-page-view" class="hidden">
-    <div class="bg-gradient-to-r from-red-900 via-red-700 to-red-900 text-white py-12 px-4 text-center border-b-4 border-amber-400">
-      <h1 class="text-3xl sm:text-4xl font-black italic tracking-wider uppercase text-amber-300 drop-shadow-md">CONTACT US</h1>
+    <div id="contact-hero" class="theme-header-bg theme-header-text py-12 px-4 text-center border-b-4 theme-accent-border">
+      <h1 class="text-3xl sm:text-4xl font-black italic tracking-wider uppercase drop-shadow-md">CONTACT US</h1>
       <p class="text-xs sm:text-sm text-stone-200 font-semibold tracking-widest mt-1 uppercase">REACH OUT TO KAVALI'S FINEST BITTU CRACKERS</p>
     </div>
 
-    <div class="max-w-4xl mx-auto px-4 -mt-6 grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+    <div class="max-w-4xl mx-auto px-4 -mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
       <!-- Call Us -->
-      <div class="bg-white rounded-2xl p-6 shadow-md border-2 border-stone-100 text-center space-y-3 hover:border-amber-400 transition">
-        <div class="w-13 h-13 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl shadow-xs border border-red-100">
+      <div class="bg-white rounded-2xl p-6 shadow-md border-2 border-stone-100 text-center space-y-3 hover:border-stone-300 transition">
+        <div class="w-12 h-12 bg-stone-50 rounded-full flex items-center justify-center mx-auto text-xl shadow-xs border theme-accent-text">
           📞
         </div>
         <h3 class="font-black text-sm uppercase text-stone-900 tracking-wider">CALL US</h3>
         <p class="text-[11px] text-stone-500">For phone bookings & questions</p>
-        <div class="space-y-1 font-bold text-xs text-red-700 font-mono">
+        <div class="space-y-1 font-bold text-xs theme-accent-text font-mono">
           <p><a href="tel:+917993659115" class="hover:underline">+91 7993659115</a></p>
           <p><a href="tel:+919848104866" class="hover:underline">+91 9848104866</a></p>
           <p><a href="tel:+917661869408" class="hover:underline">+91 7661869408</a></p>
@@ -97,23 +130,22 @@
       </div>
 
       <!-- WhatsApp -->
-      <div class="bg-emerald-50/70 rounded-2xl p-6 shadow-md border-2 border-emerald-300 text-center space-y-3 hover:border-emerald-500 transition">
-        <div class="w-13 h-13 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl shadow-xs">
+      <div class="bg-white rounded-2xl p-6 shadow-md border-2 border-emerald-300 text-center space-y-3 hover:border-emerald-500 transition">
+        <div class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-full flex items-center justify-center mx-auto text-xl shadow-xs">
           💬
         </div>
-        <h3 class="font-black text-sm uppercase text-emerald-900 tracking-wider">WHATSAPP</h3>
+        <h3 class="font-black text-sm uppercase text-emerald-950 tracking-wider">WHATSAPP</h3>
         <p class="text-[11px] text-emerald-700 font-semibold">Instant Price List & Booking</p>
-        <div class="grid grid-cols-1 gap-1.5 font-black text-xs text-emerald-700 font-mono">
-          <a href="https://wa.me/917829978883" target="_blank" class="hover:underline bg-white/70 py-1 rounded border border-emerald-200">+91 7829978883</a>
-          <a href="https://wa.me/917993659115" target="_blank" class="hover:underline bg-white/70 py-1 rounded border border-emerald-200">+91 7993659115</a>
-          <a href="https://wa.me/919848104866" target="_blank" class="hover:underline bg-white/70 py-1 rounded border border-emerald-200">+91 9848104866</a>
-          <a href="https://wa.me/917661869408" target="_blank" class="hover:underline bg-white/70 py-1 rounded border border-emerald-200">+91 7661869408</a>
+        <div class="grid grid-cols-1 gap-1.5 font-black text-xs text-emerald-800 font-mono">
+          <a href="https://wa.me/917829978883" target="_blank" class="hover:underline bg-stone-50 py-1 rounded border border-emerald-200">+91 7829978883</a>
+          <a href="https://wa.me/917993659115" target="_blank" class="hover:underline bg-stone-50 py-1 rounded border border-emerald-200">+91 7993659115</a>
+          <a href="https://wa.me/919848104866" target="_blank" class="hover:underline bg-stone-50 py-1 rounded border border-emerald-200">+91 9848104866</a>
         </div>
       </div>
 
       <!-- Store Location -->
-      <div class="bg-white rounded-2xl p-6 shadow-md border-2 border-stone-100 text-center space-y-3 hover:border-amber-400 transition">
-        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto text-xl shadow-xs border border-amber-200">
+      <div class="bg-white rounded-2xl p-6 shadow-md border-2 border-stone-100 text-center space-y-3 hover:border-stone-300 transition">
+        <div class="w-12 h-12 bg-amber-50 text-amber-700 rounded-full flex items-center justify-center mx-auto text-xl shadow-xs border border-amber-200">
           📍
         </div>
         <h3 class="font-black text-sm uppercase text-stone-900 tracking-wider">OUR STORE</h3>
@@ -124,7 +156,7 @@
     </div>
 
     <div class="text-center pb-8">
-      <button onclick="switchToCatalogView()" class="bg-red-700 hover:bg-red-800 text-amber-300 font-bold px-6 py-2.5 rounded-full text-xs shadow-md border border-amber-400 transition active:scale-95">
+      <button onclick="switchToCatalogView()" class="theme-accent-bg text-white font-bold px-6 py-2.5 rounded-full text-xs shadow-md transition active:scale-95">
         ← Back to Cracker Catalog
       </button>
     </div>
@@ -133,43 +165,24 @@
   <!-- ================= CATALOG STOREFRONT VIEW ================= -->
   <div id="catalog-page-view">
 
-    <!-- ALL 18 CATEGORIES HORIZONTAL FILTER BAR (IMAGES 2 & 3) -->
-    <div class="px-3 pt-3 pb-2 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs bg-white border-b border-stone-200 no-scrollbar">
-      <button onclick="filterCategory('All')" class="cat-btn bg-red-700 text-amber-300 border border-amber-400 px-3.5 py-1.5 rounded-full font-bold shadow-xs shrink-0">All</button>
-      <button onclick="filterCategory('One Sound Crackers')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">One Sound Crackers</button>
-      <button onclick="filterCategory('Chakkars & Spinners')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Chakkars & Spinners</button>
-      <button onclick="filterCategory('Flower Pots')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Flower Pots</button>
-      <button onclick="filterCategory('Bombs')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Bombs</button>
-      <button onclick="filterCategory('Rockets')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Rockets</button>
-      <button onclick="filterCategory('Garlands & Chorsa')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Garlands & Chorsa</button>
-      <button onclick="filterCategory('Night Aerial Fancy')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Night Aerial Fancy</button>
-      <button onclick="filterCategory('Festival Repeaters')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Festival Repeaters</button>
-      <button onclick="filterCategory('Bijili & Paper Bombs')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Bijili & Paper Bombs</button>
-      <button onclick="filterCategory('Twinkling Stars')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Twinkling Stars</button>
-      <button onclick="filterCategory('Colour Fountains')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Colour Fountains</button>
-      <button onclick="filterCategory('Kids Zone Novelties')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Kids Zone Novelties</button>
-      <button onclick="filterCategory('Sparklers')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Sparklers</button>
-      <button onclick="filterCategory('New Arrivals')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">New Arrivals</button>
-      <button onclick="filterCategory('Colourful Matches')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Colourful Matches</button>
-      <button onclick="filterCategory('Serpent & Caps')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Serpent & Caps</button>
-      <button onclick="filterCategory('Gift Boxes')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Gift Boxes</button>
-      <button onclick="filterCategory('Ropes & Chains')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Ropes & Chains</button>
-      <button onclick="filterCategory('Special Items')" class="cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0">Special Items</button>
+    <!-- HORIZONTAL TOP CATEGORIES BAR -->
+    <div id="top-category-bar" class="px-3 pt-3 pb-2 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs bg-white border-b border-stone-200 no-scrollbar shadow-2xs">
+      <button onclick="filterCategory('All')" class="cat-pill active-cat theme-header-bg theme-header-text px-3.5 py-1.5 rounded-full font-bold shadow-xs shrink-0">All</button>
     </div>
 
-    <!-- ================= FLOATING / STICKY STATS PILL ================= -->
-    <div class="max-w-5xl mx-auto px-3 py-3">
-      <div class="bg-white rounded-full border border-stone-200/90 shadow-md p-2 flex items-center justify-between gap-2 overflow-x-auto">
+    <!-- FLOATING STATS PILL -->
+    <div class="max-w-6xl mx-auto px-3 py-3">
+      <div class="bg-white rounded-full border border-stone-200 shadow-md p-2 flex items-center justify-between gap-2 overflow-x-auto">
         
-        <!-- Left: Categories Modal Trigger + Live Search -->
+        <!-- Left: Categories Trigger + Search -->
         <div class="flex items-center space-x-2 shrink-0">
-          <button onclick="openCategoryModal()" class="bg-red-700 hover:bg-red-800 active:scale-95 text-amber-300 font-extrabold text-[11px] px-3.5 py-2 rounded-full flex items-center space-x-1 border border-amber-400/50 shadow-sm transition">
+          <button onclick="openCategoryModal()" class="theme-header-bg theme-header-text font-extrabold text-[11px] px-3.5 py-2 rounded-full flex items-center space-x-1 shadow-sm active:scale-95 transition">
             <span>⚙</span>
             <span>CATEGORIES</span>
           </button>
           
           <div class="relative">
-            <input type="text" id="live-search" placeholder="Search..." oninput="renderProducts()" class="border border-stone-200 rounded-full pl-7 pr-2.5 py-1.5 text-[11px] w-24 sm:w-32 outline-none focus:border-red-700 bg-stone-50" />
+            <input type="text" id="live-search" placeholder="Search crackers..." oninput="renderProducts()" class="border border-stone-200 rounded-full pl-7 pr-2.5 py-1.5 text-[11px] w-24 sm:w-36 outline-none bg-stone-50" />
             <span class="absolute left-2.5 top-2 text-[10px] text-stone-400">🔍</span>
           </div>
           <span class="text-stone-300 hidden sm:inline">|</span>
@@ -177,30 +190,30 @@
 
         <!-- Middle: Stats & Direct Cart Pill Button -->
         <div class="flex items-center space-x-2 shrink-0">
-          <div class="flex items-center space-x-1.5 bg-orange-50 px-2 py-1 rounded-xl border border-orange-200">
-            <div class="w-6 h-6 bg-orange-500 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">
+          <div class="flex items-center space-x-1.5 bg-stone-100 px-2.5 py-1 rounded-xl border border-stone-200">
+            <div class="w-6 h-6 theme-accent-bg text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">
               📦
             </div>
             <div>
-              <span class="text-[8px] font-black uppercase tracking-wider text-stone-400 block leading-none">PRODUCTS</span>
+              <span class="text-[8px] font-black uppercase tracking-wider text-stone-500 block leading-none">PRODUCTS</span>
               <span id="pill-distinct-products" class="text-xs font-black text-stone-900 leading-none">0</span>
             </div>
           </div>
 
-          <div class="flex items-center space-x-1.5 bg-blue-50 px-2 py-1 rounded-xl border border-blue-200">
-            <div class="w-6 h-6 bg-blue-600 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">
+          <div class="flex items-center space-x-1.5 bg-stone-100 px-2.5 py-1 rounded-xl border border-stone-200">
+            <div class="w-6 h-6 theme-header-bg text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">
               🛍️
             </div>
             <div>
-              <span class="text-[8px] font-black uppercase tracking-wider text-stone-400 block leading-none">ITEMS</span>
+              <span class="text-[8px] font-black uppercase tracking-wider text-stone-500 block leading-none">ITEMS</span>
               <span id="pill-total-items" class="text-xs font-black text-stone-900 leading-none">0</span>
             </div>
           </div>
 
-          <button onclick="openCartView()" class="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-2.5 py-1.5 rounded-xl border border-emerald-700 shadow-sm transition">
+          <button onclick="openCartView()" class="theme-accent-bg text-white flex items-center space-x-1.5 px-3 py-1.5 rounded-xl shadow-sm active:scale-95 transition">
             <span class="text-xs">🛒</span>
             <div class="text-left">
-              <span class="text-[8px] font-black uppercase tracking-wider text-emerald-200 block leading-none">VIEW CART</span>
+              <span class="text-[8px] font-black uppercase tracking-wider text-white/80 block leading-none">VIEW CART</span>
               <span id="pill-total-rupees" class="text-xs font-black text-white leading-none">₹0</span>
             </div>
           </button>
@@ -209,149 +222,83 @@
         <!-- Right: LIST / GRID Toggle -->
         <div class="flex items-center bg-stone-100 p-0.5 rounded-full shrink-0 border border-stone-200">
           <button onclick="setViewMode('list')" id="btn-toggle-list" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold text-stone-500 flex items-center space-x-1 transition">
-            <span>☰</span>
-            <span>LIST</span>
+            <span>☰</span><span>LIST</span>
           </button>
-          <button onclick="setViewMode('grid')" id="btn-toggle-grid" class="px-2.5 py-1 rounded-full text-[10px] font-black bg-white text-red-700 shadow-sm flex items-center space-x-1 transition">
-            <span>⊞</span>
-            <span>GRID</span>
+          <button onclick="setViewMode('grid')" id="btn-toggle-grid" class="px-2.5 py-1 rounded-full text-[10px] font-black bg-white shadow-sm flex items-center space-x-1 transition theme-accent-text">
+            <span>⊞</span><span>GRID</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Products Main Container -->
-    <main class="p-3 max-w-4xl mx-auto" id="product-container">
-      <div id="product-list" class="w-full">
-        <div class="text-center text-xs text-stone-400 py-12">Loading festival crackers catalog...</div>
-      </div>
-    </main>
+    <!-- MAIN DUAL-COLUMN LAYOUT -->
+    <div class="max-w-6xl mx-auto px-3 py-2 flex gap-4">
+      
+      <!-- DESKTOP LEFT CATEGORIES SIDEBAR -->
+      <aside class="hidden md:block w-56 shrink-0 space-y-2 sticky top-24 h-[calc(100vh-7rem)] overflow-y-auto no-scrollbar">
+        <div class="bg-white rounded-2xl border border-stone-200 p-3 shadow-xs space-y-1.5">
+          <div class="flex items-center justify-between border-b pb-2 mb-2">
+            <span class="font-extrabold text-xs text-stone-900 uppercase tracking-wide">Category Index</span>
+            <span class="theme-accent-text text-xs">✨</span>
+          </div>
+          <div id="sidebar-categories-list" class="space-y-1 text-xs font-bold">
+            <button onclick="filterCategory('All')" class="sidebar-cat-btn active-cat w-full text-left px-3 py-2 rounded-xl theme-header-bg theme-header-text transition">
+              All Crackers
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- PRODUCT CARDS MAIN CONTAINER -->
+      <main class="flex-1 min-w-0" id="product-container">
+        <div id="product-list" class="w-full">
+          <div class="text-center text-xs text-stone-400 py-12">Loading festival crackers catalog...</div>
+        </div>
+      </main>
+    </div>
   </div>
 
-  <!-- ================= CATEGORY SELECTION MODAL (IMAGE 1: FULL 18 CATEGORIES INCLUDED) ================= -->
+  <!-- ================= CATEGORY SELECTION MODAL ================= -->
   <div id="category-drawer-modal" class="fixed inset-0 bg-neutral-950/75 backdrop-blur-2xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-3.5 max-h-[85vh] flex flex-col">
       <div class="flex justify-between items-center border-b pb-2.5 shrink-0">
         <div class="flex items-center space-x-2">
-          <span class="text-base text-red-700">⚙</span>
+          <span class="theme-accent-text text-base">⚙</span>
           <h3 class="font-extrabold text-sm text-stone-900">Select Cracker Category</h3>
         </div>
         <button onclick="closeCategoryModal()" class="text-stone-400 hover:text-black text-2xl font-black">&times;</button>
       </div>
-
-      <div class="grid grid-cols-1 gap-1.5 text-xs font-bold overflow-y-auto pr-1">
-        <button onclick="selectCategoryFromModal('All')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🎆 All Crackers</span>
-          <span id="cat-check-All">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('One Sound Crackers')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🔊 One Sound Crackers</span>
-          <span id="cat-check-One-Sound-Crackers" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Chakkars & Spinners')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🌀 Chakkars & Spinners</span>
-          <span id="cat-check-Chakkars--Spinners" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Flower Pots')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🏺 Flower Pots</span>
-          <span id="cat-check-Flower-Pots" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Bombs')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>💣 Bombs</span>
-          <span id="cat-check-Bombs" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Rockets')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🚀 Rockets</span>
-          <span id="cat-check-Rockets" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Garlands & Chorsa')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🎇 Garlands & Chorsa</span>
-          <span id="cat-check-Garlands--Chorsa" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Night Aerial Fancy')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🌌 Night Aerial Fancy</span>
-          <span id="cat-check-Night-Aerial-Fancy" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Festival Repeaters')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>✨ Festival Repeaters</span>
-          <span id="cat-check-Festival-Repeaters" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Bijili & Paper Bombs')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>💥 Bijili & Paper Bombs</span>
-          <span id="cat-check-Bijili--Paper-Bombs" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Twinkling Stars')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>⭐ Twinkling Stars</span>
-          <span id="cat-check-Twinkling-Stars" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Colour Fountains')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>⛲ Colour Fountains</span>
-          <span id="cat-check-Colour-Fountains" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Kids Zone Novelties')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🧸 Kids Zone Novelties</span>
-          <span id="cat-check-Kids-Zone-Novelties" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Sparklers')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🪄 Sparklers</span>
-          <span id="cat-check-Sparklers" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('New Arrivals')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🆕 New Arrivals</span>
-          <span id="cat-check-New-Arrivals" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Colourful Matches')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🔥 Colourful Matches</span>
-          <span id="cat-check-Colourful-Matches" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Serpent & Caps')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🐍 Serpent & Caps</span>
-          <span id="cat-check-Serpent--Caps" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Gift Boxes')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🎁 Gift Boxes</span>
-          <span id="cat-check-Gift-Boxes" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Ropes & Chains')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>⛓️ Ropes & Chains</span>
-          <span id="cat-check-Ropes--Chains" class="hidden">✓</span>
-        </button>
-        <button onclick="selectCategoryFromModal('Special Items')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-red-50">
-          <span>🎉 Special Items</span>
-          <span id="cat-check-Special-Items" class="hidden">✓</span>
-        </button>
-      </div>
+      <div id="modal-category-items" class="grid grid-cols-1 gap-1.5 text-xs font-bold overflow-y-auto pr-1"></div>
     </div>
   </div>
 
-  <!-- ================= FLOATING STICKY BOTTOM CART BAR ================= -->
+  <!-- ================= FLOATING BOTTOM CART BAR ================= -->
   <div id="floating-bottom-cart-bar" class="fixed bottom-3 inset-x-0 z-40 px-4 hidden">
-    <div onclick="openCartView()" class="max-w-md mx-auto bg-gradient-to-r from-red-800 to-red-900 text-white rounded-2xl p-3 shadow-2xl border-2 border-amber-400 flex items-center justify-between cursor-pointer active:scale-98 transition">
+    <div onclick="openCartView()" class="max-w-md mx-auto theme-header-bg text-white rounded-2xl p-3 shadow-2xl border-2 theme-accent-border flex items-center justify-between cursor-pointer active:scale-98 transition">
       <div class="flex items-center space-x-2.5">
-        <div class="w-9 h-9 bg-amber-400 text-red-950 rounded-xl flex items-center justify-center font-black text-base shadow-sm">
+        <div class="w-9 h-9 bg-white text-stone-900 rounded-xl flex items-center justify-center font-black text-base shadow-sm">
           🛒
         </div>
         <div>
-          <p class="text-xs font-black text-amber-300 leading-tight"><span id="float-cart-count">0</span> Items in Cart</p>
+          <p class="text-xs font-black theme-header-text leading-tight"><span id="float-cart-count">0</span> Items in Cart</p>
           <p class="text-[11px] font-bold text-stone-200">Total: <span id="float-cart-total" class="font-black text-white">₹0</span></p>
         </div>
       </div>
-      <button class="bg-amber-400 hover:bg-amber-300 text-red-950 font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wide flex items-center space-x-1 shadow-sm">
+      <button class="theme-accent-bg text-white font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wide flex items-center space-x-1 shadow-sm">
         <span>View Cart & Book</span>
         <span>➔</span>
       </button>
     </div>
   </div>
 
-  <!-- ================= WARM BEIGE FOOTER ================= -->
-  <footer class="bg-[#F8F4EA] text-stone-800 mt-16 border-t-4 border-amber-500 shadow-inner">
+  <!-- ================= FOOTER ================= -->
+  <footer class="bg-white text-stone-800 mt-16 border-t-4 theme-accent-border shadow-inner">
     <div class="max-w-5xl mx-auto px-4 py-12 space-y-8 text-xs">
-      
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="space-y-2">
           <div class="flex items-center space-x-2">
-            <span class="bg-red-700 text-amber-300 font-black px-2 py-0.5 rounded border border-amber-400 text-sm">B</span>
-            <h2 class="text-base font-black text-red-800 uppercase tracking-wide">Bittu Fireworks</h2>
+            <span class="theme-header-bg theme-header-text font-black px-2 py-0.5 rounded text-sm">B</span>
+            <h2 class="text-base font-black text-stone-900 uppercase tracking-wide">Bittu Fireworks</h2>
           </div>
           <p class="text-stone-600 text-[11px] leading-relaxed">
             Premier destination for highest quality crackers and fireworks in KAVALI. Unbeatable festival offers for unforgettable festival celebrations.
@@ -359,66 +306,42 @@
         </div>
 
         <div class="space-y-2.5">
-          <h3 class="font-black text-red-800 uppercase tracking-wider text-[11px] border-b border-amber-300 pb-1">Quick Links</h3>
+          <h3 class="font-black text-stone-900 uppercase tracking-wider text-[11px] border-b pb-1">Quick Links</h3>
           <ul class="space-y-1.5 text-stone-700 text-[11px] font-medium">
-            <li><button onclick="handleQuickEnquiryClick()" class="hover:text-red-700 flex items-center space-x-1"><span>⚡</span><span>Quick Enquiry</span></button></li>
-            <li><button onclick="switchToContactView()" class="hover:text-red-700 flex items-center space-x-1"><span>📞</span><span>Contact Us</span></button></li>
-            <li><button onclick="switchToCatalogView()" class="hover:text-red-700 flex items-center space-x-1"><span>🎆</span><span>All Crackers</span></button></li>
-            <li class="text-stone-400">Terms & Conditions</li>
+            <li><button onclick="handleQuickEnquiryClick()" class="hover:underline flex items-center space-x-1"><span>⚡</span><span>Quick Enquiry</span></button></li>
+            <li><button onclick="switchToContactView()" class="hover:underline flex items-center space-x-1"><span>📞</span><span>Contact Us</span></button></li>
+            <li><button onclick="switchToCatalogView()" class="hover:underline flex items-center space-x-1"><span>🎆</span><span>All Crackers</span></button></li>
           </ul>
         </div>
 
         <div class="space-y-2.5">
-          <h3 class="font-black text-red-800 uppercase tracking-wider text-[11px] border-b border-amber-300 pb-1">Contact Us</h3>
+          <h3 class="font-black text-stone-900 uppercase tracking-wider text-[11px] border-b pb-1">Contact Us</h3>
           <p class="text-stone-700 text-[11px]">
             📍 Vengal Rao Nagar, Kavali, S.P.S.R Nellore District, AP - 524201
           </p>
-          <div class="space-y-1 text-red-800 font-mono text-[11px] font-bold">
+          <div class="space-y-1 theme-accent-text font-mono text-[11px] font-bold">
             <p><a href="tel:+917993659115" class="hover:underline">📞 +91 7993659115</a></p>
             <p><a href="tel:+919848104866" class="hover:underline">📞 +91 9848104866</a></p>
-            <p><a href="tel:+917661869408" class="hover:underline">📞 +91 7661869408</a></p>
           </div>
         </div>
 
         <div class="space-y-2.5">
-          <h3 class="font-black text-emerald-800 uppercase tracking-wider text-[11px] border-b border-amber-300 pb-1">WhatsApp Us</h3>
+          <h3 class="font-black text-stone-900 uppercase tracking-wider text-[11px] border-b pb-1">WhatsApp Us</h3>
           <p class="text-stone-500 text-[10px]">Tap any number to open instant chat:</p>
           <div class="grid grid-cols-2 gap-1.5 font-mono text-[10px]">
-            <a href="https://wa.me/917829978883" target="_blank" class="bg-white hover:bg-emerald-50 px-2 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 font-bold text-center shadow-xs">+91 7829978883</a>
-            <a href="https://wa.me/917993659115" target="_blank" class="bg-white hover:bg-emerald-50 px-2 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 font-bold text-center shadow-xs">+91 7993659115</a>
-            <a href="https://wa.me/919848104866" target="_blank" class="bg-white hover:bg-emerald-50 px-2 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 font-bold text-center shadow-xs">+91 9848104866</a>
-            <a href="https://wa.me/917661869408" target="_blank" class="bg-white hover:bg-emerald-50 px-2 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 font-bold text-center shadow-xs">+91 7661869408</a>
+            <a href="https://wa.me/917829978883" target="_blank" class="bg-stone-50 hover:bg-stone-100 px-2 py-1.5 rounded-lg border text-stone-800 font-bold text-center shadow-xs">+91 7829978883</a>
+            <a href="https://wa.me/917993659115" target="_blank" class="bg-stone-50 hover:bg-stone-100 px-2 py-1.5 rounded-lg border text-stone-800 font-bold text-center shadow-xs">+91 7993659115</a>
           </div>
         </div>
       </div>
 
-      <div class="bg-white p-4 rounded-2xl border-2 border-amber-400/60 shadow-xs space-y-1.5">
-        <div class="flex items-center space-x-2">
-          <span class="text-base">💳</span>
-          <h3 class="font-black text-red-800 uppercase tracking-wider text-[11px]">Payment & Banking Info</h3>
-        </div>
-        <p class="text-stone-700 leading-relaxed text-[11px]">
-          Once placed an enquiry, please call us at <span class="text-red-700 font-bold">7661869408</span> / <span class="text-red-700 font-bold">9848104866</span> or send a message to admin WhatsApp numbers (<span class="text-emerald-700 font-bold">+91 7829978883</span>, <span class="text-emerald-700 font-bold">+91 7993659115</span>, <span class="text-emerald-700 font-bold">+91 9848104866</span>, <span class="text-emerald-700 font-bold">+91 7661869408</span>) to receive official UPI QR code & banking payment details.
-        </p>
-      </div>
-
-      <div class="border-t border-stone-300 pt-5 space-y-2 text-stone-600 text-[10px] leading-relaxed">
-        <h4 class="font-bold text-red-800 uppercase tracking-wider">Legal Compliance Notice</h4>
-        <p>
-          As per 2018 Supreme Court order, online direct sale of firecrackers is not permitted! We value our customers and strictly respect jurisdiction. We request you to add your products to the cart and submit the required crackers through the enquiry booking button. We will contact you within 24 hours and confirm the order through WhatsApp or phone call.
-        </p>
-        <p>
-          Bittu Fireworks follows 100% legal & statutory compliances, and all our shops and godowns are maintained strictly as per the Explosives Act. We dispatch parcels through registered and legal transport service providers.
-        </p>
-      </div>
-
-      <div class="border-t border-stone-300 pt-4 text-center text-stone-500 text-[10px] font-medium">
+      <div class="border-t border-stone-200 pt-4 text-center text-stone-500 text-[10px] font-medium">
         © 2026 Bittu Fireworks, Kavali. All rights reserved.
       </div>
     </div>
   </footer>
 
-  <!-- ================= CHECKOUT / CONFIRM DETAILS MODAL ================= -->
+  <!-- ================= CHECKOUT / CART MODAL ================= -->
   <div id="cart-modal" class="fixed inset-0 bg-neutral-950/75 backdrop-blur-xs z-50 hidden flex justify-end">
     <div class="bg-stone-50 w-full max-w-md h-full flex flex-col overflow-y-auto">
       
@@ -428,8 +351,8 @@
           <h2 class="text-base font-extrabold text-stone-900">Confirm Booking Details</h2>
         </div>
         <div class="flex items-center space-x-3 text-[11px] font-bold">
-          <span class="text-red-700">✓ Address</span>
-          <span class="text-red-700 font-black">② Items</span>
+          <span class="theme-accent-text">✓ Address</span>
+          <span class="font-black theme-accent-text">② Items</span>
           <span class="text-stone-400">③ Book</span>
         </div>
       </div>
@@ -438,7 +361,7 @@
         <div class="bg-white rounded-2xl p-4 border border-stone-200 shadow-2xs space-y-2">
           <div class="flex justify-between items-center">
             <span class="text-xs font-black text-stone-900 uppercase tracking-wide">Delivering to</span>
-            <button type="button" onclick="openAddressSelectModal()" class="text-red-700 font-bold text-xs hover:underline">Change</button>
+            <button type="button" onclick="openAddressSelectModal()" class="theme-accent-text font-bold text-xs hover:underline">Change</button>
           </div>
           <div id="address-card-content" class="pt-1"></div>
         </div>
@@ -454,22 +377,22 @@
             <span>Price (<span id="summary-items-count">0</span> items)</span>
             <span id="summary-mrp-total">₹0</span>
           </div>
-          <div class="flex justify-between text-emerald-600 font-semibold">
+          <div class="flex justify-between theme-accent-text font-semibold">
             <span>Special Festival Offers Savings</span>
             <span id="summary-discount-val">- ₹0</span>
           </div>
           <div class="flex justify-between text-stone-600 items-center">
             <div class="flex items-center space-x-1">
               <span>Delivery Charges</span>
-              <span id="delivery-zone-badge" class="bg-stone-100 text-stone-600 px-1.5 py-0.2 rounded text-[10px] font-bold">Local</span>
+              <span id="delivery-zone-badge" class="bg-stone-100 text-stone-800 px-1.5 py-0.2 rounded text-[10px] font-bold">Local</span>
             </div>
             <span id="summary-delivery-charge" class="font-bold text-stone-900">FREE</span>
           </div>
           <div class="border-t pt-2 flex justify-between items-center text-sm font-black text-stone-950">
             <span>Total Payable Amount</span>
-            <span id="summary-grand-total" class="text-red-700 text-base">₹0</span>
+            <span id="summary-grand-total" class="theme-accent-text text-base font-black">₹0</span>
           </div>
-          <div class="bg-amber-50 text-amber-800 border border-amber-200 p-2 rounded-xl text-[11px] font-bold text-center">
+          <div class="bg-stone-100 text-stone-800 border p-2 rounded-xl text-[11px] font-bold text-center">
             🎉 You save <span id="summary-savings-text">₹0</span> with Special Festival Offers
           </div>
         </div>
@@ -480,21 +403,21 @@
           <span class="text-[10px] text-stone-400 font-bold uppercase block">Pay on Delivery</span>
           <span id="bottom-bar-total" class="text-lg font-black text-stone-950">₹0</span>
         </div>
-        <button type="button" onclick="confirmOrderAndWhatsApp()" id="btn-submit-order" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 active:scale-95 text-amber-300 border border-amber-400 font-black px-6 py-3 rounded-xl text-xs uppercase tracking-wide shadow-sm transition">
+        <button type="button" onclick="confirmOrderAndWhatsApp()" id="btn-submit-order" class="theme-accent-bg text-white font-black px-6 py-3 rounded-xl text-xs uppercase tracking-wide shadow-sm active:scale-95 transition">
           Continue & Book on WhatsApp
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ================= SUCCESS CONFIRMATION MODAL ================= -->
+  <!-- ================= SUCCESS MODAL ================= -->
   <div id="order-success-modal" class="fixed inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-stone-200">
-      <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl font-black">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-stone-200 text-center space-y-4">
+      <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto text-3xl font-black">
         ✓
       </div>
       <div>
-        <span class="bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">Booking Successful</span>
+        <span class="bg-emerald-50 text-emerald-800 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">Booking Successful</span>
         <h3 class="text-xl font-black text-stone-950 mt-1">Order Confirmed!</h3>
         <p class="text-xs text-stone-500 mt-1">Order ID: <span id="success-order-id" class="font-mono font-bold text-stone-800">#---</span></p>
       </div>
@@ -507,38 +430,32 @@
         <p id="success-cust-addr" class="text-[11px] text-stone-600 line-clamp-2">---</p>
         <div class="border-t pt-1.5 flex justify-between font-bold text-stone-900">
           <span>Pay on Delivery:</span>
-          <span id="success-total" class="text-red-700 text-sm">₹0</span>
+          <span id="success-total" class="theme-accent-text text-sm font-black">₹0</span>
         </div>
       </div>
 
-      <button type="button" onclick="closeSuccessAndShopMore()" class="w-full bg-red-700 hover:bg-red-800 text-amber-300 font-bold py-3 rounded-xl text-xs active:scale-95 transition shadow-sm border border-amber-400">
+      <button type="button" onclick="closeSuccessAndShopMore()" class="w-full theme-accent-bg text-white font-bold py-3 rounded-xl text-xs active:scale-95 transition shadow-sm">
         Done & Continue Shopping
       </button>
     </div>
   </div>
 
-  <!-- ================= SAVED ADDRESSES BOTTOM SHEET ================= -->
+  <!-- ADDRESS SHEET -->
   <div id="address-select-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-2xs z-50 hidden flex items-end justify-center p-0">
     <div class="bg-white w-full max-w-md rounded-t-3xl p-4 shadow-2xl flex flex-col max-h-[85vh] space-y-3">
       <div class="flex justify-between items-center border-b pb-2">
         <h3 class="text-sm font-extrabold text-stone-900">Select delivery address</h3>
         <button onclick="closeAddressSelectModal()" class="text-stone-400 hover:text-black text-2xl font-bold">&times;</button>
       </div>
-
-      <button onclick="startAddNewAddressFlow()" class="w-full bg-red-50 border border-red-200 text-red-700 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-between hover:bg-red-100 transition">
-        <span class="flex items-center space-x-2">
-          <span class="text-base font-black">+</span>
-          <span>Add New Address</span>
-        </span>
+      <button onclick="startAddNewAddressFlow()" class="w-full bg-stone-50 border text-stone-800 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-between hover:bg-stone-100 transition">
+        <span class="flex items-center space-x-2"><span class="text-base font-black">+</span><span>Add New Address</span></span>
         <span>➔</span>
       </button>
-
-      <span class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Saved addresses</span>
       <div id="saved-addresses-list" class="space-y-2 overflow-y-auto max-h-64 pr-1"></div>
     </div>
   </div>
 
-  <!-- ================= FULLSCREEN MAP PIN PICKER ================= -->
+  <!-- MAP PIN PICKER -->
   <div id="map-pin-modal" class="fixed inset-0 bg-white z-50 hidden flex flex-col h-screen w-screen">
     <div class="px-4 py-3 border-b flex items-center justify-between bg-white z-30 shadow-xs shrink-0">
       <div class="flex items-center space-x-3">
@@ -550,18 +467,15 @@
 
     <div class="relative flex-1 w-full h-full overflow-hidden">
       <div id="interactive-map" class="absolute inset-0 w-full h-full"></div>
-
       <div class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center z-20 pb-10">
-        <div class="bg-neutral-900 text-amber-300 font-bold text-[10px] px-3 py-1 rounded-full shadow-xl mb-1.5 animate-bounce border border-amber-400">
+        <div class="theme-header-bg theme-header-text font-bold text-[10px] px-3 py-1 rounded-full shadow-xl mb-1.5 animate-bounce">
           Place pin on exact location
         </div>
-        <div class="text-red-600 text-4xl drop-shadow-lg">📍</div>
+        <div class="theme-accent-text text-4xl drop-shadow-lg">📍</div>
       </div>
-
       <div class="absolute bottom-5 inset-x-0 flex justify-center z-20 px-4 pointer-events-auto">
-        <button type="button" onclick="triggerGPSCurrentLocation()" id="btn-use-gps-pill" class="bg-white hover:bg-stone-50 text-red-700 border border-red-200 font-extrabold text-xs px-5 py-3 rounded-full shadow-2xl flex items-center space-x-2 active:scale-95 transition">
-          <span class="text-sm">🎯</span>
-          <span id="gps-pill-text">Use my current location</span>
+        <button type="button" onclick="triggerGPSCurrentLocation()" id="btn-use-gps-pill" class="bg-white hover:bg-stone-50 theme-accent-text border theme-accent-border font-extrabold text-xs px-5 py-3 rounded-full shadow-2xl flex items-center space-x-2 active:scale-95 transition">
+          <span class="text-sm">🎯</span><span id="gps-pill-text">Use my current location</span>
         </button>
       </div>
     </div>
@@ -574,66 +488,42 @@
             <h4 id="map-detected-title" class="font-extrabold text-stone-900 text-xs truncate">Locating area...</h4>
             <p id="map-detected-full" class="text-[11px] text-stone-500 line-clamp-2 mt-0.5">Move pin to your exact delivery house</p>
           </div>
-          <span id="map-zone-rate-pill" class="bg-emerald-50 text-emerald-700 font-bold text-[10px] px-2.5 py-1 rounded-full shrink-0">Checking rate...</span>
+          <span id="map-zone-rate-pill" class="bg-stone-100 theme-accent-text font-bold text-[10px] px-2.5 py-1 rounded-full shrink-0">Checking rate...</span>
         </div>
       </div>
-
-      <button type="button" onclick="proceedToAddressDetailsForm()" class="w-full bg-red-700 hover:bg-red-800 text-amber-300 font-bold py-3 rounded-xl text-xs shadow-md border border-amber-400 active:scale-95 transition">
+      <button type="button" onclick="proceedToAddressDetailsForm()" class="w-full theme-accent-bg text-white font-bold py-3 rounded-xl text-xs shadow-md active:scale-95 transition">
         Add address Details
       </button>
     </div>
   </div>
 
-  <!-- ================= DELIVER TO DETAILS FORM ================= -->
+  <!-- ADDRESS FORM -->
   <div id="address-form-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-2xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl flex flex-col space-y-3.5 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b pb-2">
         <h3 class="text-sm font-extrabold text-stone-900">Deliver To</h3>
         <button onclick="closeAddressFormModal()" class="text-stone-400 hover:text-black text-2xl font-bold">&times;</button>
       </div>
-
-      <div class="bg-amber-50 text-amber-900 text-[10px] p-2 rounded-xl flex items-center space-x-1 border border-amber-200">
-        <span>ℹ️</span>
-        <span>Enter your building/flat details so our delivery boy reaches you easily.</span>
-      </div>
-
       <div>
         <label class="block text-[11px] font-bold text-stone-700 mb-0.5">Flat/House/building name *</label>
-        <input id="input-house-no" type="text" placeholder="e.g. D.No 12/4, Near Water Tank" class="w-full border border-stone-300 rounded-lg p-2.5 text-xs outline-none focus:border-red-700" />
+        <input id="input-house-no" type="text" placeholder="e.g. D.No 12/4, Near Water Tank" class="w-full border border-stone-300 rounded-lg p-2.5 text-xs outline-none" />
       </div>
-
       <div class="bg-stone-50 border rounded-xl p-2.5 flex justify-between items-center text-xs">
         <div>
           <span class="text-[9px] font-bold text-stone-400 uppercase block">Area / Locality / Pincode</span>
           <p id="form-locality-text" class="font-semibold text-stone-800 text-[11px] truncate max-w-[240px]">---</p>
         </div>
-        <button type="button" onclick="reopenMapPicker()" class="text-red-700 font-bold text-xs hover:underline">Change</button>
+        <button type="button" onclick="reopenMapPicker()" class="theme-accent-text font-bold text-xs hover:underline">Change</button>
       </div>
-
       <div>
         <label class="block text-[11px] font-bold text-stone-700 mb-0.5">Enter your full name *</label>
-        <input id="input-name" type="text" placeholder="Full Name" class="w-full border border-stone-300 rounded-lg p-2.5 text-xs outline-none focus:border-red-700" />
+        <input id="input-name" type="text" placeholder="Full Name" class="w-full border border-stone-300 rounded-lg p-2.5 text-xs outline-none" />
       </div>
       <div>
         <label class="block text-[11px] font-bold text-stone-700 mb-0.5">10-digit mobile number *</label>
-        <input id="input-phone" type="tel" placeholder="Mobile Number" class="w-full border border-stone-300 rounded-lg p-2.5 text-xs outline-none focus:border-red-700" />
+        <input id="input-phone" type="tel" placeholder="Mobile Number" class="w-full border border-stone-300 rounded-lg p-2.5 text-xs outline-none" />
       </div>
-
-      <div>
-        <span class="block text-[10px] font-bold text-stone-400 uppercase mb-1">Type of address</span>
-        <div class="flex space-x-2 text-xs">
-          <label class="flex items-center space-x-1.5 border px-3 py-1.5 rounded-lg cursor-pointer bg-red-50 border-red-300 text-red-700 font-bold">
-            <input type="radio" name="addr-type" value="Home" checked class="hidden" />
-            <span>🏠 Home</span>
-          </label>
-          <label class="flex items-center space-x-1.5 border px-3 py-1.5 rounded-lg cursor-pointer bg-stone-50 text-stone-700 font-medium">
-            <input type="radio" name="addr-type" value="Work" class="hidden" />
-            <span>🏢 Work</span>
-          </label>
-        </div>
-      </div>
-
-      <button type="button" onclick="saveAndApplyAddress()" class="w-full bg-red-700 hover:bg-red-800 text-amber-300 font-bold py-3 rounded-xl text-xs shadow-md border border-amber-400 active:scale-95 transition">
+      <button type="button" onclick="saveAndApplyAddress()" class="w-full theme-accent-bg text-white font-bold py-3 rounded-xl text-xs shadow-md active:scale-95 transition">
         Save address
       </button>
     </div>
@@ -649,6 +539,7 @@
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let allProducts = [];
+    let discoveredCategories = [];
     let deliveryZones = [];
     let cart = [];
     let activeCategory = 'All';
@@ -670,42 +561,121 @@
         } catch(e) {}
       }
 
+      await loadThemeSettings();
+
       const { data: zData } = await db.from('delivery_zones').select('*');
-      deliveryZones = zData && zData.length > 0 ? zData : [
-        { zone_name: 'Kavali City & Town (Local)', pincode: '524201', area_keywords: 'kavali, vengal, musunuru, maddurupadu, rudrakota', delivery_charge: 0 },
-        { zone_name: 'Kavali Rural & Mandals', pincode: '524202', area_keywords: 'bogole, bitragunta, jaladanki, allur, dagadarthi, kaligiri, vinjamur', delivery_charge: 99 },
-        { zone_name: 'Nellore City & Towns', pincode: '524001', area_keywords: 'nellore, kovur, buchi, buchireddypalem, atmakur, udayagiri', delivery_charge: 150 },
-        { zone_name: 'Other District Border Areas', pincode: 'Any', area_keywords: 'kandukur, singarayakonda, gudur, naidupeta', delivery_charge: 199 }
-      ];
+      deliveryZones = zData || [];
 
       const { data: sData } = await db.from('store_settings').select('*').eq('id', 1).single();
       if (sData && sData.whatsapp_number) storeWhatsAppNumber = sData.whatsapp_number.replace(/\D/g, '');
 
       updateAddressUI();
-      loadLiveProducts();
+      await loadLiveProducts();
+    }
+
+    // COMPLETE REALTIME THEME ENGINE
+    async function loadThemeSettings() {
+      try {
+        const { data } = await db.from('theme_settings').select('*').eq('id', 1).single();
+        if (data) {
+          applyCustomTheme(data);
+        }
+      } catch(e) {}
+    }
+
+    function applyCustomTheme(theme) {
+      if (!theme) return;
+      const root = document.documentElement;
+      if (theme.header_bg) root.style.setProperty('--theme-header-bg', theme.header_bg);
+      if (theme.header_text) root.style.setProperty('--theme-header-text', theme.header_text);
+      if (theme.accent_color) root.style.setProperty('--theme-accent', theme.accent_color);
+      if (theme.page_bg) {
+        root.style.setProperty('--theme-page-bg', theme.page_bg);
+        document.body.style.backgroundColor = theme.page_bg;
+      }
+    }
+
+    async function loadLiveProducts() {
+      const { data } = await db.from('products').select('*');
+      if (data && data.length > 0) {
+        allProducts = data;
+        discoveredCategories = Array.from(new Set(data.map(p => (p.category || 'General').trim()).filter(Boolean))).sort();
+        renderCategoryNavigationBars();
+      }
+      renderProducts();
+    }
+
+    function renderCategoryNavigationBars() {
+      const topBar = document.getElementById('top-category-bar');
+      topBar.innerHTML = `<button onclick="filterCategory('All')" class="cat-pill active-cat theme-header-bg theme-header-text px-3.5 py-1.5 rounded-full font-bold shadow-xs shrink-0">All</button>` + 
+        discoveredCategories.map(c => `
+          <button onclick="filterCategory('${c}')" class="cat-pill bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0 hover:bg-stone-200">${c}</button>
+        `).join('');
+
+      const sidebar = document.getElementById('sidebar-categories-list');
+      if (sidebar) {
+        sidebar.innerHTML = `<button onclick="filterCategory('All')" class="sidebar-cat-btn active-cat w-full text-left px-3 py-2 rounded-xl theme-header-bg theme-header-text transition font-bold">All Crackers</button>` + 
+          discoveredCategories.map(c => `
+            <button onclick="filterCategory('${c}')" class="sidebar-cat-btn w-full text-left px-3 py-2 rounded-xl text-stone-700 hover:bg-stone-100 border border-transparent transition font-medium">${c}</button>
+          `).join('');
+      }
+
+      const modalList = document.getElementById('modal-category-items');
+      if (modalList) {
+        modalList.innerHTML = `<button onclick="selectCategoryFromModal('All')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-stone-50"><span>🎆 All Crackers</span><span>✓</span></button>` +
+          discoveredCategories.map(c => `
+            <button onclick="selectCategoryFromModal('${c}')" class="w-full p-2.5 rounded-xl border flex items-center justify-between hover:bg-stone-50"><span>💥 ${c}</span><span>➔</span></button>
+          `).join('');
+      }
+    }
+
+    function filterCategory(cat) {
+      activeCategory = cat;
+
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        const isMatch = btn.innerText.trim() === cat;
+        if (isMatch) {
+          btn.className = "cat-pill active-cat theme-header-bg theme-header-text px-3.5 py-1.5 rounded-full font-bold shadow-xs shrink-0";
+        } else {
+          btn.className = "cat-pill bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0 hover:bg-stone-200";
+          btn.style.removeProperty('background-color');
+          btn.style.removeProperty('color');
+        }
+      });
+
+      document.querySelectorAll('.sidebar-cat-btn').forEach(btn => {
+        const isMatch = (cat === 'All' && btn.innerText.includes('All')) || btn.innerText.trim() === cat;
+        if (isMatch) {
+          btn.className = "sidebar-cat-btn active-cat w-full text-left px-3 py-2 rounded-xl theme-header-bg theme-header-text transition font-bold";
+        } else {
+          btn.className = "sidebar-cat-btn w-full text-left px-3 py-2 rounded-xl text-stone-700 hover:bg-stone-100 border border-transparent transition font-medium";
+          btn.style.removeProperty('background-color');
+          btn.style.removeProperty('color');
+        }
+      });
+
+      renderProducts();
+    }
+
+    function selectCategoryFromModal(cat) {
+      filterCategory(cat);
+      closeCategoryModal();
     }
 
     function formatMediaVideoEmbed(videoUrl) {
       if (!videoUrl) return '';
       if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
         let vidId = '';
-        if (videoUrl.includes('shorts/')) {
-          vidId = videoUrl.split('shorts/')[1].split('?')[0];
-        } else if (videoUrl.includes('v=')) {
-          vidId = videoUrl.split('v=')[1].split('&')[0];
-        } else if (videoUrl.includes('youtu.be/')) {
-          vidId = videoUrl.split('youtu.be/')[1].split('?')[0];
-        }
+        if (videoUrl.includes('shorts/')) vidId = videoUrl.split('shorts/')[1].split('?')[0];
+        else if (videoUrl.includes('v=')) vidId = videoUrl.split('v=')[1].split('&')[0];
+        else if (videoUrl.includes('youtu.be/')) vidId = videoUrl.split('youtu.be/')[1].split('?')[0];
         return `<iframe class="w-full h-full rounded-xl object-cover" src="https://www.youtube.com/embed/${vidId}?rel=0" frameborder="0" allowfullscreen></iframe>`;
       }
       return `<video src="${videoUrl}" controls class="w-full h-full rounded-xl object-cover bg-black" playsinline></video>`;
     }
 
     function handleQuickEnquiryClick() {
-      const greetingMsg = encodeURIComponent(
-        `*Hello Bittu Crackers, Kavali!*\n` +
-        `I would like to place an enquiry for festival crackers and get your latest offers list. Please assist me! 🎉`
-      );
+      const greetingMsg = encodeURIComponent(`*Hello Bittu Crackers, Kavali!*\nI would like to place an enquiry for festival crackers. Please assist me! 🎉`);
       window.open(`https://wa.me/${storeWhatsAppNumber}?text=${greetingMsg}`, '_blank');
     }
 
@@ -721,23 +691,9 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function openCategoryModal() {
-      document.getElementById('category-drawer-modal').classList.remove('hidden');
-    }
-
-    function closeCategoryModal() {
-      document.getElementById('category-drawer-modal').classList.add('hidden');
-    }
-
-    function selectCategoryFromModal(cat) {
-      filterCategory(cat);
-      closeCategoryModal();
-    }
-
-    function handleTopLocationClick() {
-      if (savedAddresses.length === 0) startAddNewAddressFlow();
-      else openAddressSelectModal();
-    }
+    function openCategoryModal() { document.getElementById('category-drawer-modal').classList.remove('hidden'); }
+    function closeCategoryModal() { document.getElementById('category-drawer-modal').classList.add('hidden'); }
+    function handleTopLocationClick() { savedAddresses.length === 0 ? startAddNewAddressFlow() : openAddressSelectModal(); }
 
     function updateAddressUI() {
       const topName = document.getElementById('top-loc-name');
@@ -747,11 +703,10 @@
       if (selectedAddress) {
         topName.innerText = selectedAddress.name + ' - ' + (selectedAddress.house || selectedAddress.area.split(',')[0]);
         topDesc.innerText = selectedAddress.area;
-
         cardContent.innerHTML = `
-          <div class="flex items-start space-x-2">
-            <span class="text-stone-900 mt-0.5 text-sm">📍</span>
-            <div class="flex-1 text-xs">
+          <div class="flex items-start space-x-2 text-xs">
+            <span class="text-stone-900 mt-0.5">📍</span>
+            <div class="flex-1">
               <h3 class="font-extrabold text-stone-900 text-sm">${selectedAddress.name}</h3>
               <p class="text-stone-600 mt-0.5 leading-relaxed">${selectedAddress.house ? selectedAddress.house + ', ' : ''}${selectedAddress.area}</p>
               <p class="text-stone-500 mt-1 font-semibold">📞 ${selectedAddress.phone}</p>
@@ -762,15 +717,13 @@
       } else {
         topName.innerText = "Add Delivery Address";
         topDesc.innerText = "Tap to set GPS location for delivery";
-
         cardContent.innerHTML = `
-          <div onclick="startAddNewAddressFlow()" class="p-3 border-2 border-dashed border-red-300 rounded-xl bg-red-50/50 text-center cursor-pointer">
-            <span class="text-red-700 font-bold text-xs">+ Tap to Add Delivery Address</span>
+          <div onclick="startAddNewAddressFlow()" class="p-3 border-2 border-dashed rounded-xl bg-stone-50 text-center cursor-pointer">
+            <span class="theme-accent-text font-bold text-xs">+ Tap to Add Delivery Address</span>
           </div>
         `;
         document.getElementById('delivery-zone-badge').innerText = "Not set";
       }
-
       renderSavedAddressesList();
       updateTotal();
     }
@@ -778,17 +731,17 @@
     function renderSavedAddressesList() {
       const container = document.getElementById('saved-addresses-list');
       if (savedAddresses.length === 0) {
-        container.innerHTML = '<p class="text-xs text-stone-400 py-3 text-center">No saved addresses yet. Tap "+ Add New Address" above.</p>';
+        container.innerHTML = '<p class="text-xs text-stone-400 py-3 text-center">No saved addresses yet.</p>';
         return;
       }
       container.innerHTML = savedAddresses.map(a => `
-        <div onclick="selectAddressById('${a.id}')" class="p-3 border rounded-xl cursor-pointer flex items-start justify-between ${selectedAddress && selectedAddress.id === a.id ? 'border-red-500 bg-red-50/50' : 'bg-white hover:bg-stone-50'}">
-          <div class="flex items-start space-x-2.5">
+        <div onclick="selectAddressById('${a.id}')" class="p-3 border rounded-xl cursor-pointer flex items-start justify-between ${selectedAddress && selectedAddress.id === a.id ? 'theme-accent-border bg-stone-50' : 'bg-white hover:bg-stone-50'}">
+          <div class="flex items-start space-x-2.5 text-xs">
             <span class="text-base text-stone-700 mt-0.5">📍</span>
-            <div class="text-xs">
+            <div>
               <div class="flex items-center space-x-2">
                 <span class="font-bold text-stone-900">${a.name}</span>
-                ${selectedAddress && selectedAddress.id === a.id ? '<span class="bg-red-100 text-red-700 font-bold text-[9px] px-1.5 py-0.2 rounded">Selected</span>' : ''}
+                ${selectedAddress && selectedAddress.id === a.id ? '<span class="theme-accent-bg text-white font-bold text-[9px] px-1.5 py-0.2 rounded">Selected</span>' : ''}
               </div>
               <p class="text-stone-600 mt-0.5 text-[11px]">${a.house ? a.house + ', ' : ''}${a.area}</p>
               <p class="text-stone-500 font-semibold mt-0.5 text-[11px]">📞 ${a.phone}</p>
@@ -800,11 +753,7 @@
 
     function selectAddressById(id) {
       const matched = savedAddresses.find(a => a.id === id);
-      if (matched) {
-        selectedAddress = matched;
-        updateAddressUI();
-        closeAddressSelectModal();
-      }
+      if (matched) { selectedAddress = matched; updateAddressUI(); closeAddressSelectModal(); }
     }
 
     function openAddressSelectModal() { document.getElementById('address-select-modal').classList.remove('hidden'); }
@@ -813,10 +762,7 @@
     function startAddNewAddressFlow() {
       closeAddressSelectModal();
       document.getElementById('map-pin-modal').classList.remove('hidden');
-      setTimeout(() => {
-        initMapPicker();
-        triggerGPSCurrentLocation();
-      }, 250);
+      setTimeout(() => { initMapPicker(); triggerGPSCurrentLocation(); }, 250);
     }
 
     function closeMapPinModal() { document.getElementById('map-pin-modal').classList.add('hidden'); }
@@ -829,14 +775,12 @@
       if (!leafletMap) {
         leafletMap = L.map('interactive-map', { zoomControl: false }).setView([startLat, startLon], 16);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
-
         leafletMap.on('moveend', function() {
           const center = leafletMap.getCenter();
           tempMapCoords = { lat: center.lat, lon: center.lng };
           reverseGeocodeMapCenter(center.lat, center.lng);
         });
       }
-
       leafletMap.invalidateSize();
       leafletMap.setView([startLat, startLon], 16);
       reverseGeocodeMapCenter(startLat, startLon);
@@ -845,22 +789,14 @@
     function triggerGPSCurrentLocation() {
       const pillText = document.getElementById('gps-pill-text');
       pillText.innerText = "Finding your GPS location...";
-
       navigator.geolocation.getCurrentPosition((pos) => {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
         tempMapCoords = { lat, lon };
-
-        if (leafletMap) {
-          leafletMap.invalidateSize();
-          leafletMap.setView([lat, lon], 17);
-        }
+        if (leafletMap) { leafletMap.invalidateSize(); leafletMap.setView([lat, lon], 17); }
         reverseGeocodeMapCenter(lat, lon);
         pillText.innerText = "Use my current location";
-      }, (err) => {
-        pillText.innerText = "Use my current location";
-        alert("Please enable GPS location permission in your browser.");
-      }, { enableHighAccuracy: true, timeout: 8000 });
+      }, () => { pillText.innerText = "Use my current location"; alert("Please enable GPS location."); }, { enableHighAccuracy: true });
     }
 
     async function reverseGeocodeMapCenter(lat, lon) {
@@ -868,31 +804,17 @@
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
         const data = await res.json();
         const addr = data.address || {};
-
         const areaTitle = addr.suburb || addr.neighbourhood || addr.village || addr.road || addr.town || addr.city || "Detected Area";
         const district = addr.county || addr.city_district || addr.state_district || "";
-        const state = addr.state || "";
         const pincode = addr.postcode ? addr.postcode.toString().trim() : "";
-
-        const addressParts = [areaTitle, district, state].filter(Boolean);
-        const fullAddress = addressParts.join(', ') + (pincode ? ` - ${pincode}` : '');
-
+        const fullAddress = [areaTitle, district, addr.state].filter(Boolean).join(', ') + (pincode ? ` - ${pincode}` : '');
         const zoneInfo = evaluateDeliveryCharge(fullAddress, pincode);
 
-        tempDetectedInfo = {
-          areaName: areaTitle,
-          fullAddress: fullAddress,
-          pincode: pincode,
-          zoneName: zoneInfo.zoneName,
-          deliveryCharge: zoneInfo.charge
-        };
-
+        tempDetectedInfo = { areaName: areaTitle, fullAddress, pincode, zoneName: zoneInfo.zoneName, deliveryCharge: zoneInfo.charge };
         document.getElementById('map-detected-title').innerText = areaTitle;
         document.getElementById('map-detected-full').innerText = fullAddress;
         document.getElementById('map-zone-rate-pill').innerText = zoneInfo.charge === 0 ? "FREE Delivery" : `₹${zoneInfo.charge} Delivery`;
-      } catch (e) {
-        console.warn(e);
-      }
+      } catch (e) {}
     }
 
     function evaluateDeliveryCharge(addressString, detectedPincode) {
@@ -906,14 +828,12 @@
           }
         }
       }
-
       for (const z of deliveryZones) {
         const keys = (z.area_keywords || '').split(',').map(k => k.trim().toLowerCase());
         if (keys.some(k => k && lowerAddr.includes(k))) {
           return { zoneName: z.zone_name, charge: Number(z.delivery_charge || 0) };
         }
       }
-
       return { zoneName: "Regional Delivery", charge: 99 };
     }
 
@@ -940,13 +860,11 @@
 
       if (!houseNo) return alert("Please enter Flat / House / Building name.");
       if (!name) return alert("Please enter your name.");
-      if (!phone || phone.length < 10) return alert("Please enter a valid 10-digit mobile number.");
+      if (!phone || phone.length < 10) return alert("Please enter a valid mobile number.");
 
       const newAddr = {
         id: "addr_" + Date.now(),
-        name: name,
-        phone: phone,
-        house: houseNo,
+        name, phone, house: houseNo,
         area: tempDetectedInfo.fullAddress,
         lat: tempMapCoords.lat,
         lon: tempMapCoords.lon,
@@ -957,7 +875,6 @@
       savedAddresses.unshift(newAddr);
       selectedAddress = newAddr;
       localStorage.setItem('bittu_saved_addresses', JSON.stringify(savedAddresses));
-
       updateAddressUI();
       closeAddressFormModal();
     }
@@ -976,18 +893,17 @@
         container.innerHTML = '<p class="text-xs text-stone-400 text-center py-6">Your cart is empty.</p>';
         return;
       }
-
       container.innerHTML = cart.map(item => `
         <div class="py-2.5 flex items-center justify-between text-xs">
           <div class="flex-1 pr-2">
             <h4 class="font-bold text-stone-900 leading-tight">${item.name}</h4>
             <div class="flex items-center space-x-1.5 mt-0.5">
-              <span class="font-extrabold text-red-700">₹${item.offer_price}</span>
+              <span class="font-extrabold theme-accent-text">₹${item.offer_price}</span>
               <span class="line-through text-stone-400 text-[10px]">₹${item.mrp}</span>
             </div>
           </div>
           <div class="flex items-center space-x-2">
-            <div class="flex items-center border border-stone-300 rounded-lg overflow-hidden h-7">
+            <div class="flex items-center border rounded-lg overflow-hidden h-7 theme-accent-border">
               <button onclick="updateItemQty('${item.id}', -1)" class="w-6 h-full font-black text-stone-600 hover:bg-stone-100 flex items-center justify-center">−</button>
               <span class="font-bold text-xs px-2 text-stone-900">${item.qty}</span>
               <button onclick="updateItemQty('${item.id}', 1)" class="w-6 h-full font-black text-stone-600 hover:bg-stone-100 flex items-center justify-center">+</button>
@@ -1032,11 +948,7 @@
 
     async function confirmOrderAndWhatsApp() {
       if (cart.length === 0) return alert("Your cart is empty. Please add items.");
-      if (!selectedAddress) {
-        alert("Please add and confirm your delivery address before placing your order.");
-        startAddNewAddressFlow();
-        return;
-      }
+      if (!selectedAddress) return alert("Please add and confirm your delivery address.");
 
       const btn = document.getElementById('btn-submit-order');
       btn.disabled = true;
@@ -1065,23 +977,14 @@
 
         const itemLines = cart.map(i => `• ${i.name} (x${i.qty}) = ₹${i.offer_price * i.qty}`).join('\n');
         const message = encodeURIComponent(
-          `*NEW FESTIVAL ORDER #${orderId}*\n` +
-          `---------------------------------\n` +
-          `*Customer Name:* ${selectedAddress.name}\n` +
-          `*Phone:* ${selectedAddress.phone}\n` +
-          `*Delivery Address:* ${fullAddr}\n` +
-          `*Google Maps Pin:* ${mapPinUrl}\n` +
-          `*Delivery Zone:* ${selectedAddress.zoneName}\n` +
-          `---------------------------------\n` +
-          `*Items Ordered (${itemsCount} items):*\n${itemLines}\n` +
-          `---------------------------------\n` +
-          `*Delivery Fee:* ${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}\n` +
-          `*Total Pay on Delivery:* ₹${grandTotal.toFixed(0)}\n\n` +
-          `Please confirm my festival crackers booking! 🎉`
+          `*NEW FESTIVAL ORDER #${orderId}*\n---------------------------------\n` +
+          `*Customer Name:* ${selectedAddress.name}\n*Phone:* ${selectedAddress.phone}\n` +
+          `*Delivery Address:* ${fullAddr}\n*Google Maps Pin:* ${mapPinUrl}\n` +
+          `---------------------------------\n*Items (${itemsCount}):*\n${itemLines}\n` +
+          `---------------------------------\n*Total Pay on Delivery:* ₹${grandTotal.toFixed(0)}`
         );
 
         window.open(`https://wa.me/${storeWhatsAppNumber}?text=${message}`, '_blank');
-
         closeCartView();
         document.getElementById('success-order-id').innerText = '#' + orderId;
         document.getElementById('success-cust-name').innerText = selectedAddress.name;
@@ -1092,38 +995,22 @@
         cart = [];
         renderProducts();
         updateTotal();
-      } catch (err) {
-        alert("Booking error: " + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "Continue & Book on WhatsApp";
-      }
+      } catch (err) { alert("Booking error: " + err.message); }
+      finally { btn.disabled = false; btn.innerText = "Continue & Book on WhatsApp"; }
     }
 
-    function closeSuccessAndShopMore() {
-      document.getElementById('order-success-modal').classList.add('hidden');
-    }
-
-    async function loadLiveProducts() {
-      const { data } = await db.from('products').select('*');
-      if (data) {
-        allProducts = data;
-        renderProducts();
-      }
-    }
+    function closeSuccessAndShopMore() { document.getElementById('order-success-modal').classList.add('hidden'); }
 
     function setViewMode(mode) {
       currentViewMode = mode;
       const listBtn = document.getElementById('btn-toggle-list');
       const gridBtn = document.getElementById('btn-toggle-grid');
-
-      if (mode === 'list') {
-        listBtn.className = "px-2.5 py-1 rounded-full text-[10px] font-black bg-white text-red-700 shadow-sm flex items-center space-x-1 transition";
-        gridBtn.className = "px-2.5 py-1 rounded-full text-[10px] font-extrabold text-stone-500 flex items-center space-x-1 transition";
-      } else {
-        gridBtn.className = "px-2.5 py-1 rounded-full text-[10px] font-black bg-white text-red-700 shadow-sm flex items-center space-x-1 transition";
-        listBtn.className = "px-2.5 py-1 rounded-full text-[10px] font-extrabold text-stone-500 flex items-center space-x-1 transition";
-      }
+      listBtn.className = mode === 'list' 
+        ? "px-2.5 py-1 rounded-full text-[10px] font-black bg-white theme-accent-text shadow-sm flex items-center space-x-1 transition"
+        : "px-2.5 py-1 rounded-full text-[10px] font-extrabold text-stone-500 flex items-center space-x-1 transition";
+      gridBtn.className = mode === 'grid'
+        ? "px-2.5 py-1 rounded-full text-[10px] font-black bg-white theme-accent-text shadow-sm flex items-center space-x-1 transition"
+        : "px-2.5 py-1 rounded-full text-[10px] font-extrabold text-stone-500 flex items-center space-x-1 transition";
       renderProducts();
     }
 
@@ -1131,22 +1018,16 @@
       const container = document.getElementById('product-list');
       const searchQuery = (document.getElementById('live-search') ? document.getElementById('live-search').value.toLowerCase().trim() : '');
       
-      let filtered = activeCategory === 'All' ? [...allProducts] : allProducts.filter(p => p.category === activeCategory);
-      if (searchQuery) {
-        filtered = filtered.filter(p => p.name.toLowerCase().includes(searchQuery) || (p.category && p.category.toLowerCase().includes(searchQuery)));
-      }
+      let filtered = activeCategory === 'All' ? [...allProducts] : allProducts.filter(p => (p.category || '').toLowerCase() === activeCategory.toLowerCase());
+      if (searchQuery) filtered = filtered.filter(p => p.name.toLowerCase().includes(searchQuery) || (p.category && p.category.toLowerCase().includes(searchQuery)));
 
       if (filtered.length === 0) {
         container.className = "w-full";
-        container.innerHTML = '<div class="text-center text-xs text-stone-400 py-12">No products found.</div>';
+        container.innerHTML = '<div class="text-center text-xs text-stone-400 py-12">No products found in this category.</div>';
         return;
       }
 
-      if (currentViewMode === 'list') {
-        container.className = "w-full flex flex-col space-y-3";
-      } else {
-        container.className = "w-full grid grid-cols-2 sm:grid-cols-3 gap-3";
-      }
+      container.className = currentViewMode === 'list' ? "w-full flex flex-col space-y-3" : "w-full grid grid-cols-2 sm:grid-cols-3 gap-3";
 
       container.innerHTML = filtered.map(p => {
         const inCartItem = cart.find(c => c.id === p.id);
@@ -1156,115 +1037,97 @@
 
         const mediaGalleryHtml = hasVideo ? `
           <div class="relative w-full overflow-hidden rounded-xl bg-stone-100">
-            <div id="media-carousel-${p.id}" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar w-full h-40 sm:h-44">
+            <div class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar w-full h-40 sm:h-44">
               <div class="w-full h-full shrink-0 snap-center relative">
-                <img src="${p.image_url || 'https://placehold.co/400x200?text=Cracker'}" class="w-full h-full object-cover rounded-xl" />
-                <span class="absolute bottom-1.5 right-1.5 bg-black/60 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full backdrop-blur-xs">
-                  Swipe for Video ➔
-                </span>
+                <img src="${p.image_url || 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300'}" class="w-full h-full object-cover rounded-xl" />
+                <span class="absolute bottom-1.5 right-1.5 bg-black/60 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full backdrop-blur-xs">Swipe for Video ➔</span>
               </div>
               <div class="w-full h-full shrink-0 snap-center relative bg-black flex items-center justify-center">
                 ${formatMediaVideoEmbed(p.video_url)}
               </div>
             </div>
-            <div class="absolute top-1.5 right-1.5 bg-amber-400 text-red-950 font-black text-[8px] px-1.5 py-0.2 rounded-full shadow-xs">
+            <div class="absolute top-1.5 right-1.5 theme-header-bg theme-header-text font-black text-[8px] px-1.5 py-0.2 rounded-full shadow-xs">
               📷 1/2 • 🎬 Video
             </div>
           </div>
         ` : `
           <div class="relative w-full h-40 sm:h-44 overflow-hidden rounded-xl bg-stone-100">
-            <img src="${p.image_url || 'https://placehold.co/400x200?text=Cracker'}" class="w-full h-full object-cover rounded-xl" />
+            <img src="${p.image_url || 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300'}" class="w-full h-full object-cover rounded-xl" />
           </div>
         `;
 
         if (currentViewMode === 'list') {
-          const listStepperHtml = qty > 0 ? `
-            <div class="flex items-center border border-stone-200 bg-stone-50 rounded-lg overflow-hidden h-7">
-              <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-7 h-full flex items-center justify-center font-bold text-stone-500 hover:bg-stone-200 text-sm active:scale-95 transition">−</button>
-              <span class="font-bold text-xs px-2.5 text-stone-800">${qty}</span>
-              <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-7 h-full flex items-center justify-center font-bold text-stone-500 hover:bg-stone-200 text-sm active:scale-95 transition">+</button>
+          const listStepper = qty > 0 ? `
+            <div class="flex items-center border rounded-lg overflow-hidden h-7 theme-accent-border">
+              <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-7 h-full flex items-center justify-center font-bold text-stone-700 hover:bg-stone-100 text-sm active:scale-95">−</button>
+              <span class="font-bold text-xs px-2.5 text-stone-900">${qty}</span>
+              <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-7 h-full flex items-center justify-center font-bold text-stone-700 hover:bg-stone-100 text-sm active:scale-95">+</button>
             </div>
           ` : `
-            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="bg-red-50 hover:bg-red-100 text-red-700 font-bold px-3 py-1.5 rounded-lg text-xs border border-red-200 active:scale-95 transition">
+            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="bg-stone-50 hover:bg-stone-100 theme-accent-text font-bold px-3 py-1.5 rounded-lg text-xs border theme-accent-border active:scale-95 transition">
               + Add
             </button>
           `;
 
           return `
-            <div class="bg-white border border-stone-200 rounded-2xl p-3.5 shadow-xs flex items-start space-x-3.5 w-full hover:border-amber-400/60 transition">
-              <div class="w-24 h-24 shrink-0 overflow-hidden rounded-xl">
-                ${mediaGalleryHtml}
-              </div>
+            <div class="bg-white border border-stone-200 rounded-2xl p-3.5 shadow-xs flex items-start space-x-3.5 w-full hover:border-stone-400 transition">
+              <div class="w-24 h-24 shrink-0 overflow-hidden rounded-xl">${mediaGalleryHtml}</div>
               <div class="flex-1 min-w-0">
                 <h3 class="font-bold text-xs text-stone-900 leading-snug line-clamp-2">${p.name}</h3>
-                <p class="text-[10px] text-stone-400 uppercase font-semibold mt-0.5 tracking-wider">${p.category}</p>
+                <p class="text-[10px] theme-accent-text uppercase font-semibold mt-0.5 tracking-wider">${p.category}</p>
                 <div class="mt-1 flex items-baseline space-x-1.5">
                   <span class="text-[11px] text-stone-400">MRP: <span class="line-through">₹${p.mrp}</span></span>
-                  <span class="font-extrabold text-stone-950 text-sm">₹${p.offer_price}</span>
+                  <span class="font-extrabold theme-accent-text text-sm">₹${p.offer_price}</span>
                 </div>
-                ${savings > 0 ? `<p class="text-[11px] font-bold text-amber-600 mt-0.5">Special Offer: Save ₹${savings}</p>` : ''}
-                <div class="mt-2 flex justify-end">
-                  ${listStepperHtml}
-                </div>
+                ${savings > 0 ? `<p class="text-[11px] font-bold theme-accent-text mt-0.5">Special Offer: Save ₹${savings}</p>` : ''}
+                <div class="mt-2 flex justify-end">${listStepper}</div>
               </div>
             </div>
           `;
         }
 
-        const gridQtyButtonHtml = qty > 0 ? `
-          <div class="flex items-center justify-between border-2 border-red-700 bg-red-50 rounded-lg overflow-hidden h-8 w-full">
-            <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-700 hover:bg-red-100 text-sm active:scale-95 transition">−</button>
-            <span class="font-black text-red-700 text-xs px-1">${qty}</span>
-            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold text-red-700 hover:bg-red-100 text-sm active:scale-95 transition">+</button>
+        const gridQtyButton = qty > 0 ? `
+          <div class="flex items-center justify-between border-2 rounded-lg overflow-hidden h-8 w-full theme-accent-border">
+            <button type="button" onclick="updateItemQty('${p.id}', -1)" class="w-8 h-full flex items-center justify-center font-extrabold hover:bg-stone-100 text-sm active:scale-95">−</button>
+            <span class="font-black text-xs px-1 text-stone-900">${qty}</span>
+            <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-8 h-full flex items-center justify-center font-extrabold hover:bg-stone-100 text-sm active:scale-95">+</button>
           </div>
         ` : `
-          <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-full bg-red-50 hover:bg-red-100 text-red-700 font-bold h-8 rounded-lg text-xs border border-red-200 active:scale-95 transition">
+          <button type="button" onclick="updateItemQty('${p.id}', 1)" class="w-full bg-stone-50 hover:bg-stone-100 theme-accent-text font-bold h-8 rounded-lg text-xs border theme-accent-border active:scale-95 transition">
             + Add
           </button>
         `;
 
         return `
-          <div class="bg-white border border-stone-200 rounded-2xl p-3 flex flex-col justify-between shadow-xs hover:border-amber-400/60 transition">
+          <div class="bg-white border border-stone-200 rounded-2xl p-3 flex flex-col justify-between shadow-xs hover:border-stone-400 transition">
             <div>
-              <div class="mb-2">
-                ${mediaGalleryHtml}
-              </div>
-              <div class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">${p.category}</div>
+              <div class="mb-2">${mediaGalleryHtml}</div>
+              <div class="text-[10px] theme-accent-text font-bold uppercase tracking-wider">${p.category}</div>
               <h3 class="font-bold text-xs mt-0.5 leading-snug line-clamp-2 h-8 text-stone-900">${p.name}</h3>
               <div class="flex items-center space-x-1.5 mt-1.5">
-                <span class="font-extrabold text-red-700 text-sm">₹${p.offer_price}</span>
+                <span class="font-extrabold theme-accent-text text-sm">₹${p.offer_price}</span>
                 <span class="line-through text-stone-400 text-[11px]">₹${p.mrp}</span>
               </div>
-              ${savings > 0 ? `<p class="text-[10px] font-bold text-amber-600 mt-0.5">Special Offer: Save ₹${savings}</p>` : ''}
+              ${savings > 0 ? `<p class="text-[10px] font-bold theme-accent-text mt-0.5">Special Offer: Save ₹${savings}</p>` : ''}
             </div>
-            <div class="mt-2.5">${gridQtyButtonHtml}</div>
+            <div class="mt-2.5">${gridQtyButton}</div>
           </div>
         `;
       }).join('');
     }
 
     function updateItemQty(id, change) {
-      const prod = allProducts.find(p => p.id === id);
-      const existing = cart.find(c => c.id === id);
+      const prod = allProducts.find(p => p.id == id);
+      const existing = cart.find(c => c.id == id);
       if (existing) {
         existing.qty += change;
-        if (existing.qty <= 0) cart = cart.filter(c => c.id !== id);
+        if (existing.qty <= 0) cart = cart.filter(c => c.id != id);
       } else if (change > 0) {
         cart.push({ ...prod, qty: 1 });
       }
       renderProducts();
       renderCartItems();
       updateTotal();
-    }
-
-    function filterCategory(cat) {
-      activeCategory = cat;
-      document.querySelectorAll('.cat-btn').forEach(btn => {
-        btn.className = btn.innerText === cat 
-          ? "cat-btn bg-red-700 text-amber-300 border border-amber-400 px-3.5 py-1.5 rounded-full font-bold shadow-xs shrink-0" 
-          : "cat-btn bg-stone-100 text-stone-700 px-3.5 py-1.5 rounded-full font-medium shrink-0";
-      });
-      renderProducts();
     }
 
     init();
