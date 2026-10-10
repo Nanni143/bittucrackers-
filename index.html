@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <!-- DYNAMIC THEME ENGINE STYLES -->
   <style>
     :root {
       --theme-header-bg: #064e3b;       /* Forest Green */
@@ -188,7 +189,7 @@
   <!-- ================= CATALOG STOREFRONT VIEW ================= -->
   <div id="catalog-page-view">
 
-    <!-- HORIZONTAL TOP CATEGORIES BAR -->
+    <!-- HORIZONTAL TOP CATEGORIES BAR (DYNAMICALLY SYNCED) -->
     <div id="top-category-bar" class="px-3 pt-3 pb-2 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs bg-white border-b border-stone-200 no-scrollbar shadow-2xs">
       <button onclick="filterCategory('All')" class="cat-pill active-cat theme-header-bg theme-header-text px-3.5 py-1.5 rounded-full font-bold shadow-xs shrink-0">All</button>
     </div>
@@ -635,12 +636,14 @@
       const { data } = await db.from('products').select('*');
       if (data && data.length > 0) {
         allProducts = data;
+        // Collect all distinct categories currently assigned to actual products
         discoveredCategories = Array.from(new Set(data.map(p => (p.category || 'General').trim()).filter(Boolean))).sort();
         renderCategoryNavigationBars();
       }
       renderProducts();
     }
 
+    // SYNC CATEGORY BARS DIRECTLY WITH DISCOVERED PRODUCT CATEGORIES
     function renderCategoryNavigationBars() {
       const topBar = document.getElementById('top-category-bar');
       topBar.innerHTML = `<button onclick="filterCategory('All')" class="cat-pill active-cat theme-header-bg theme-header-text px-3.5 py-1.5 rounded-full font-bold shadow-xs shrink-0">All</button>` + 
@@ -1119,7 +1122,7 @@
             </button>
           `;
 
-          // LIST VIEW: Expands the image frame to w-28/w-32 with full object-contain
+          // LIST VIEW: Full object-contain image box
           return `
             <div class="bg-white border border-stone-200 rounded-2xl p-3 shadow-xs flex items-center space-x-3.5 w-full hover:border-stone-300 transition">
               <div class="w-24 h-24 sm:w-28 sm:h-28 shrink-0 cracker-img-box cursor-pointer shadow-2xs" onclick="openImageZoom('${safeImg}', '${escapedName}')">
