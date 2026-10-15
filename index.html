@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,7 +10,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
-    /* Premium Festival Theme: Ruby Red, Warm Champagne, Crisp White & Gold */
+    /* Premium Festival Theme: Warm Ivory Storefront with Jet-Black Bottom Footer */
     :root {
       --bg-portal: #FAF8F5;          /* Warm Champagne Ivory */
       --ruby-dark: #881337;          /* Rich Ruby Red */
@@ -18,15 +18,20 @@
       --ruby-hover: #BE123C;         /* Vibrant Ruby */
       --gold-accent: #F59E0B;        /* Festival Gold */
       --gold-light: #FEF3C7;         /* Soft Gold Badge */
-      --card-bg: #FFFFFF;
-      --card-border: #E7E5E4;
+    }
+
+    html, body {
+      min-height: 100%;
     }
 
     body {
       background-color: var(--bg-portal) !important;
       color: #1C1917;
+      display: flex;
+      flex-direction: column;
     }
 
+    /* Cracker Box Image Styling */
     .cracker-img-box {
       display: flex;
       align-items: center;
@@ -57,10 +62,10 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="pb-28 font-sans antialiased selection:bg-rose-900 selection:text-amber-200">
+<body class="selection:bg-rose-900 selection:text-amber-200">
 
   <!-- ================= TOP NOTICE TICKER: RUBY & GOLD ================= -->
-  <div class="bg-gradient-to-r from-rose-950 via-rose-900 to-rose-950 text-amber-300 border-b border-rose-800 text-[10px] md:text-xs py-2 px-3 font-bold flex items-center justify-between overflow-x-auto whitespace-nowrap shadow-xs">
+  <div class="bg-gradient-to-r from-rose-950 via-rose-900 to-rose-950 text-amber-300 border-b border-rose-800 text-[10px] md:text-xs py-2 px-3 font-bold flex items-center justify-between overflow-x-auto whitespace-nowrap shadow-xs shrink-0">
     <div class="flex items-center space-x-6 mx-auto">
       <span>✨ 100% GENUINE SIVAKASI FESTIVAL CRACKERS</span>
       <span>💥 SPECIAL FESTIVAL DISCOUNTS ON ALL ITEMS</span>
@@ -68,8 +73,8 @@
     </div>
   </div>
 
-  <!-- ================= TOP NAVIGATION: CRISP WHITE WITH RUBY TOUCHES ================= -->
-  <nav class="bg-white/95 backdrop-blur-md border-b border-stone-200 px-3 py-2.5 sticky top-0 z-40 shadow-xs">
+  <!-- ================= TOP NAVIGATION ================= -->
+  <nav class="bg-white/95 backdrop-blur-md border-b border-stone-200 px-3 py-2.5 sticky top-0 z-40 shadow-xs shrink-0">
     <div class="max-w-6xl mx-auto flex items-center justify-between gap-2">
       
       <!-- Brand & Location Pin -->
@@ -115,135 +120,196 @@
     </div>
   </nav>
 
-  <!-- ================= CONTACT US PAGE VIEW ================= -->
-  <div id="contact-page-view" class="hidden">
-    <div class="bg-gradient-to-r from-rose-950 via-rose-900 to-rose-950 text-white py-12 px-4 text-center border-b-4 border-amber-400 shadow-md">
-      <h1 class="text-3xl sm:text-4xl font-black italic tracking-wider uppercase text-amber-300 drop-shadow-md">CONTACT US</h1>
-      <p class="text-xs sm:text-sm text-stone-200 font-semibold tracking-widest mt-1 uppercase">REACH OUT TO KAVALI'S PREMIER BITTU CRACKERS</p>
-    </div>
+  <!-- ================= MAIN CONTENT WRAPPER (FLEX-GROW ENSURES FOOTER STICKS TO BOTTOM) ================= -->
+  <div class="flex-1 flex flex-col">
 
-    <div class="max-w-4xl mx-auto px-4 -mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-      <div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 text-center space-y-3">
-        <div class="w-12 h-12 bg-rose-50 text-rose-800 rounded-2xl flex items-center justify-center mx-auto text-xl shadow-2xs border border-rose-100">📞</div>
-        <h3 class="font-black text-sm uppercase text-stone-900 tracking-wider">CALL US</h3>
-        <p class="text-[11px] text-stone-500">Phone bookings & inquiries</p>
-        <div class="space-y-1 font-bold text-xs text-rose-900 font-mono">
-          <p><a href="tel:+917993659115" class="hover:underline">+91 7993659115</a></p>
-          <p><a href="tel:+919848104866" class="hover:underline">+91 9848104866</a></p>
-          <p><a href="tel:+917661869408" class="hover:underline">+91 7661869408</a></p>
-        </div>
+    <!-- CONTACT US PAGE VIEW -->
+    <div id="contact-page-view" class="hidden flex-1">
+      <div class="bg-gradient-to-r from-rose-950 via-rose-900 to-rose-950 text-white py-12 px-4 text-center border-b-4 border-amber-400 shadow-md">
+        <h1 class="text-3xl sm:text-4xl font-black italic tracking-wider uppercase text-amber-300 drop-shadow-md">CONTACT US</h1>
+        <p class="text-xs sm:text-sm text-stone-200 font-semibold tracking-widest mt-1 uppercase">REACH OUT TO KAVALI'S PREMIER BITTU CRACKERS</p>
       </div>
 
-      <div class="bg-white rounded-3xl p-6 shadow-sm border border-emerald-200 text-center space-y-3">
-        <div class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto text-xl shadow-2xs">💬</div>
-        <h3 class="font-black text-sm uppercase text-emerald-950 tracking-wider">WHATSAPP</h3>
-        <p class="text-[11px] text-emerald-700 font-semibold">Instant Price List & Fast Support</p>
-        <div class="grid grid-cols-1 gap-1.5 font-black text-xs text-emerald-800 font-mono">
-          <a href="https://wa.me/917829978883" target="_blank" class="hover:underline bg-stone-50 py-1.5 rounded-xl border border-emerald-200">+91 7829978883</a>
-          <a href="https://wa.me/917993659115" target="_blank" class="hover:underline bg-stone-50 py-1.5 rounded-xl border border-emerald-200">+91 7993659115</a>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 text-center space-y-3">
-        <div class="w-12 h-12 bg-amber-50 text-amber-700 rounded-2xl flex items-center justify-center mx-auto text-xl shadow-2xs border border-amber-200">📍</div>
-        <h3 class="font-black text-sm uppercase text-stone-900 tracking-wider">STORE ADDRESS</h3>
-        <p class="text-xs text-stone-600 leading-relaxed font-medium">
-          Vengal Rao Nagar, Kavali, S.P.S.R Nellore District, Andhra Pradesh - 524201
-        </p>
-      </div>
-    </div>
-
-    <div class="text-center pb-8">
-      <button onclick="switchToCatalogView()" class="bg-rose-800 hover:bg-rose-900 text-amber-300 font-bold px-6 py-2.5 rounded-full text-xs shadow-md border border-amber-400 transition active:scale-95">
-        ← Back to Cracker Catalog
-      </button>
-    </div>
-  </div>
-
-  <!-- ================= CATALOG STOREFRONT VIEW ================= -->
-  <div id="catalog-page-view">
-
-    <!-- TOP HORIZONTAL CATEGORIES BAR (DYNAMICALLY SYNCED) -->
-    <div id="top-category-bar" class="px-3 pt-3 pb-2.5 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs bg-white border-b border-stone-200 no-scrollbar shadow-xs">
-      <button onclick="filterCategory('All')" class="cat-pill active-cat bg-rose-800 text-amber-300 border border-amber-400 px-4 py-1.5 rounded-full font-bold shadow-xs shrink-0">All</button>
-    </div>
-
-    <!-- FLOATING STATS CONTROL BAR -->
-    <div class="max-w-6xl mx-auto px-3 py-3">
-      <div class="bg-white rounded-full border border-stone-200 shadow-sm p-2 flex items-center justify-between gap-2 overflow-x-auto">
-        <div class="flex items-center space-x-2 shrink-0">
-          <button onclick="openCategoryModal()" class="bg-rose-800 hover:bg-rose-900 text-amber-300 font-extrabold text-[11px] px-4 py-2 rounded-full flex items-center space-x-1.5 border border-amber-400 shadow-xs active:scale-95 transition">
-            <span>⚙</span><span>CATEGORIES</span>
-          </button>
-          <div class="relative">
-            <input type="text" id="live-search" placeholder="Search crackers..." oninput="renderProducts()" class="border border-stone-200 rounded-full pl-7 pr-3 py-1.5 text-[11px] w-28 sm:w-40 outline-none bg-stone-50 focus:border-rose-700" />
-            <span class="absolute left-2.5 top-2 text-[10px] text-stone-400">🔍</span>
+      <div class="max-w-4xl mx-auto px-4 -mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 text-center space-y-3">
+          <div class="w-12 h-12 bg-rose-50 text-rose-800 rounded-2xl flex items-center justify-center mx-auto text-xl shadow-2xs border border-rose-100">📞</div>
+          <h3 class="font-black text-sm uppercase text-stone-900 tracking-wider">CALL US</h3>
+          <p class="text-[11px] text-stone-500">Phone bookings & inquiries</p>
+          <div class="space-y-1 font-bold text-xs text-rose-900 font-mono">
+            <p><a href="tel:+917993659115" class="hover:underline">+91 7993659115</a></p>
+            <p><a href="tel:+919848104866" class="hover:underline">+91 9848104866</a></p>
+            <p><a href="tel:+917661869408" class="hover:underline">+91 7661869408</a></p>
           </div>
         </div>
 
-        <div class="flex items-center space-x-2 shrink-0">
-          <div class="flex items-center space-x-1.5 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200">
-            <div class="w-6 h-6 bg-amber-500 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">📦</div>
-            <div>
-              <span class="text-[8px] font-black uppercase text-amber-900 block leading-none">PRODUCTS</span>
-              <span id="pill-distinct-products" class="text-xs font-black text-stone-900 leading-none">0</span>
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-emerald-200 text-center space-y-3">
+          <div class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto text-xl shadow-2xs">💬</div>
+          <h3 class="font-black text-sm uppercase text-emerald-950 tracking-wider">WHATSAPP</h3>
+          <p class="text-[11px] text-emerald-700 font-semibold">Instant Price List & Fast Support</p>
+          <div class="grid grid-cols-1 gap-1.5 font-black text-xs text-emerald-800 font-mono">
+            <a href="https://wa.me/917829978883" target="_blank" class="hover:underline bg-stone-50 py-1.5 rounded-xl border border-emerald-200">+91 7829978883</a>
+            <a href="https://wa.me/917993659115" target="_blank" class="hover:underline bg-stone-50 py-1.5 rounded-xl border border-emerald-200">+91 7993659115</a>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 text-center space-y-3">
+          <div class="w-12 h-12 bg-amber-50 text-amber-700 rounded-2xl flex items-center justify-center mx-auto text-xl shadow-2xs border border-amber-200">📍</div>
+          <h3 class="font-black text-sm uppercase text-stone-900 tracking-wider">STORE ADDRESS</h3>
+          <p class="text-xs text-stone-600 leading-relaxed font-medium">
+            Vengal Rao Nagar, Kavali, S.P.S.R Nellore District, Andhra Pradesh - 524201
+          </p>
+        </div>
+      </div>
+
+      <div class="text-center pb-8">
+        <button onclick="switchToCatalogView()" class="bg-rose-800 hover:bg-rose-900 text-amber-300 font-bold px-6 py-2.5 rounded-full text-xs shadow-md border border-amber-400 transition active:scale-95">
+          ← Back to Cracker Catalog
+        </button>
+      </div>
+    </div>
+
+    <!-- CATALOG STOREFRONT VIEW -->
+    <div id="catalog-page-view" class="flex-1 flex flex-col">
+
+      <!-- TOP HORIZONTAL CATEGORIES BAR -->
+      <div id="top-category-bar" class="px-3 pt-3 pb-2.5 overflow-x-auto whitespace-nowrap space-x-2 flex text-xs bg-white border-b border-stone-200 no-scrollbar shadow-xs shrink-0">
+        <button onclick="filterCategory('All')" class="cat-pill active-cat bg-rose-800 text-amber-300 border border-amber-400 px-4 py-1.5 rounded-full font-bold shadow-xs shrink-0">All</button>
+      </div>
+
+      <!-- FLOATING STATS CONTROL BAR -->
+      <div class="max-w-6xl mx-auto px-3 py-3 w-full shrink-0">
+        <div class="bg-white rounded-full border border-stone-200 shadow-sm p-2 flex items-center justify-between gap-2 overflow-x-auto">
+          <div class="flex items-center space-x-2 shrink-0">
+            <button onclick="openCategoryModal()" class="bg-rose-800 hover:bg-rose-900 text-amber-300 font-extrabold text-[11px] px-4 py-2 rounded-full flex items-center space-x-1.5 border border-amber-400 shadow-xs active:scale-95 transition">
+              <span>⚙</span><span>CATEGORIES</span>
+            </button>
+            <div class="relative">
+              <input type="text" id="live-search" placeholder="Search crackers..." oninput="renderProducts()" class="border border-stone-200 rounded-full pl-7 pr-3 py-1.5 text-[11px] w-28 sm:w-40 outline-none bg-stone-50 focus:border-rose-700" />
+              <span class="absolute left-2.5 top-2 text-[10px] text-stone-400">🔍</span>
             </div>
           </div>
 
-          <div class="flex items-center space-x-1.5 bg-rose-50 px-2.5 py-1 rounded-xl border border-rose-200">
-            <div class="w-6 h-6 bg-rose-700 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">🛍️</div>
-            <div>
-              <span class="text-[8px] font-black uppercase text-rose-900 block leading-none">ITEMS</span>
-              <span id="pill-total-items" class="text-xs font-black text-stone-900 leading-none">0</span>
+          <div class="flex items-center space-x-2 shrink-0">
+            <div class="flex items-center space-x-1.5 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200">
+              <div class="w-6 h-6 bg-amber-500 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">📦</div>
+              <div>
+                <span class="text-[8px] font-black uppercase text-amber-900 block leading-none">PRODUCTS</span>
+                <span id="pill-distinct-products" class="text-xs font-black text-stone-900 leading-none">0</span>
+              </div>
             </div>
+
+            <div class="flex items-center space-x-1.5 bg-rose-50 px-2.5 py-1 rounded-xl border border-rose-200">
+              <div class="w-6 h-6 bg-rose-700 text-white rounded-lg flex items-center justify-center text-xs font-black shadow-xs">🛍️</div>
+              <div>
+                <span class="text-[8px] font-black uppercase text-rose-900 block leading-none">ITEMS</span>
+                <span id="pill-total-items" class="text-xs font-black text-stone-900 leading-none">0</span>
+              </div>
+            </div>
+
+            <button onclick="openCartView()" class="bg-rose-800 hover:bg-rose-900 text-white flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl shadow-xs active:scale-95 transition border border-rose-700">
+              <span class="text-xs">🛒</span>
+              <div class="text-left">
+                <span class="text-[8px] font-black uppercase text-amber-300 block leading-none">VIEW CART</span>
+                <span id="pill-total-rupees" class="text-xs font-black text-white leading-none">₹0</span>
+              </div>
+            </button>
           </div>
 
-          <button onclick="openCartView()" class="bg-rose-800 hover:bg-rose-900 text-white flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl shadow-xs active:scale-95 transition border border-rose-700">
-            <span class="text-xs">🛒</span>
-            <div class="text-left">
-              <span class="text-[8px] font-black uppercase text-amber-300 block leading-none">VIEW CART</span>
-              <span id="pill-total-rupees" class="text-xs font-black text-white leading-none">₹0</span>
-            </div>
-          </button>
-        </div>
-
-        <div class="flex items-center bg-stone-100 p-0.5 rounded-full shrink-0 border border-stone-200">
-          <button onclick="setViewMode('list')" id="btn-toggle-list" class="px-3 py-1 rounded-full text-[10px] font-extrabold text-stone-500 flex items-center space-x-1 transition">
-            <span>☰</span><span>LIST</span>
-          </button>
-          <button onclick="setViewMode('grid')" id="btn-toggle-grid" class="px-3 py-1 rounded-full text-[10px] font-black bg-white text-rose-900 shadow-sm flex items-center space-x-1 transition">
-            <span>⊞</span><span>GRID</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- MAIN DUAL-COLUMN LAYOUT -->
-    <div class="max-w-6xl mx-auto px-3 py-2 flex gap-4">
-      
-      <!-- DESKTOP LEFT CATEGORIES SIDEBAR -->
-      <aside class="hidden md:block w-60 shrink-0 space-y-2 sticky top-24 h-[calc(100vh-7.5rem)] overflow-y-auto no-scrollbar">
-        <div class="bg-white rounded-3xl border border-stone-200 p-3 shadow-xs space-y-1.5">
-          <div class="flex items-center justify-between border-b border-stone-100 pb-2.5 mb-2">
-            <span class="font-extrabold text-xs text-stone-900 uppercase tracking-wide">Category Index</span>
-            <span class="text-rose-700 text-xs">✨</span>
-          </div>
-          <div id="sidebar-categories-list" class="space-y-1 text-xs font-bold">
-            <button onclick="filterCategory('All')" class="sidebar-cat-btn active-cat w-full text-left px-3 py-2 rounded-xl bg-rose-800 text-amber-300 border border-amber-400 font-bold transition">
-              All Crackers
+          <div class="flex items-center bg-stone-100 p-0.5 rounded-full shrink-0 border border-stone-200">
+            <button onclick="setViewMode('list')" id="btn-toggle-list" class="px-3 py-1 rounded-full text-[10px] font-extrabold text-stone-500 flex items-center space-x-1 transition">
+              <span>☰</span><span>LIST</span>
+            </button>
+            <button onclick="setViewMode('grid')" id="btn-toggle-grid" class="px-3 py-1 rounded-full text-[10px] font-black bg-white text-rose-900 shadow-sm flex items-center space-x-1 transition">
+              <span>⊞</span><span>GRID</span>
             </button>
           </div>
         </div>
-      </aside>
+      </div>
 
-      <!-- PRODUCT CARDS CONTAINER -->
-      <main class="flex-1 min-w-0" id="product-container">
-        <div id="product-list" class="w-full">
-          <div class="text-center text-xs text-stone-400 py-16">Loading festival crackers catalog...</div>
-        </div>
-      </main>
+      <!-- MAIN DUAL-COLUMN LAYOUT -->
+      <div class="max-w-6xl mx-auto px-3 py-2 flex gap-4 w-full flex-1">
+        
+        <!-- DESKTOP LEFT CATEGORIES SIDEBAR -->
+        <aside class="hidden md:block w-60 shrink-0 space-y-2 sticky top-24 self-start max-h-[calc(100vh-7.5rem)] overflow-y-auto no-scrollbar">
+          <div class="bg-white rounded-3xl border border-stone-200 p-3 shadow-xs space-y-1.5">
+            <div class="flex items-center justify-between border-b border-stone-100 pb-2.5 mb-2">
+              <span class="font-extrabold text-xs text-stone-900 uppercase tracking-wide">Category Index</span>
+              <span class="text-rose-700 text-xs">✨</span>
+            </div>
+            <div id="sidebar-categories-list" class="space-y-1 text-xs font-bold">
+              <button onclick="filterCategory('All')" class="sidebar-cat-btn active-cat w-full text-left px-3 py-2 rounded-xl bg-rose-800 text-amber-300 border border-amber-400 font-bold transition">
+                All Crackers
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        <!-- PRODUCT CARDS CONTAINER -->
+        <main class="flex-1 min-w-0" id="product-container">
+          <div id="product-list" class="w-full">
+            <div class="text-center text-xs text-stone-400 py-16">Loading festival crackers catalog...</div>
+          </div>
+        </main>
+      </div>
+
     </div>
   </div>
+
+  <!-- ================= STICKY SOLID BLACK ABOUT US & FOOTER BLOCK ================= -->
+  <footer id="portal-footer" class="bg-neutral-950 text-neutral-200 border-t-4 border-amber-500 shadow-2xl mt-auto shrink-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-12 space-y-8 text-xs">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Brand Info -->
+        <div class="space-y-2.5">
+          <div class="flex items-center space-x-2">
+            <span class="bg-rose-700 text-amber-300 font-black px-2.5 py-0.5 rounded-lg text-sm border border-amber-400">B</span>
+            <h2 class="text-base font-black text-white uppercase tracking-wider">Bittu Fireworks</h2>
+          </div>
+          <p class="text-neutral-400 text-[11px] leading-relaxed">
+            Premier destination for highest quality crackers and fireworks in KAVALI. Unbeatable festival offers for unforgettable festival celebrations.
+          </p>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="space-y-2.5">
+          <h3 class="font-black text-amber-400 uppercase tracking-wider text-[11px] border-b border-neutral-800 pb-1.5">Quick Links</h3>
+          <ul class="space-y-1.5 text-neutral-300 text-[11px] font-medium">
+            <li><button onclick="handleQuickEnquiryClick()" class="hover:text-amber-300 flex items-center space-x-1.5"><span>⚡</span><span>Quick Enquiry</span></button></li>
+            <li><button onclick="switchToContactView()" class="hover:text-amber-300 flex items-center space-x-1.5"><span>📞</span><span>Contact Us</span></button></li>
+            <li><button onclick="switchToCatalogView()" class="hover:text-amber-300 flex items-center space-x-1.5"><span>🎆</span><span>All Crackers</span></button></li>
+          </ul>
+        </div>
+
+        <!-- Contact Us -->
+        <div class="space-y-2.5">
+          <h3 class="font-black text-amber-400 uppercase tracking-wider text-[11px] border-b border-neutral-800 pb-1.5">Contact Us</h3>
+          <p class="text-neutral-300 text-[11px] leading-relaxed">
+            📍 Vengal Rao Nagar, Kavali, S.P.S.R Nellore District, AP - 524201
+          </p>
+          <div class="space-y-1 text-amber-300 font-mono text-[11px] font-bold">
+            <p><a href="tel:+917993659115" class="hover:underline">📞 +91 7993659115</a></p>
+            <p><a href="tel:+919848104866" class="hover:underline">📞 +91 9848104866</a></p>
+            <p><a href="tel:+917661869408" class="hover:underline">📞 +91 7661869408</a></p>
+          </div>
+        </div>
+
+        <!-- WhatsApp Support -->
+        <div class="space-y-2.5">
+          <h3 class="font-black text-amber-400 uppercase tracking-wider text-[11px] border-b border-neutral-800 pb-1.5">WhatsApp Us</h3>
+          <p class="text-neutral-400 text-[10px]">Tap to chat directly on WhatsApp:</p>
+          <div class="grid grid-cols-2 gap-1.5 font-mono text-[10px]">
+            <a href="https://wa.me/917829978883" target="_blank" class="bg-neutral-900 hover:bg-neutral-800 px-2 py-2 rounded-xl border border-neutral-700 text-amber-300 font-bold text-center shadow-2xs transition">+91 7829978883</a>
+            <a href="https://wa.me/917993659115" target="_blank" class="bg-neutral-900 hover:bg-neutral-800 px-2 py-2 rounded-xl border border-neutral-700 text-amber-300 font-bold text-center shadow-2xs transition">+91 7993659115</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-neutral-800 pt-5 text-center text-neutral-500 text-[11px] font-medium">
+        © 2026 Bittu Fireworks, Kavali. All rights reserved.
+      </div>
+    </div>
+  </footer>
 
   <!-- ================= CATEGORY MODAL DRAWER ================= -->
   <div id="category-drawer-modal" class="fixed inset-0 bg-neutral-950/75 backdrop-blur-2xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -290,57 +356,6 @@
       </button>
     </div>
   </div>
-
-  <!-- ================= FOOTER / ABOUT US SECTION ================= -->
-  <footer id="portal-footer" class="bg-white text-stone-800 mt-20 border-t-4 border-rose-800 shadow-sm">
-    <div class="max-w-5xl mx-auto px-4 py-12 space-y-8 text-xs">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="space-y-2">
-          <div class="flex items-center space-x-2">
-            <span class="bg-rose-800 text-amber-300 font-black px-2 py-0.5 rounded text-sm border border-amber-400">B</span>
-            <h2 class="text-base font-black text-rose-950 uppercase tracking-wide">Bittu Fireworks</h2>
-          </div>
-          <p class="text-stone-600 text-[11px] leading-relaxed">
-            Premier destination for highest quality crackers and fireworks in KAVALI. Unbeatable festival offers for unforgettable festival celebrations.
-          </p>
-        </div>
-
-        <div class="space-y-2.5">
-          <h3 class="font-black text-stone-900 uppercase tracking-wider text-[11px] border-b pb-1">Quick Links</h3>
-          <ul class="space-y-1.5 text-stone-700 text-[11px] font-medium">
-            <li><button onclick="handleQuickEnquiryClick()" class="hover:underline flex items-center space-x-1"><span>⚡</span><span>Quick Enquiry</span></button></li>
-            <li><button onclick="switchToContactView()" class="hover:underline flex items-center space-x-1"><span>📞</span><span>Contact Us</span></button></li>
-            <li><button onclick="switchToCatalogView()" class="hover:underline flex items-center space-x-1"><span>🎆</span><span>All Crackers</span></button></li>
-          </ul>
-        </div>
-
-        <div class="space-y-2.5">
-          <h3 class="font-black text-stone-900 uppercase tracking-wider text-[11px] border-b pb-1">Contact Us</h3>
-          <p class="text-stone-700 text-[11px]">
-            📍 Vengal Rao Nagar, Kavali, S.P.S.R Nellore District, AP - 524201
-          </p>
-          <div class="space-y-1 text-rose-800 font-mono text-[11px] font-bold">
-            <p><a href="tel:+917993659115" class="hover:underline">📞 +91 7993659115</a></p>
-            <p><a href="tel:+919848104866" class="hover:underline">📞 +91 9848104866</a></p>
-            <p><a href="tel:+917661869408" class="hover:underline">📞 +91 7661869408</a></p>
-          </div>
-        </div>
-
-        <div class="space-y-2.5">
-          <h3 class="font-black text-stone-900 uppercase tracking-wider text-[11px] border-b pb-1">WhatsApp Us</h3>
-          <p class="text-stone-500 text-[10px]">Tap to chat directly on WhatsApp:</p>
-          <div class="grid grid-cols-2 gap-1.5 font-mono text-[10px]">
-            <a href="https://wa.me/917829978883" target="_blank" class="bg-rose-50 hover:bg-rose-100 px-2 py-1.5 rounded-xl border border-rose-200 text-rose-900 font-bold text-center shadow-2xs">+91 7829978883</a>
-            <a href="https://wa.me/917993659115" target="_blank" class="bg-rose-50 hover:bg-rose-100 px-2 py-1.5 rounded-xl border border-rose-200 text-rose-900 font-bold text-center shadow-2xs">+91 7993659115</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="border-t border-stone-200 pt-5 text-center text-stone-500 text-[10px] font-medium">
-        © 2026 Bittu Fireworks, Kavali. All rights reserved.
-      </div>
-    </div>
-  </footer>
 
   <!-- ================= CHECKOUT / CART MODAL ================= -->
   <div id="cart-modal" class="fixed inset-0 bg-neutral-950/75 backdrop-blur-xs z-50 hidden flex justify-end">
@@ -533,7 +548,6 @@
       const { data } = await db.from('products').select('*');
       if (data && data.length > 0) {
         allProducts = data;
-        // Dynamically extract every category assigned to products
         discoveredCategories = Array.from(new Set(data.map(p => (p.category || 'General').trim()).filter(Boolean))).sort();
         renderCategoryNavigationBars();
       }
